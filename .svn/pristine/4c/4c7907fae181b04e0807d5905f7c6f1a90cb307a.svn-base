@@ -1,0 +1,182 @@
+/* 以下是公共样式 */
+body,
+ol,
+ul,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+th,
+td,
+dl,
+dd,
+form,
+fieldset,
+legend,
+input,
+textarea,
+select {
+    margin: 0;
+    padding: 0;
+}
+body {
+    font-family:'微软雅黑', 'Microsoft Yahei', sans-serif;
+    font-size: 13px;
+    color: #666;
+    /* color: #252631; */
+    background: #F7FAFB;
+    -webkit-text-size-adjust: 100%;
+}
+html,body,#app {
+    height: 100%;
+    min-width: 1320px;
+    margin:0 auto;
+}
+/* @media screen and (max-width: 1400px) {
+    html {
+        zoom: 0.9
+    }
+} */
+#app {
+    position: relative;
+    overflow-x: hidden;
+}
+em {
+    font-style: normal;
+}
+li {
+    list-style: none;
+}
+img {
+    border: 0;
+}
+table {
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+p {
+    word-wrap: break-word;
+}
+.clearfix:after{
+    display: block;
+    clear: both;
+    content: "";
+    visibility: hidden;
+    height: 0;
+}
+.clearfix{
+    zoom:1;
+}
+.plr0 {
+    padding-left: 0!important;
+    padding-right: 0!important;
+}
+.fl {
+    float: left;
+}
+.fr {
+    float: right;
+}
+.color9 {
+    color: #999999;
+}
+.mb1 {
+    margin-bottom: 1rem;
+}
+.tac {
+    text-align: center;
+}
+.tal {
+    text-align: left;
+}
+.tar {
+    text-align: right;
+}
+.vam {
+    vertical-align: middle!important;
+}
+.dlb {
+    display: inline-block;
+}
+.dpb {
+    display: block;
+}
+.red {
+    color: #F56C6C!important;
+}
+.green {
+    color: green!important;
+}
+.imgBoder {
+    border-radius:4px;
+    border:1px solid rgba(0,0,0,0.15);
+    padding: 5px;
+}
+.h36 {
+    height: 36px;
+}
+.pl20 {
+    padding-left: 20px;
+}
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none !important;
+    margin: 0;
+}
+input[type="number"]{
+  -moz-appearance: textfield;
+}
+.wp10 {
+    width: 10%;
+}
+.wp15 {
+    width: 10%;
+}
+.wp20 {
+    width: 10%;
+}
+.wp25 {
+    width: 10%;
+}
+.wp30 {
+    width: 10%;
+}
+.wp35 {
+    width: 10%;
+}
+.wp40 {
+    width: 10%;
+}
+.wp45 {
+    width: 10%;
+}
+.wp100 {
+    width: 100%;
+}
+.tableWrap {
+    padding: 0 20px;
+}
+.mb20 {
+    margin-bottom: 20px;
+}
+.mt20 {
+    margin-top: 20px;
+}
+.c3 {
+    color: #333333;
+}
+.c6 {
+    color: #666666;
+}
+.c9 {
+    color: #999999;
+}
+.fwb {
+    font-weight: bold;
+}
+.pointer {
+    cursor: pointer;
+}

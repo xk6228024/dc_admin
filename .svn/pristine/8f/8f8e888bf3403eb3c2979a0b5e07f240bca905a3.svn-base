@@ -1,0 +1,769 @@
+<!-- 备案信息查询 -->
+<template>
+    <div class="recordInformationDetail">
+        <div class="content">
+            <el-tabs type="card" v-model="tabIndex" @tab-click="changeTabs">
+                <el-tab-pane label="基本信息" name="tab1" class="basic-info clearfix">
+                    <div class="tab_inner">
+                        <div class="info-title">备案信息</div>
+                        <div class="info-content">
+                            <el-row>
+                                <el-col :span="8">
+                                    <div class="item-name">所属辖区局：</div>
+                                    <div class="item-value">{{this.info.baseInfo.a1}}</div>
+                                </el-col>
+                                <el-col :span="8">
+                                    <div class="item-name">备案类型：</div>
+                                    <div class="item-value">{{this.info.baseInfo.a2}}</div>
+                                </el-col>
+                                <el-col :span="8">
+                                    <div class="item-name">备案编号：</div>
+                                    <div class="item-value">{{this.info.baseInfo.a3}}</div>
+                                </el-col>
+                                <el-col :span="8">
+                                    <div class="item-name">录入时间：</div>
+                                    <div class="item-value">{{this.info.baseInfo.a4}}</div>
+                                </el-col>
+                                <el-col :span="8">
+                                    <div class="item-name">录入人姓名：</div>
+                                    <div class="item-value">{{this.info.baseInfo.a5}}</div>
+                                </el-col>
+                                <el-col :span="8">
+                                    <div class="item-name">状态：</div>
+                                    <div class="item-value">{{this.info.baseInfo.a6}}</div>
+                                </el-col>
+                                <el-col :span="8">
+                                    <div class="item-name">审核时间：</div>
+                                    <div class="item-value">{{this.info.baseInfo.a7}}</div>
+                                </el-col>
+                                <el-col :span="8">
+                                    <div class="item-name">审核人姓名：</div>
+                                    <div class="item-value">{{this.info.baseInfo.a8}}</div>
+                                </el-col>
+                                <el-col :span="8">
+                                    <div class="item-name">审核状态：</div>
+                                    <div class="item-value">{{this.info.baseInfo.a9}}</div>
+                                </el-col>
+                            </el-row>
+                        </div>
+                    </div>
+                    <div class="tab_inner">
+                        <div class="info-title">企业信息</div>
+                        <div class="info-content">
+                            <el-row>
+                                <el-col :span="8">
+                                    <div class="item-name">单位名称：</div>
+                                    <div class="item-value">{{this.info.envInfo.a1}}</div>
+                                </el-col>
+                                <el-col :span="8">
+                                    <div class="item-name">统一社会信用代码：</div>
+                                    <div class="item-value">{{this.info.envInfo.a2}}</div>
+                                </el-col>
+                                <el-col :span="8">
+                                    <div class="item-name">企业性质：</div>
+                                    <div class="item-value">{{this.info.envInfo.a3}}</div>
+                                </el-col>
+                                <el-col :span="8">
+                                    <div class="item-name">单位法人：</div>
+                                    <div class="item-value">{{this.info.envInfo.a4}}</div>
+                                </el-col>
+                                <el-col :span="8">
+                                    <div class="item-name">法人证件号码：</div>
+                                    <div class="item-value">{{this.info.envInfo.a5}}</div>
+                                </el-col>
+                                <el-col :span="8">
+                                    <div class="item-name">联系电话：</div>
+                                    <div class="item-value">{{this.info.envInfo.a6}}</div>
+                                </el-col>
+                                <el-col :span="8">
+                                    <div class="item-name">业户类别：</div>
+                                    <div class="item-value">{{this.info.envInfo.a7}}</div>
+                                </el-col>
+                                <el-col :span="8">
+                                    <div class="item-name">经营类型：</div>
+                                    <div class="item-value">{{this.info.envInfo.a8}}</div>
+                                </el-col>
+                                <el-col :span="8">
+                                    <div class="item-name">业务类型：</div>
+                                    <div class="item-value">{{this.info.envInfo.a9}}</div>
+                                </el-col>
+                                <el-col :span="8">
+                                    <div class="item-name">是否从事燃气汽车维修：</div>
+                                    <div class="item-value">{{this.info.envInfo.a10}}</div>
+                                </el-col>
+                                <el-col :span="8">
+                                    <div class="item-name">是否从事新能源汽车维修：</div>
+                                    <div class="item-value">{{this.info.envInfo.a11}}</div>
+                                </el-col>
+                                <el-col :span="8">
+                                    <div class="item-name">是否连锁经营：</div>
+                                    <div class="item-value">{{this.info.envInfo.a12}}</div>
+                                </el-col>
+                                <el-col :span="8">
+                                    <div class="item-name">经营种类项目：</div>
+                                    <div class="item-value">{{this.info.envInfo.a13}}</div>
+                                </el-col>
+                                <el-col :span="8">
+                                    <div class="item-name">注册地址：</div>
+                                    <div class="item-value">{{this.info.envInfo.a14}}</div>
+                                </el-col>
+                                <el-col :span="8">
+                                    <div class="item-name">经营地址：</div>
+                                    <div class="item-value">{{this.info.envInfo.a15}}</div>
+                                </el-col>
+                            </el-row>
+                        </div>
+                    </div>
+                </el-tab-pane>
+                <el-tab-pane label="经营场地" name="tab2" class="basic-info clearfix">
+                    <div class="tab_inner">
+                        <div class="info-content">
+                            <el-row>
+                                <el-col :span="8">
+                                    <div class="item-name">场地所属：</div>
+                                    <div class="item-value">{{this.info.fieldInfo.a1}}</div>
+                                </el-col>
+                                <el-col :span="8">
+                                    <div class="item-name">经营场所总面积(m²)：</div>
+                                    <div class="item-value">{{this.info.fieldInfo.a2}}</div>
+                                </el-col>
+                                <el-col :span="8">
+                                    <div class="item-name">停车厂面积(m²)：</div>
+                                    <div class="item-value">{{this.info.fieldInfo.a3}}</div>
+                                </el-col>
+                                <el-col :span="8">
+                                    <div class="item-name">生产厂房面积(m²)：</div>
+                                    <div class="item-value">{{this.info.fieldInfo.a4}}</div>
+                                </el-col>
+                                <el-col :span="8">
+                                    <div class="item-name">接待室面积(m²)：</div>
+                                    <div class="item-value">{{this.info.fieldInfo.a5}}</div>
+                                </el-col>
+                                <el-col :span="8">
+                                    <div class="item-name">总成维修车间面积(m²)：</div>
+                                    <div class="item-value">{{this.info.fieldInfo.a6}}</div>
+                                </el-col>
+                                <el-col :span="8">
+                                    <div class="item-name">危险货物运输车辆专业停车场地面积(m²)：</div>
+                                    <div class="item-value">{{this.info.fieldInfo.a7}}</div>
+                                </el-col>
+                                <el-col :span="8">
+                                    <div class="item-name">危险货物运输车辆作业专业维修车间面积(m²)：</div>
+                                    <div class="item-value">{{this.info.fieldInfo.a8}}</div>
+                                </el-col>
+                                <el-col :span="8">
+                                    <div class="item-name">燃气汽车维修专业维修厂房面积(m²)：</div>
+                                    <div class="item-value">{{this.info.fieldInfo.a9}}</div>
+                                </el-col>
+                            </el-row>
+                        </div>
+                    </div>
+                </el-tab-pane>
+                <el-tab-pane label="安全制度" name="tab3" class="basic-info clearfix">
+                    <div class="tab_inner">
+                        <div class="info-content">
+                            <el-row>
+                                <el-col :span="8">
+                                    <div class="item-name">质量管理制度：</div>
+                                    <div class="item-value">{{this.info.safeInfo.a1}}</div>
+                                </el-col>
+                                <el-col :span="8">
+                                    <div class="item-name">安全生产管理制度：</div>
+                                    <div class="item-value">{{this.info.safeInfo.a2}}</div>
+                                </el-col>
+                                <el-col :span="8">
+                                    <div class="item-name">车辆维修档案管理制度：</div>
+                                    <div class="item-value">{{this.info.safeInfo.a3}}</div>
+                                </el-col>
+                                <el-col :span="8">
+                                    <div class="item-name">人员培训制度：</div>
+                                    <div class="item-value">{{this.info.safeInfo.a4}}</div>
+                                </el-col>
+                                <el-col :span="8">
+                                    <div class="item-name">设备管理制度：</div>
+                                    <div class="item-value">{{this.info.safeInfo.a5}}</div>
+                                </el-col>
+                                <el-col :span="8">
+                                    <div class="item-name">配件管理制度：</div>
+                                    <div class="item-value">{{this.info.safeInfo.a6}}</div>
+                                </el-col>
+                                <el-col :span="8">
+                                    <div class="item-name">突发事件应急预案：</div>
+                                    <div class="item-value">{{this.info.safeInfo.a7}}</div>
+                                </el-col>
+                                <el-col :span="8">
+                                    <div class="item-name">安全操作规程材料：</div>
+                                    <div class="item-value">{{this.info.safeInfo.a8}}</div>
+                                </el-col>
+                            </el-row>
+                        </div>
+                    </div>
+                </el-tab-pane>
+                <el-tab-pane label="设施设备" name="tab4" class="basic-info clearfix">
+                    <div class="tab_inner">
+                        <div class="info-content">
+                            <el-row>
+                                <el-col :span="8">
+                                    <div class="item-name">仪表工具：</div>
+                                    <div class="item-value">{{this.info.equipmentInfo.a1}}</div>
+                                </el-col>
+                                <el-col :span="8">
+                                    <div class="item-name">通用设备：</div>
+                                    <div class="item-value">{{this.info.equipmentInfo.a1}}</div>
+                                </el-col>
+                                <el-col :span="8">
+                                    <div class="item-name">专用设备：</div>
+                                    <div class="item-value">{{this.info.equipmentInfo.a1}}</div>
+                                </el-col>
+                                <el-col :span="8">
+                                    <div class="item-name">检测设备：</div>
+                                    <div class="item-value">{{this.info.equipmentInfo.a1}}</div>
+                                </el-col>
+                                <el-col :span="8">
+                                    <div class="item-name">综合小修设备：</div>
+                                    <div class="item-value">{{this.info.equipmentInfo.a1}}</div>
+                                </el-col>
+                                <el-col :span="8">
+                                    <div class="item-name">发动机修理设备：</div>
+                                    <div class="item-value">{{this.info.equipmentInfo.a1}}</div>
+                                </el-col>
+                                <el-col :span="8">
+                                    <div class="item-name">车身维修设备：</div>
+                                    <div class="item-value">{{this.info.equipmentInfo.a1}}</div>
+                                </el-col>
+                                <el-col :span="8">
+                                    <div class="item-name">四轮定位检测调整设备：</div>
+                                    <div class="item-value">{{this.info.equipmentInfo.a1}}</div>
+                                </el-col>
+                                <el-col :span="8">
+                                    <div class="item-name">电气系统维修设备：</div>
+                                    <div class="item-value">{{this.info.equipmentInfo.a1}}</div>
+                                </el-col>
+                                <el-col :span="8">
+                                    <div class="item-name">自动变速器维修设备：</div>
+                                    <div class="item-value">{{this.info.equipmentInfo.a1}}</div>
+                                </el-col>
+                                <el-col :span="8">
+                                    <div class="item-name">轮胎动平衡及修补设备：</div>
+                                    <div class="item-value">{{this.info.equipmentInfo.a1}}</div>
+                                </el-col>
+                                <el-col :span="8">
+                                    <div class="item-name">机动车润滑与养护设备：</div>
+                                    <div class="item-value">{{this.info.equipmentInfo.a1}}</div>
+                                </el-col>
+                                <el-col :span="8">
+                                    <div class="item-name">车辆美容装潢设备：</div>
+                                    <div class="item-value">{{this.info.equipmentInfo.a1}}</div>
+                                </el-col>
+                                <el-col :span="8">
+                                    <div class="item-name">喷油泵、喷油器维修设备：</div>
+                                    <div class="item-value">{{this.info.equipmentInfo.a1}}</div>
+                                </el-col>
+                                <el-col :span="8">
+                                    <div class="item-name">曲轴修磨设备：</div>
+                                    <div class="item-value">{{this.info.equipmentInfo.a1}}</div>
+                                </el-col>
+                                <el-col :span="8">
+                                    <div class="item-name">散热器维修设备：</div>
+                                    <div class="item-value">{{this.info.equipmentInfo.a1}}</div>
+                                </el-col>
+                                <el-col :span="8">
+                                    <div class="item-name">气缸镗磨设备：</div>
+                                    <div class="item-value">{{this.info.equipmentInfo.a1}}</div>
+                                </el-col>
+                                <el-col :span="8">
+                                    <div class="item-name">空调维修设备：</div>
+                                    <div class="item-value">{{this.info.equipmentInfo.a1}}</div>
+                                </el-col>
+                                <el-col :span="8">
+                                    <div class="item-name">车辆玻璃安装及维护设备：</div>
+                                    <div class="item-value">{{this.info.equipmentInfo.a1}}</div>
+                                </el-col>
+                                <el-col :span="8">
+                                    <div class="item-name">危险货物运输设备：</div>
+                                    <div class="item-value">{{this.info.equipmentInfo.a1}}</div>
+                                </el-col>
+                                <el-col :span="8">
+                                    <div class="item-name">摩托车维修设备：</div>
+                                    <div class="item-value">{{this.info.equipmentInfo.a1}}</div>
+                                </el-col>
+                            </el-row>
+                        </div>
+                    </div>
+                </el-tab-pane>
+                <el-tab-pane label="环保信息" name="tab5" class="basic-info clearfix">
+                    <div class="table_inner">
+                        <el-table
+                        :data="info.epInfo"
+                        :header-cell-style="{'background':'rgba(250,250,250,1)','text-align':'center'}"
+                        border
+                        style="width:100%;">
+                            <el-table-column
+                            prop="num"
+                            label="序号"
+                            width="80"
+                            align="center">
+                            </el-table-column>
+                            <el-table-column
+                            prop="label"
+                            label="环保要求"
+                            align="left">
+                            </el-table-column>
+                            <el-table-column
+                            prop="result"
+                            label="检查结果"
+                            width="100"
+                            align="center">
+                            </el-table-column>
+                        </el-table>
+                    </div>
+                </el-tab-pane>
+                <el-tab-pane label="人员信息" name="tab6" class="basic-info clearfix">
+                    <div class="table_inner">
+                        <el-table
+                        :data="info.personInfo"
+                        :header-cell-style="{'background':'rgba(250,250,250,1)','text-align':'center'}"
+                        border
+                        style="width:100%;">
+                            <el-table-column
+                            prop="num"
+                            label="序号"
+                            width="80"
+                            align="center">
+                            </el-table-column>
+                            <el-table-column
+                            prop="a1"
+                            label="姓名"
+                            align="center">
+                            </el-table-column>
+                            <el-table-column
+                            prop="a2"
+                            label="文化程度"
+                            align="center">
+                            </el-table-column>
+                            <el-table-column
+                            prop="a3"
+                            label="岗位"
+                            align="center">
+                            </el-table-column>
+                            <el-table-column
+                            prop="a4"
+                            label="身份证号"
+                            align="center">
+                            </el-table-column>
+                            <el-table-column
+                            prop="a5"
+                            label="手机号码"
+                            align="center">
+                            </el-table-column>
+                            <el-table-column
+                            prop="a6"
+                            label="所学专业"
+                            align="center">
+                            </el-table-column>
+                            <el-table-column
+                            prop="result"
+                            label="操作"
+                            width="100"
+                            align="center">
+                            <template slot-scope="scope">
+                                <el-button type="text" @click="$router.push('/recordPerson?id=' + scope.row.a1)">详情</el-button>
+                            </template>
+                            </el-table-column>
+                        </el-table>
+                        <!-- <div class="page">
+                            <el-pagination
+                                :current-page.sync="pageNum"
+                                background
+                                :page-sizes="[10, 15, 20]"
+                                :page-size="pageSize"
+                                layout="prev, pager, next, sizes,  jumper, total"
+                                :total="total"
+                                @size-change="handleSizeChange"
+                                @current-change="handleCurrentChange"
+                            />
+                        </div> -->
+                    </div>
+                </el-tab-pane>
+                <el-tab-pane label="文件信息" name="tab7" class="basic-info clearfix">
+                    <div class="tab_inner">
+                        <div class="info-title">备案信息</div>
+                        <div class="info-content clearfix">
+                            <div class="img_item" v-for="item in info.imgList1" :key="item.id">
+                                <div class="img_border" @click="$zoomImg(item.url)">
+                                    <img :src="item.url">
+                                </div>
+                                <p>{{item.name}}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab_inner">
+                        <div class="info-title">经营场地</div>
+                        <div class="info-content clearfix">
+                            <div class="img_item" v-for="item in info.imgList2" :key="item.id">
+                                <div class="img_border" @click="$zoomImg(item.url)">
+                                    <img :src="item.url">
+                                </div>
+                                <p>{{item.name}}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab_inner">
+                        <div class="info-title">安全制度</div>
+                        <div class="info-content clearfix">
+                            <div class="img_item" v-for="item in info.imgList3" :key="item.id">
+                                <div class="img_border" @click="$zoomImg(item.url)">
+                                    <img :src="item.url">
+                                </div>
+                                <p>{{item.name}}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab_inner">
+                        <div class="info-title">设施设备</div>
+                        <div class="info-content clearfix">
+                            <div class="img_item" v-for="item in info.imgList4" :key="item.id">
+                                <div class="img_border" @click="$zoomImg(item.url)">
+                                    <img :src="item.url">
+                                </div>
+                                <p>{{item.name}}</p>
+                            </div>
+                        </div>
+                    </div>
+                </el-tab-pane>
+            </el-tabs>
+        </div>
+    </div>
+</template>
+
+<script>
+// import BreadFoot from '@/components/BreadFoot.vue'
+export default {
+    name: 'recordInformationDetail',
+    components: {
+    },
+    data () {
+        return {
+            pageNum: 1,
+            total: 0,
+            pageSize: 10,
+            breadArr: [
+                { title: '档案管理', path: '' }, { title: '企业备案信息', path: '' }
+            ],
+            tabIndex: 'tab1',
+            info: {
+                baseInfo: {
+                    a1: '南山区/南头街街道办',
+                    a2: '内容展示',
+                    a3: '44030601201900007',
+                    a4: '2019-09-12 14:30:30',
+                    a5: '哈利',
+                    a6: '已备案',
+                    a7: '2019-09-14 14:50:45',
+                    a8: '默默',
+                    a9: '已审核'
+                },
+                envInfo: {
+                    a1: '深圳市标域上通汽车有限公司',
+                    a2: '92441202MA531THF49',
+                    a3: '私营',
+                    a4: '王东',
+                    a5: '92441202MA531THF49',
+                    a6: '15671252109',
+                    a7: '二类维修',
+                    a8: '综合修理',
+                    a9: '汽车维修',
+                    a10: '否',
+                    a11: '否',
+                    a12: '否',
+                    a13: '小型车维修',
+                    a14: '黄岗二路2号尚东花园第7幢首层25号商铺',
+                    a15: '黄岗二路2号尚东花园第7幢首层25号商铺'
+                },
+                fieldInfo: {
+                    a1: '租赁',
+                    a2: '108',
+                    a3: '400',
+                    a4: '1000',
+                    a5: '40',
+                    a6: '120',
+                    a7: '60',
+                    a8: '21',
+                    a9: '59'
+                },
+                safeInfo: {
+                    a1: '是',
+                    a2: '是',
+                    a3: '是',
+                    a4: '是',
+                    a5: '是',
+                    a6: '是',
+                    a7: '是',
+                    a8: '是'
+                },
+                equipmentInfo: {
+                    a1: '--'
+                },
+                epInfo: [
+                    {
+                        num: 1,
+                        label: '应具有废油、废液、废气、废水（以下简称“四废”）、废蓄电池、废轮胎、含石棉废料及有害垃圾等物质集中收集、有效处理和保持环境整洁的环境保护管理制度，并有效执行。有害物质存储区域应界定清楚，必要时应有隔离、控制措施。',
+                        result: '符合'
+                    },
+                    {
+                        num: 2,
+                        label: '作业环境以及按生产工艺配置的处理“四废”及采光、通风、吸尘、净化、消声等设施，均应符合环境保护的有关规定。',
+                        result: '符合'
+                    },
+                    {
+                        num: 3,
+                        label: '涂漆车间应设有专用的废水排放及处理设施，采用干打磨工艺的，应有粉尘收集装置和除尘设备，并应设有通风设备。',
+                        result: '符合'
+                    },
+                    {
+                        num: 4,
+                        label: '摩托车维修产生的废弃物，其收集、存放和处理应符合国家有关的环保规定。',
+                        result: '符合'
+                    },
+                    {
+                        num: 5,
+                        label: '调试车间或调试工位应设置汽车尾气收集净化装置。',
+                        result: '符合'
+                    },
+                    {
+                        num: 6,
+                        label: '是否有干打磨工艺',
+                        result: '符合'
+                    },
+                    {
+                        num: 7,
+                        label: '是否有调试车间或工位',
+                        result: '符合'
+                    },
+                    {
+                        num: 8,
+                        label: '是否有涂漆车间',
+                        result: '符合'
+                    }
+                ],
+                personInfo: [
+                    {
+                        num: 1,
+                        a1: '大飞',
+                        a2: '高中',
+                        a3: '技术负责人',
+                        a4: '421098812312312341422',
+                        a5: '1321321312312',
+                        a6: '汽车维修'
+                    }
+                ],
+                imgList1: [
+                    {
+                        url: 'https://user-gold-cdn.xitu.io/2020/1/5/16f741d746a0631f?imageView2/0/w/1280/h/960/format/webp/ignore-error/1',
+                        name: '法人身份证'
+                    },
+                    {
+                        url: 'https://user-gold-cdn.xitu.io/2020/1/5/16f741d746a0631f?imageView2/0/w/1280/h/960/format/webp/ignore-error/1',
+                        name: '不产固废承诺书'
+                    },
+                    {
+                        url: 'https://user-gold-cdn.xitu.io/2020/1/5/16f741d746a0631f?imageView2/0/w/1280/h/960/format/webp/ignore-error/1',
+                        name: '连锁经营协议书副本'
+                    },
+                    {
+                        url: 'https://user-gold-cdn.xitu.io/2020/1/5/16f741d746a0631f?imageView2/0/w/1280/h/960/format/webp/ignore-error/1',
+                        name: '连锁经营的作业标准和管理 手册'
+                    },
+                    {
+                        url: 'https://user-gold-cdn.xitu.io/2020/1/5/16f741d746a0631f?imageView2/0/w/1280/h/960/format/webp/ignore-error/1',
+                        name: '连锁经营服务网点符合机动车 维修经营相应条件的承诺书'
+                    }
+                ],
+                imgList2: [
+                    {
+                        url: 'https://user-gold-cdn.xitu.io/2020/1/5/16f741d746a0631f?imageView2/0/w/1280/h/960/format/webp/ignore-error/1',
+                        name: '企业门头照片'
+                    },
+                    {
+                        url: 'https://user-gold-cdn.xitu.io/2020/1/5/16f741d746a0631f?imageView2/0/w/1280/h/960/format/webp/ignore-error/1',
+                        name: '土地使用权及产权证明材料'
+                    },
+                    {
+                        url: 'https://user-gold-cdn.xitu.io/2020/1/5/16f741d746a0631f?imageView2/0/w/1280/h/960/format/webp/ignore-error/1',
+                        name: '土地使用权'
+                    },
+                    {
+                        url: 'https://user-gold-cdn.xitu.io/2020/1/5/16f741d746a0631f?imageView2/0/w/1280/h/960/format/webp/ignore-error/1',
+                        name: '租赁合同或租赁备案证明'
+                    }
+                ],
+                imgList3: [
+                    {
+                        url: 'https://user-gold-cdn.xitu.io/2020/1/5/16f741d746a0631f?imageView2/0/w/1280/h/960/format/webp/ignore-error/1',
+                        name: '质量管理制度'
+                    },
+                    {
+                        url: 'https://user-gold-cdn.xitu.io/2020/1/5/16f741d746a0631f?imageView2/0/w/1280/h/960/format/webp/ignore-error/1',
+                        name: '安全生产管理制度'
+                    },
+                    {
+                        url: 'https://user-gold-cdn.xitu.io/2020/1/5/16f741d746a0631f?imageView2/0/w/1280/h/960/format/webp/ignore-error/1',
+                        name: '车辆维修档案管理制度'
+                    },
+                    {
+                        url: 'https://user-gold-cdn.xitu.io/2020/1/5/16f741d746a0631f?imageView2/0/w/1280/h/960/format/webp/ignore-error/1',
+                        name: '人员培训制度'
+                    },
+                    {
+                        url: 'https://user-gold-cdn.xitu.io/2020/1/5/16f741d746a0631f?imageView2/0/w/1280/h/960/format/webp/ignore-error/1',
+                        name: '设备管理制度'
+                    },
+                    {
+                        url: 'https://user-gold-cdn.xitu.io/2020/1/5/16f741d746a0631f?imageView2/0/w/1280/h/960/format/webp/ignore-error/1',
+                        name: '配件管理制度'
+                    },
+                    {
+                        url: 'https://user-gold-cdn.xitu.io/2020/1/5/16f741d746a0631f?imageView2/0/w/1280/h/960/format/webp/ignore-error/1',
+                        name: '突发事件应急预案'
+                    },
+                    {
+                        url: 'https://user-gold-cdn.xitu.io/2020/1/5/16f741d746a0631f?imageView2/0/w/1280/h/960/format/webp/ignore-error/1',
+                        name: '安全操作规程材料'
+                    }
+                ],
+                imgList4: [
+                    {
+                        url: 'https://user-gold-cdn.xitu.io/2020/1/5/16f741d746a0631f?imageView2/0/w/1280/h/960/format/webp/ignore-error/1',
+                        name: '气缸压力表检定证书'
+                    },
+                    {
+                        url: 'https://user-gold-cdn.xitu.io/2020/1/5/16f741d746a0631f?imageView2/0/w/1280/h/960/format/webp/ignore-error/1',
+                        name: '液压油压力表检定证书'
+                    },
+                    {
+                        url: 'https://user-gold-cdn.xitu.io/2020/1/5/16f741d746a0631f?imageView2/0/w/1280/h/960/format/webp/ignore-error/1',
+                        name: '燃油压力表检定证书'
+                    },
+                    {
+                        url: 'https://user-gold-cdn.xitu.io/2020/1/5/16f741d746a0631f?imageView2/0/w/1280/h/960/format/webp/ignore-error/1',
+                        name: '气体压力及流量检测仪检定证书'
+                    },
+                    {
+                        url: 'https://user-gold-cdn.xitu.io/2020/1/5/16f741d746a0631f?imageView2/0/w/1280/h/960/format/webp/ignore-error/1',
+                        name: '尾气分析仪或不透光烟度计检 定证书'
+                    },
+                    {
+                        url: 'https://user-gold-cdn.xitu.io/2020/1/5/16f741d746a0631f?imageView2/0/w/1280/h/960/format/webp/ignore-error/1',
+                        name: '汽车前照灯检测设备检定证书'
+                    },
+                    {
+                        url: 'https://user-gold-cdn.xitu.io/2020/1/5/16f741d746a0631f?imageView2/0/w/1280/h/960/format/webp/ignore-error/1',
+                        name: '侧滑试验台检定证书'
+                    },
+                    {
+                        url: 'https://user-gold-cdn.xitu.io/2020/1/5/16f741d746a0631f?imageView2/0/w/1280/h/960/format/webp/ignore-error/1',
+                        name: '制动性能检验设备检定证书'
+                    }
+                ]
+            }
+        }
+    },
+    created () {
+    },
+    methods: {
+        changeTabs (index) {},
+        queryData () {},
+        handleSizeChange (val) {
+            this.pageSize = val
+            this.pageNum = 1
+            this.queryData()
+        },
+        handleCurrentChange (val) {
+            this.pageNum = val
+            this.queryData()
+        }
+    }
+}
+</script>
+<style lang="less">
+.recordInformationDetail {
+    .table_inner {
+        padding: 20px;
+        background: #ffffff;
+    }
+    .tab_inner {
+        background: #ffffff;
+        border-bottom: 20px solid #edf0f5;
+        .info-title {
+            padding: 0 30px;
+            height: 54px;
+            line-height: 54px;
+            text-align: left;
+            color: #333;
+            font-size: 16px;
+            font-weight: bold;
+            border-bottom: 1px solid #E9E9E9;
+        }
+        .info-content {
+            padding: 24px 30px;
+            font-size: 14px;
+            .item-name, .item-value {
+                display: inline-block;
+                margin-bottom: 16px;
+                font-size: 14px;
+            }
+            .item-name {
+                color: #333;
+            }
+            .item-value {
+                color: #666;
+            }
+        }
+        .img_item {
+            cursor: pointer;
+            float: left;
+            margin-right: 45px;
+            margin-bottom: 15px;
+            width: 162px;
+            .img_border {
+                width: 144px;
+                padding: 8px;
+                height: 144px;
+                border: 1px solid rgba(0,0,0,0.15);
+                border-radius: 4px;
+                img {
+                    max-width: 100%;
+                    max-height: 100%;
+                }
+            }
+            p {
+                color: #666666;
+                margin-top: 10px;
+            }
+        }
+    }
+    .el-tabs__content {
+        padding-bottom: 20px;
+    }
+    .el-tabs--card>.el-tabs__header {
+        background: #EDF0F5;
+        border: none;
+        margin: 0;
+        .el-tabs__nav {
+            border: none;
+        }
+        .el-tabs__item {
+            box-sizing: border-box;
+            border: none;
+            border-radius:3px 3px 0px 0px;
+            background: #FFF;
+            margin-right: 10px;
+            border-top: 3px solid #FFF;
+            &.is-active {
+                color: #1890FF;
+                border-top: 3px solid #3E94FE;
+            }
+        }
+    }
+}
+</style>

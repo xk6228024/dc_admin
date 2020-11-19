@@ -1,0 +1,421 @@
+<template>
+    <div id="winMenuManage">
+        <div class="content">
+            <div class="header">
+                应用菜单管理
+                <el-button type="primary" class="btn" @click="addOrUpdateVisible = true"
+                icon="el-icon-plus">添加菜单</el-button>
+            </div>
+            <!-- <div class="empty" v-if="!winIds.length">
+                <div class="empty-icon">
+                    <i class="el-icon-warning"></i>
+                </div>
+                <div class="empty-title">暂无菜单</div>
+                <div class="empty-text">请添加菜单后进行下一步操作</div>
+                <div class="emtpy-btn">
+                    <el-button type="primary" class="btn"
+                    icon="el-icon-plus" @click="openAddMenu">创建菜单</el-button>
+                </div>
+            </div> -->
+            <div class="menu-content">
+                <el-tabs v-model="activeName" type="card" @tab-click="tabChange">
+                    <el-tab-pane :label="item.winName" :name="item.winId" v-for="item in winIds" :key="item.winId + ''">
+                        <el-table
+                            border
+                            :data="dataList"
+                            height="600"
+                            class="table"
+                            style="width: 100%;">
+                            <table-tree-column
+                                ref="trees"
+                                prop="name"
+                                align="left"
+                                treeKey="menuId"
+                                width="250"
+                                label="名称">
+                            </table-tree-column>
+                            <el-table-column
+                                prop="parentName"
+                                header-align="left"
+                                align="left"
+                                width="120"
+                                label="上级菜单">
+                                <template slot-scope="scope">
+                                    {{scope.row.parentName || '--'}}
+                                </template>
+                            </el-table-column>
+                            <!-- <el-table-column
+                                header-align="left"
+                                align="left"
+                                width="120"
+                                label="图标">
+                                <template slot-scope="scope">
+                                    <img v-if="scope.row.icon" :src="`${baseUrl}img/${scope.row.icon}.png`">
+                                    <span v-else>--</span>
+                                </template>
+                            </el-table-column> -->
+                            <el-table-column
+                                prop="type"
+                                header-align="left"
+                                align="left"
+                                label="类型"
+                                width="120">
+                                <template slot-scope="scope">
+                                <span v-if="scope.row.type === 0" style="color:#006600">目录</span>
+                                <span v-else-if="scope.row.type === 1" style="color:#3399FF">菜单</span>
+                                <span v-else-if="scope.row.type === 2" style="color:#CCCCFF">按钮</span>
+                                </template>
+                            </el-table-column>
+                            <el-table-column
+                                prop="orderNum"
+                                header-align="left"
+                                align="left"
+                                label="排序号"
+                                width="120">
+                            </el-table-column>
+                            <el-table-column
+                                prop="url"
+                                header-align="left"
+                                align="left"
+                                width=""
+                                :show-overflow-tooltip="true"
+                                label="菜单路径">
+                            </el-table-column>
+                            <el-table-column
+                                prop="perms"
+                                header-align="left"
+                                align="left"
+                                width=""
+                                :show-overflow-tooltip="true"
+                                label="授权标识">
+                            </el-table-column>
+                            <el-table-column
+                                header-align="left"
+                                align="left"
+                                width="150"
+                                label="操作">
+                                <template slot-scope="scope">
+                                    <el-button type="text" size="small" @click="editDetail(scope.row)" :disabled="!$checkAuth('sys:menus:update')">详情</el-button>
+                                    <el-button type="text" size="small" @click="deleteHandle(scope.row.menuId)" :disabled="!$checkAuth('sys:menus:delete')">删除</el-button>
+                                </template>
+                            </el-table-column>
+                        </el-table>
+                    </el-tab-pane>
+                </el-tabs>
+            </div>
+        </div>
+        <!-- 弹窗, 新增 / 修改 -->
+        <modal
+            :title="'添加菜单'"
+            :width="640"
+            class="menu-content"
+            @alertCancel="alertCancel"
+            @alertConfirm="addMenus"
+            :alert="addOrUpdateVisible">
+            <div class="menu-form">
+                <el-form :model="form" :rules="rules" ref="form" class="form" label-suffix="：" label-position="right" label-width="126px">
+                    <el-form-item prop="winId" label="选择应用">
+                        <el-select v-model="form.winId" placeholder="请选择"
+                        class="form-select">
+                            <el-option
+                                v-for="item in winIds"
+                                :key="item.winId"
+                                :label="item.winName"
+                                :value="item.winId">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item prop="type" label="菜单类型">
+                        <el-radio-group v-model="form.type">
+                            <el-radio :label="0">目录</el-radio>
+                            <el-radio :label="1">菜单</el-radio>
+                            <el-radio :label="2">按钮</el-radio>
+                        </el-radio-group>
+                    </el-form-item>
+                    <el-form-item prop="parentId" label="上级目录">
+                        <el-popover
+                            placement="bottom"
+                            width="400"
+                            v-model="showPopover"
+                            trigger="click">
+                            <el-tree :data="selectMenu" :props="defaultProps" @node-click="handleNodeClick"></el-tree>
+                            <div class="msg" slot="reference">
+                                <el-input type="text" v-model="form.parentName" readonly placeholder="请选择上级目录"></el-input>
+                            </div>
+                        </el-popover>
+                    </el-form-item>
+                    <el-form-item prop="name" label="名称">
+                        <el-input type="text" v-model="form.name" maxlength="10" placeholder="请输入名称"></el-input>
+                    </el-form-item>
+                    <el-form-item prop="url" label="菜单路径" v-if="form.type === 1">
+                        <el-input type="text" v-model="form.url" maxlength="50" placeholder="请输入路径"></el-input>
+                    </el-form-item>
+                    <el-form-item prop="orderNum" label="排序号" v-if="form.type !== 2">
+                        <el-input type="number" v-model="form.orderNum" placeholder="请输入排列序号"></el-input>
+                    </el-form-item>
+                    <el-form-item prop="status" label="状态">
+                        <el-radio-group v-model="form.status">
+                            <el-radio :label="1">启用</el-radio>
+                            <el-radio :label="0">禁用</el-radio>
+                        </el-radio-group>
+                    </el-form-item>
+                    <el-form-item prop="perms" label="授权标识">
+                        <el-input v-model="form.perms" maxlength="100" type="text" placeholder=""></el-input>
+                    </el-form-item>
+                    <el-form-item prop="remark" label="备注说明">
+                        <el-input v-model="form.remark" maxlength="250" type="textarea" resize="none" class="textarea"></el-input>
+                    </el-form-item>
+                </el-form>
+                <!-- <div class="form-item"  v-if="type === 1">
+                    <div class="title">图标：</div>
+                    <div class="msg">
+                        <span @click="selectImg(index)" v-for="(icon,index) in iconList" :key="index" class="img_box" :class="{active: imgIndex === index}">
+                            <img :src="icon.src">
+                        </span>
+                    </div>
+                </div> -->
+            </div>
+        </modal>
+    </div>
+</template>
+
+<script>
+import modal from '@/components/Modal'
+import TableTreeColumn from '@/views/common/tableTreeColumn'
+export default {
+    name: 'winMenuManage',
+    data () {
+        return {
+            winIds: [],
+            dataList: [],
+            addOrUpdateVisible: false,
+            baseUrl: '',
+            activeName: '',
+            defaultProps: {
+                children: 'children',
+                label: 'name'
+            },
+            showPopover: false,
+            form: {
+                type: 0,
+                winId: '',
+                name: '',
+                parentName: '',
+                parentId: '',
+                orderNum: 0,
+                status: 1
+            },
+            rules: {
+                winId: { required: true, message: '请选择', trigger: 'blur' },
+                status: { required: true, message: '请选择', trigger: 'blur' },
+                type: { required: true, message: '请选择', trigger: 'blur' },
+                parentId: { required: true, message: '请选择', trigger: 'blur' },
+                name: { required: true, message: '请输入', trigger: 'blur' },
+                url: { required: true, message: '请输入', trigger: 'blur' }
+            },
+            currentMenuId: ''
+        }
+    },
+    created () {
+        this.findSysWin()
+    },
+    components: {
+        modal,
+        TableTreeColumn
+    },
+    computed: {
+        selectMenu () {
+            return [
+                {
+                    menuId: '0',
+                    name: '顶级菜单',
+                    children: this.dataList
+                }
+            ]
+        }
+    },
+    methods: {
+        // 查询应用
+        findSysWin () {
+            this.$post('/admin/sys-win/findSysWin', {})
+                .then(res => {
+                    if (res.code === 0 && res.data) {
+                        res.data.forEach(item => {
+                            item.winId = item.winId + ''
+                        })
+                        this.winIds = res.data
+                        this.activeName = res.data[0].winId
+                        this.findSysMenuByWinId()
+                    }
+                })
+        },
+        // 查询应用菜单
+        findSysMenuByWinId () {
+            this.$post('/admin/sys-menu/findSysMenuByWinId', {
+                data: {
+                    winId: this.activeName
+                }
+            })
+                .then(res => {
+                    if (res.code === 0 && res.data) {
+                        this.dataList = this.makeTree(res.data, 1, 99)
+                    }
+                })
+        },
+        // 组成树形菜单
+        makeTree (data) {
+            var tree = []
+            for (let i = 0; i < data.length; i++) {
+                if (data[i].parentId === '0') {
+                    data[i].lever = 1
+                    data[i].children = []
+                    tree.push(data[i])
+                }
+            }
+            for (let i = 0; i < data.length; i++) {
+                for (let j = 0; j < tree.length; j++) {
+                    if (data[i].parentId === tree[j].menuId) {
+                        data[i].lever = 2
+                        data[i].parentName = tree[j].name
+                        tree[j].children.push(data[i])
+                    }
+                }
+            }
+            tree = tree.sort((a, b) => {
+                return a.orderNum - b.orderNum
+            })
+            return tree
+        },
+        // tab切换
+        tabChange () {
+            this.findSysMenuByWinId()
+        },
+        editDetail (item) {
+            item.winId = item.winId + ''
+            this.currentMenuId = item.menuId
+            this.form = { ...item }
+            this.addOrUpdateVisible = true
+        },
+        deleteHandle (menuId) {
+            this.$confirm('确定删除该菜单吗？', '提示', {
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+                type: 'warning'
+            }).then(() => {
+                this.$post('/admin/sys-menu/delSysMenuById', {
+                    data: {
+                        menuId
+                    }
+                }).then(res => {
+                    if (res.code === 0) {
+                        this.$message({
+                            type: 'success',
+                            message: '创建成功!'
+                        })
+                        this.findSysMenuByWinId()
+                    }
+                })
+            }).catch(() => {})
+        },
+        // 添加菜单
+        addMenus () {
+            this.$refs.form.validate((valid) => {
+                if (valid) {
+                    let url
+                    let msg
+                    let params = {
+                        ...this.form
+                    }
+                    if (this.currentMenuId) {
+                        url = '/admin/sys-menu/updateSysMenuById'
+                        params.menuId = this.currentMenuId
+                        msg = '修改成功'
+                    } else {
+                        url = '/admin/sys-menu/saveSysMenu'
+                        msg = '创建成功'
+                    }
+                    this.$post(url, {
+                        data: params
+                    }).then(res => {
+                        if (res.code === 0) {
+                            this.$message({
+                                type: 'success',
+                                message: msg
+                            })
+                            this.findSysMenuByWinId()
+                            this.alertCancel()
+                        }
+                    })
+                }
+            })
+        },
+        alertCancel () {
+            this.addOrUpdateVisible = false
+            this.currentMenuId = ''
+            this.form.parentName = ''
+            this.form.name = ''
+            this.form.url = ''
+            this.$nextTick(() => {
+                this.$refs.form.resetFields()
+            })
+        },
+        // 点击树行
+        handleNodeClick (val) {
+            this.form.parentName = val.name
+            this.form.parentId = val.menuId
+            this.showPopover = false
+        },
+        openAddMenu () {
+            this.addOrUpdateVisible = true
+        }
+    }
+}
+</script>
+
+<style lang='less'>
+#winMenuManage {
+    .header {
+        font-size: 15px;
+        font-weight: bold;
+        padding: 0 24px;
+        line-height: 72px;
+        border-bottom: 1px solid #ddd;
+        margin-bottom: 24px;
+        .btn {
+            float: right;
+            margin-top: 16px;
+        }
+    }
+    .empty {
+        text-align: center;
+        margin-top: 150px;
+        .empty-icon {
+            margin-bottom: 20px;
+            i {
+                font-size: 70px;
+                color: #ccc;
+            }
+        }
+        .empty-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .empty-text {
+            color: #999;
+            margin-bottom: 24px;
+        }
+    }
+    .menu-content {
+        padding: 20px;
+        padding-top: 0;
+        .menu-form {
+            margin: 0 24px;
+            .form-select {
+                width: 100%;
+            }
+        }
+    }
+}
+</style>

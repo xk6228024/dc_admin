@@ -1,0 +1,143 @@
+import Vue from 'vue'
+import Vuex from 'vuex'
+import router from './router.js'
+
+Vue.use(Vuex)
+
+export default new Vuex.Store({
+    state: {
+        tabIndex: 0, // 标签页角标
+        settings: {
+            theme: '#4D7CFE'
+        },
+        refreshList: [],
+        showLeft: true, // 是否显示左边栏
+        // 主题颜色
+        themeBgColor: '',
+        themeFontColor: '',
+        themeFontColorL: '',
+        tabsList: [
+            {
+                name: 'home',
+                path: '/home',
+                title: '首页'
+            }
+        ], // 标签页列表
+        tabShow: true, // 标签页显示
+        excludeComponents: [], // 不缓存组件的name列表
+        activeTab: 'home' // 当前选中的tab
+    },
+    mutations: {
+        // 设置需要刷新的页面
+        setRefreshList (state, val) {
+            if (!state.refreshList.includes('val')) {
+                state.refreshList.push(val)
+                // console.log(state.refreshList)
+            }
+        },
+        // 删除需要刷新的页面
+        delRefreshList (state, val) {
+            // if (state.refreshList[val]) {
+            //     delete state.refreshList[val]
+            // }
+            state.refreshList.forEach((e, index) => {
+                if (e === val) {
+                    state.refreshList.splice(index, 1)
+                }
+            })
+        },
+        delTabsList (state, val) {
+            let list = state.tabsList
+            list.forEach(e => {
+                if (e.name === val) {
+                    list.splice(1, '')
+                }
+            })
+            state.tabsList = list
+        },
+        setThemeBgColor (state, val) {
+            state.themeBgColor = val
+        },
+        setThemeFontColor (state, val) {
+            state.themeFontColor = val
+        },
+        setThemeFontColorL (state, val) {
+            state.themeFontColorL = val
+        },
+        // setTheme
+        setTheme (state, val) {
+            state.settings.theme = val
+        },
+        // 切换tab
+        setTabsIndex (state, val) {
+            state.tabIndex = val
+        },
+        // 设置当前标签页列表
+        setTabsList (state, val) {
+            state.tabsList = val
+        },
+        // 设置标签页是否显示
+        setTabShow (state, val) {
+            state.tabShow = val
+        },
+        // 设置当前选中tab
+        setActiveTab (state, val) {
+            state.activeTab = val
+        },
+        // 设置keep-alive排除缓存名单
+        setExcludeComponents (state, val) {
+            state.excludeComponents = val
+        }
+    },
+    actions: {
+        // 跳转至指定页面
+        routerTo ({ commit }, { excludeName, nextPath }) {
+            setTimeout(() => {
+                commit('setExcludeComponents', [])
+                router.push(nextPath)
+            })
+            commit('setExcludeComponents', [excludeName])
+            router.push('/empty')
+        },
+        // 清除所有缓存,排除首页
+        delAllCache ({ state, commit }, nextPath) {
+            setTimeout(() => {
+                commit('setExcludeComponents', [])
+                router.push(nextPath)
+            })
+            commit('setExcludeComponents', state.tabsList.map((item) => {
+                if (item.name !== 'home') { return item.name }
+            }))
+            commit('setTabsList', [{
+                name: 'home',
+                path: '/home',
+                title: '首页'
+            }])
+            commit('setActiveTab', 'home')
+        },
+        // 清除指定页面缓存
+        delCache ({ commit }, name) {
+            const comments = typeof name === 'string' ? [name] : name
+            commit('setExcludeComponents', comments)
+            setTimeout(() => {
+                commit('setExcludeComponents', [])
+            })
+        },
+        // 关闭指定页
+        closePage ({ state, commit }, { nextPath, refresh }) {
+            let tabs = state.tabsList
+            tabs.forEach((item, index) => {
+                if (item.name === state.activeTab) {
+                    tabs.splice(index, 1)
+                }
+            })
+            commit('setTabsList', tabs)
+            setTimeout(() => {
+                commit('setExcludeComponents', [])
+                router.push(nextPath)
+            })
+            commit('setExcludeComponents', [state.activeTab, refresh || ''])
+            router.push('/empty')
+        }
+    }
+})

@@ -1,0 +1,586 @@
+<!-- 编辑代理商 -->
+<template>
+    <div class="enterpriseOpenDetail">
+        <h3 class="detail-title">系统配置信息
+            <el-button class="fr back" type="primary" @click="save">保存</el-button>
+            <el-button class="fr back" @click="closePage">关闭</el-button>
+        </h3>
+        <el-form ref="form" class="form" :inline="true" :model="form">
+            <div>
+                <el-row>
+                    <el-col :span="8">
+                        <el-form-item label="管理员账号" label-position="top" prop="enterpriseUsername" :rules="$validate({required:true})" >
+                            <el-input maxlength="20" :disabled="!!$route.query.id" type="text" v-model="form.enterpriseUsername"/>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="维护超期提醒时间" label-position="top" prop="enterpriseUsername" :rules="$validate({required:true})" >
+                           <el-date-picker
+                                style="width:100%;"
+                                v-model="form.enterpriseUsername"
+                                type="date"
+                                placeholder="选择日期">
+                            </el-date-picker>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="综合检测提醒时间" label-position="top" prop="enterpriseUsername" :rules="$validate({required:true})" >
+                           <el-date-picker
+                                style="width:100%;"
+                                v-model="form.enterpriseUsername"
+                                type="date"
+                                placeholder="选择日期">
+                            </el-date-picker>
+                        </el-form-item>
+                    </el-col>
+                    <!-- <input type="password" style="display: none"/> -->
+                    <el-button size="small" style="margin-top:38px;" @click="resetPassword" v-if="this.$route.query.id">
+                        重置密码
+                    </el-button>
+                    <el-tooltip class="icon_item" v-if="this.$route.query.id" effect="dark" style="margin-left:10px;" content="密码重置后会恢复为'用户名+888',如用户名为user,密码为'user888'。" placement="top">
+                        <img src="../../../assets/img/tips.png">
+                    </el-tooltip>
+                    <!-- <el-col :span="8">
+                        <el-form-item label="管理员密码" label-position="top" prop="enterprisePassword" :rules="$validate({required:true})">
+                            <el-input maxlength="20" type="password" autocomplete="new-password" v-model="form.enterprisePassword" />
+                        </el-form-item>
+                    </el-col> -->
+                </el-row>
+                <el-row>
+                    <el-col :span="24">
+                        <div class="line"></div>
+                    </el-col>
+                    <el-col :span="24">
+                        <h3>基础信息</h3>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="企业名称" label-position="top" prop="enterpriseName" :rules="$validate({required:true})">
+                            <el-input type="text" v-model="form.enterpriseName" />
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="企业简称" label-position="top" prop="enterpriseJcShortName" :rules="$validate({required:true})">
+                            <el-input type="text" v-model="form.enterpriseJcShortName" />
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="所在地区" label-position="top" prop="region" :rules="$validate({required:true})">
+                            <el-cascader
+                            :props="propsOption"
+                            placeholder="请选择"
+                            v-model="form.region"
+                            clearable
+                            :options="allCityList"
+                            filterable
+                            >
+                            </el-cascader>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="社会信用代码" label-position="top" prop="enterpriseCreditIdentifier" :rules="$validate({required:true, type:'enterpriseCreditIdentifier'})">
+                            <el-input type="text" maxlength="18" v-model="form.enterpriseCreditIdentifier" />
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="经营许可证号" label-position="top" prop="enterpriseBusinessCertificate" :rules="$validate({required:true, type:'enterpriseBusinessCertificate'})">
+                            <el-input type="text" maxlength="12" v-model="form.enterpriseBusinessCertificate" />
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="许可证有效期" label-position="top" prop="enterpriseCertificate" :rules="$validate({required:true})">
+                            <el-date-picker
+                                v-model="form.enterpriseCertificate"
+                                type="daterange"
+                                range-separator="至"
+                                start-placeholder="开始日期"
+                                value-format="yyyy-MM-dd"
+                                end-placeholder="结束日期">
+                            </el-date-picker>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="经营性质" label-position="top" prop="enterpriseEconomicCategory" :rules="$validate({required:true})">
+                            <el-select v-model="form.enterpriseEconomicCategory" placeholder="请选择">
+                                <el-option
+                                v-for="item in economicsList"
+                                :key="item.value"
+                                :label="item.label"
+                                :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="营业时间" label-position="top" prop="enterpriseJcBusiness" :rules="$validate({required:true})">
+                            <el-time-picker
+                                is-range
+                                v-model="form.enterpriseJcBusiness"
+                                value-format="HH:mm"
+                                range-separator="至"
+                                start-placeholder="开始时间"
+                                end-placeholder="结束时间"
+                                placeholder="选择时间范围">
+                            </el-time-picker>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="负责人" label-position="top" prop="enterpriseOwner" :rules="$validate({required:true})">
+                            <el-input type="text" v-model="form.enterpriseOwner" />
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="负责人电话" label-position="top" prop="enterpriseOwnerPhone" :rules="$validate({required:true, type:'phone'})">
+                            <el-input type="number" maxlength="12" v-model="form.enterpriseOwnerPhone" />
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="联系人" label-position="top" prop="enterpriseLinkName" :rules="$validate({required:true})">
+                            <el-input type="text" v-model="form.enterpriseLinkName" />
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="联系人电话" label-position="top" prop="enterpriseLinkMobile" :rules="$validate({required:true, type:'phone'})">
+                            <el-input type="number" maxlength="12" v-model="form.enterpriseLinkMobile" />
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="企业业务电话" label-position="top" prop="enterpriseBusinessPhone" :rules="$validate({required:true, type:'phone'})">
+                            <el-input type="number" maxlength="12" v-model="form.enterpriseBusinessPhone" />
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="电子邮箱" label-position="top" prop="enterpriseRegisterEmail">
+                            <el-input type="text" v-model="form.enterpriseRegisterEmail" />
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="邮政编码" label-position="top" prop="enterprisePostalcode">
+                            <el-input type="text" v-model="form.enterprisePostalcode" />
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="经营地址" label-position="top" prop="enterpriseOperatingAddress" :rules="$validate({required:true})">
+                            <el-input type="text" v-model="form.enterpriseOperatingAddress" />
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="16">
+                        <el-form-item style="width: 90%;" label="经营范围" label-position="top" prop="enterpriseOperationArea">
+                            <el-input type="text" v-model="form.enterpriseOperationArea" />
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="24">
+                        <el-form-item style="width: 93%;" class="from_item" label="企业概况" label-position="top" prop="enterpriseIntroduction">
+                            <el-input type="text" v-model="form.enterpriseIntroduction" />
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="24">
+                        <div class="line"></div>
+                    </el-col>
+                    <el-col :span="24">
+                        <h3>扩展信息</h3>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="法人代表" label-position="top" prop="enterpriseLegalPerson">
+                            <el-input type="text" v-model="form.enterpriseLegalPerson" />
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="注册资金" label-position="top" prop="enterpriseRegisteredCapital">
+                            <el-input type="number" v-model="form.enterpriseRegisteredCapital" />
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="拥有车辆数" label-position="top" prop="enterpriseRegisteredCapital">
+                            <el-input type="number" v-model="form.enterpriseRegisteredCapital" />
+                        </el-form-item>
+                    </el-col>
+                    <!-- <el-col :span="8">
+                        <el-form-item label="拥有车辆数量" label-position="top" prop="cityConfigDetectLock">
+                            <el-input type="text" v-model="form.cityConfigVtamsServicerTel" />
+                        </el-form-item>
+                    </el-col> -->
+                    <el-col :span="24">
+                        <el-form-item label="照片（支持jpg/png格式，图片小于5M）" label-position="top" prop="enterpriseBusinessLicense">
+                            <div class="photo clearfix">
+                                <el-upload
+                                    v-if="!form.enterpriseBusinessLicense"
+                                    class="image-upload photo-one"
+                                    :accept="'image/png,image/jpeg'"
+                                    :show-file-list="false"
+                                    :action="uploadURL + 'attachment/file/upload'"
+                                    :on-success="handleSuccess1"
+                                    :before-upload="beforeUpload">
+                                    <i class="el-icon-plus"></i>
+                                    <p>上传照片</p>
+                                </el-upload>
+                                <div v-else class="image-pic photo-one">
+                                    <img :src="form.enterpriseBusinessLicense" width="100%"
+                                    @click="$lookImg(form.enterpriseBusinessLicense)" class="pic">
+                                    <i class="el-icon-error"
+                                    @click="form.enterpriseBusinessLicense = ''" ></i>
+                                </div>
+                            </div>
+                            <div class="photo clearfix">
+                                <el-upload
+                                    v-if="!form.enterpriseBusinessPermit"
+                                    class="image-upload photo-two"
+                                    :accept="'image/png,image/jpeg'"
+                                    :show-file-list="false"
+                                    :action="uploadURL + 'attachment/file/upload'"
+                                    :on-success="handleSuccess2"
+                                    :before-upload="beforeUpload">
+                                    <i class="el-icon-plus"></i>
+                                    <p>上传照片</p>
+                                </el-upload>
+                                <div v-else class="image-pic photo-two">
+                                    <img :src="form.enterpriseBusinessPermit"  width="100%"
+                                    @click="$lookImg(form.enterpriseBusinessPermit)" class="pic">
+                                    <i class="el-icon-error"
+                                    @click="form.enterpriseBusinessPermit = ''" ></i>
+                                </div>
+                            </div>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+            </div>
+        </el-form>
+    </div>
+</template>
+
+<script>
+export default {
+    name: 'enterpriseOpenDetail',
+    data () {
+        return {
+            propsOption: {
+                label: 'regionName',
+                children: 'childList',
+                value: 'regionCode'
+            },
+            allCityList: [], // 城市
+            economicsList: [
+                { value: 100, label: '内资' },
+                { value: 110, label: '国有全资' },
+                { value: 120, label: '集体全资' },
+                { value: 130, label: '股份合作' },
+                { value: 140, label: '联营' },
+                { value: 141, label: '国有联营' },
+                { value: 142, label: '集体联营' },
+                { value: 143, label: '国有与集体联营' },
+                { value: 149, label: '其他联营' },
+                { value: 150, label: '有限责任(公司)' },
+                { value: 159, label: '其他有限责任(公司)' },
+                { value: 160, label: '股份有限(公司)' },
+                { value: 170, label: '私有' },
+                { value: 171, label: '私有独资' },
+                { value: 172, label: '私有合伙' },
+                { value: 173, label: '私营有限责任(公司)' },
+                { value: 174, label: '私营股份有限(公司)' },
+                { value: 179, label: '其他私有' },
+                { value: 190, label: '其他内资' },
+                { value: 200, label: '港、澳、台投资' },
+                { value: 210, label: '内地和港、澳或台合资' },
+                { value: 220, label: '内地和港、澳或台合作' },
+                { value: 230, label: '港、澳或台独资' },
+                { value: 240, label: '港、澳或台投资股份有限(公司)' },
+                { value: 290, label: '其他港澳台投资' },
+                { value: 300, label: '国外投资' },
+                { value: 310, label: '中外合资' },
+                { value: 320, label: '中外合作' },
+                { value: 330, label: '外资' },
+                { value: 340, label: '国外投资股份有限(公司)' },
+                { value: 390, label: '其他国外投资' },
+                { value: 900, label: '其他' }
+            ],
+            uploadURL: window.uploadURL,
+            form: {
+                region: '',
+                enterpriseCertificate: [],
+                enterpriseJcBusiness: '',
+                enterpriseUsername: '',
+                enterprisePassword: '',
+                enterpriseName: '',
+                enterpriseJcShortName: '',
+                enterpriseCreditIdentifier: '',
+                enterpriseBusinessCertificate: '',
+                enterpriseEconomicCategory: '',
+                enterpriseOwner: '',
+                enterpriseOwnerPhone: '',
+                enterpriseLinkName: '',
+                enterpriseLinkMobile: '',
+                enterpriseBusinessPhone: '',
+                enterpriseRegisterEmail: '',
+                enterprisePostalcode: '',
+                enterpriseOperatingAddress: '',
+                enterpriseOperationArea: '',
+                enterpriseIntroduction: '',
+                enterpriseLegalPerson: '',
+                enterpriseRegisteredCapital: '',
+                enterpriseBusinessLicense: '',
+                enterpriseBusinessPermit: ''
+            }
+        }
+    },
+    created () {
+        this.getAllCity()
+    },
+    mounted () {
+        if (this.$route.query.id) {
+            this.getDetail()
+        }
+    },
+    methods: {
+        resetPassword () {
+            this.$get(`ent/vtams/reset/password/${this.$route.query.id}`).then(res => {
+                if (res.code === 0) {
+                    this.$message({
+                        message: '请求成功',
+                        type: 'success'
+                    })
+                }
+            })
+        },
+        getAllCity () {
+            this.$get('/comm/citys/dc/tree').then(res => {
+                if (res.code === 0) {
+                    this.allCityList = res.data
+                }
+            })
+        },
+        closePage () {
+            this.$store.dispatch('closePage', {
+                nextPath: '/vtamsEnterprise',
+                refresh: 'vtamsEnterprise'
+            })
+        },
+        getDetail () {
+            this.$post(`/ent/vtams/view/${this.$route.query.id}`, {
+            }).then(res => {
+                if (res.code === 0) {
+                    res.data.enterpriseEconomicCategory = Number(res.data.enterpriseEconomicCategory)
+                    if (res.data.enterpriseProvince && res.data.enterpriseCity) {
+                        res.data.region = [res.data.enterpriseProvince, res.data.enterpriseCity, res.data.enterpriseRegion]
+                    }
+                    if (res.data.enterpriseCertificateS && res.data.enterpriseCertificateE) {
+                        res.data.enterpriseCertificate = [res.data.enterpriseCertificateS, res.data.enterpriseCertificateE]
+                    }
+                    if (res.data.enterpriseJcBusinessS && res.data.enterpriseJcBusinessE) {
+                        res.data.enterpriseJcBusiness = [res.data.enterpriseJcBusinessS, res.data.enterpriseJcBusinessE]
+                    }
+                    this.form = res.data
+                    this.$refs['form'].resetFields()
+                }
+            })
+        },
+        save () {
+            this.$refs.form.validate((valid) => {
+                if (valid) {
+                    let url; let msg = ''
+                    if (this.$route.query.id) {
+                        url = `/ent/vtams/edit/${this.$route.query.id}`
+                        msg = '编辑成功！'
+                    } else {
+                        url = '/ent/vtams/add'
+                        msg = '添加成功！'
+                    }
+                    this.form.cityConfigVtamsMarketArea = (this.form.region && this.form.region[0]) || ''
+                    this.form.cityConfigVtamsProvince = (this.form.region && this.form.region[1]) || ''
+                    this.form.cityConfigVtamsCity = (this.form.region && this.form.region[2]) || ''
+                    // this.form.enterpriseRegion = ''
+                    this.$post(url, {
+                        ...this.form,
+                        enterpriseProvince: this.form.region && this.form.region[0],
+                        enterpriseCity: this.form.region && this.form.region[1],
+                        enterpriseRegion: this.form.region && this.form.region[2],
+                        enterpriseCertificateS: this.form.enterpriseCertificate && this.form.enterpriseCertificate[0],
+                        enterpriseCertificateE: this.form.enterpriseCertificate && this.form.enterpriseCertificate[1],
+                        enterpriseJcBusinessS: this.form.enterpriseJcBusiness && this.form.enterpriseJcBusiness[0],
+                        enterpriseJcBusinessE: this.form.enterpriseJcBusiness && this.form.enterpriseJcBusiness[1]
+                    }).then(res => {
+                        if (res.code === 0) {
+                            this.$message({
+                                type: 'success',
+                                message: msg
+                            })
+                            // this.$router.push('/vtamsEnterprise')
+                            this.$store.dispatch('closePage', {
+                                nextPath: '/vtamsEnterprise',
+                                refresh: 'vtamsEnterprise'
+                            })
+                        }
+                    })
+                }
+            })
+        },
+        beforeUpload (file) {
+            const isJPG = /jpeg|png/.test(file.type)
+            const isLt2M = file.size / 1024 / 1024 < 5
+
+            if (!isJPG) {
+                this.$message.error('上传图片只能是 JPG/JPEG/PNG 格式!')
+            }
+            if (!isLt2M) {
+                this.$message.error('上传图片大小不能超过 5MB!')
+            }
+            return isJPG && isLt2M
+        },
+        handleSuccess1 (res, file, fileList) {
+            if (res.data) {
+                this.$set(this.form, 'enterpriseBusinessLicense', res.data)
+            } else {
+                this.$alert('服务器错误，上传失败')
+            }
+        },
+        handleSuccess2 (res, file, fileList) {
+            if (res.data) {
+                this.$set(this.form, 'enterpriseBusinessPermit', res.data)
+            } else {
+                this.$alert('服务器错误，上传失败')
+            }
+        }
+    }
+}
+</script>
+
+<style lang='less' scoped>
+.enterpriseOpenDetail {
+    h5 {
+        color: #252631;
+        font-size: 14px;
+    }
+    .detail-title {
+        height:74px;
+        line-height: 74px;
+        margin:0 30px;
+        // border-bottom: 1px solid #E8ECEF;
+        font-size: 16px;
+        color:#666666;
+        .back {
+            margin-top:20px;
+            height: 36px;
+            padding: 0;
+            width: 78px;
+            margin-right: 24px;
+        }
+    }
+    .form {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 0 30px 30px;
+        color: #666;
+        .line {
+            width: 100%;
+            height: 1px;
+            background: #E8E8E8;
+            margin: 10px 0;
+        }
+        .bot {
+            border: 1px solid #E8E8E8;
+        }
+        .s-title {
+            margin-top: 10px;
+        }
+        .photo {
+            float: left;
+            width: 100px;
+            height: 100px;
+            margin-right: 20px;
+            background:rgba(0,0,0,0.02);
+            border-radius:4px;
+            border:1px solid rgba(0,0,0,0.15);
+            text-align: center;
+            .image-upload {
+                width: 100%;
+                height: 100%;
+                position: relative;
+                &.photo-one::after{
+                    content: '营业执照';
+                    position: absolute;
+                    width: 100px;
+                    height: 30px;
+                    bottom: -30px;
+                    left: 0;
+                    z-index: 999;
+                }
+                &.photo-two::after{
+                    content: '经营许可证';
+                    position: absolute;
+                    width: 100px;
+                    height: 30px;
+                    bottom: -30px;
+                    left: 0;
+                    z-index: 999;
+                }
+            }
+        }
+        .image-pic {
+            float: left;
+            width: 100px;
+            height: 100px;
+            margin-right: 20px;
+            position: relative;
+            .el-icon-error {
+                position: absolute;
+                top: -5px;
+                right: -5px;
+                cursor: pointer;
+            }
+            &.photo-one::after{
+                content: '营业执照';
+                position: absolute;
+                width: 100px;
+                height: 30px;
+                bottom: -30px;
+                left: 0;
+                z-index: 999;
+            }
+            &.photo-two::after{
+                content: '经营许可证';
+                position: absolute;
+                width: 100px;
+                height: 30px;
+                bottom: -30px;
+                left: 0;
+                z-index: 999;
+            }
+        }
+    }
+}
+</style>
+
+<style lang="less">
+.enterpriseOpenDetail {
+    .el-form-item {
+        width: 80%;
+        padding-bottom: 20px;
+        .el-form-item__content {
+            width: 100%;
+        }
+        .el-row {
+            width: 100%;
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+        .el-select, .el-input__inner {
+            width: 100%;
+        }
+        .el-input-group--append{
+            margin-top: 2px;
+            width: 100%;
+        }
+        .el-cascader {
+            line-height: 36px;
+            width: 100%;
+        }
+        .el-upload {
+            width: 100%;
+            height: 100%;
+            .el-icon-plus {
+                margin-top: 25px;
+            }
+        }
+    }
+}
+</style>

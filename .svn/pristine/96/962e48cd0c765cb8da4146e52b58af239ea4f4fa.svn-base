@@ -1,0 +1,359 @@
+<!-- 左侧导航组件 -->
+<script>
+import region from '@/assets/js/region.js'
+// import { setTimeout } from 'timers';
+export default {
+    name: 'nav-menu',
+    data () {
+        return {
+            isSupported: window.CSS && window.CSS.supports && window.CSS.supports('--a', 0), // 是否支持css变量
+            bgColor: this.$store.state.themeBgColor,
+            fontColorL: '#ffffff',
+            region,
+            navList: [],
+            // menuActive: 'home',
+            menuOpeneds: ['0'],
+            menuActive: ''
+        }
+    },
+    render () {
+        return (
+            <div class="nav-menu" id="nav_menu" refs="nav_menu" style='background:transparent'>
+                <el-menu
+                    // default-active={this.$route.name === 'home' ? '' : '0'}
+                    ref="menu"
+                    unique-opened={ true }
+                    default-active={this.menuActive}
+                    default-openeds={this.menuOpeneds}
+                    // background-color={this.bgColor}
+                    // text-color={this.fontColorL}
+                    active-text-color='#ffffff'
+                    // active-background-color={this.fontColor}
+                    // <i class={'icon-menu ' + item.icon }></i>
+                    // { chil.icon ? <i style="color:inherit" class={'icon-menu icon iconfont ' + chil.icon}></i> : '' }
+                    collapse={false}
+                    class="el-menu-vertical-demo">
+                    {this.navList.map((item, index) => {
+                        return (
+                            <div>
+                                {item.children && item.children.length && !/Board/.test(item.url)
+                                    ? <el-submenu
+                                        index={ index + ''}
+                                        // default-active={'1'}
+                                        key={ index }>
+                                        <template slot="title">
+                                            <i style="color:inherit" class={'icon-menu icon iconfont ' + item.icon}></i>
+                                            <span>{item.name}</span>
+                                        </template>
+                                        {item.children && item.children.length
+                                            ? <el-menu-item-group v-show={ item.children }>
+                                                {item.children.map((chil, chilIndex) => {
+                                                    return (
+                                                        <el-menu-item
+                                                            onClick={ this.goto.bind(this, chil.url) }
+                                                            key={ chil.chilIndex }
+                                                            index={ index + '' + chilIndex }>
+                                                            { chil.name }
+                                                        </el-menu-item>
+                                                    )
+                                                })}
+                                            </el-menu-item-group>
+                                            : ''}
+                                    </el-submenu>
+                                    : <el-menu-item index={ index + ''} onClick={ this.goto.bind(this, item.url) }>
+                                        <i style="color:inherit" class={'icon-menu icon iconfont ' + item.icon}></i>
+                                        <span slot="title">{item.name}</span>
+                                    </el-menu-item>}
+                            </div>
+                        )
+                    })}
+                </el-menu>
+            </div>
+        )
+    },
+    computed: {
+        demo () {
+            return this.$store.state.themeBgColor
+        }
+    },
+    watch: {
+        // '$store.state.themeBgColor': function (val) {
+        //     this.bgColor = this.$store.state.themeBgColor
+        // },
+        // '$store.state.themeFontColorL': function (val) {
+        //     console.log(val)
+        //     this.fontColorL = val
+        // },
+        '$store.state.tabIndex': function (val) {
+            let menuList = JSON.parse(localStorage.menuList)
+            if (val - 0 === 0) {
+                this.$router.push('/')
+            } else {
+                this.navList = menuList[val - 1].children
+                // this.menuActive = '0'
+                // console.log(this.$refs.menu)
+                if (this.$refs.menu) {
+                    // console.log(this.navList[0].url)
+                    if (!/Board/.test(this.navList[0].url)) {
+                        // this.$refs.menu.open('0')
+                        setTimeout(() => {
+                            this.$refs.menu.open('0')
+                        }, 300)
+                    }
+                    // setTimeout(() => {
+                    //     // console.log(this.)
+                    //     this.$refs.menu.open('0')
+                    //     // this.$refs.menu.activeIndex = '0'
+                    // }, 300)
+                }
+            }
+        },
+        '$route': {
+            handler: function (val) {
+                if (val.meta.tag) {
+                    val = val.meta.tag
+                } else {
+                    val = val.name
+                }
+                this.$nextTick(() => {
+                    let menuList = JSON.parse(localStorage.menuList)
+                    menuList.forEach((e, eindex) => {
+                        e.children.forEach((r, rindex) => {
+                            if (r.url === val && val !== 'carData') {
+                                this.menuActive = rindex + ''
+                                this.$store.commit('setTabsIndex', eindex + 1)
+                            } else {
+                                r.children && r.children.forEach((t, tindex) => {
+                                    if (t.url === val) {
+                                        this.menuActive = rindex + '' + tindex
+                                        this.$store.commit('setTabsIndex', eindex + 1)
+                                    }
+                                })
+                            }
+                        })
+                    })
+                })
+                // setTimeout(() => {
+                //     let menuList = JSON.parse(localStorage.menuList)
+                //     menuList.forEach((e, eindex) => {
+                //         e.children.forEach((r, rindex) => {
+                //             if (r.url === val && val !== 'carData') {
+                //                 // console.log(val)
+                //                 this.menuActive = rindex + ''
+                //                 this.$store.commit('setTabsIndex', eindex + 1)
+                //             } else {
+                //                 r.children && r.children.forEach((t, tindex) => {
+                //                     if (t.url === val) {
+                //                         this.menuActive = rindex + '' + tindex
+                //                         // console.log(this.menuActive)
+                //                         this.$store.commit('setTabsIndex', eindex + 1)
+                //                     }
+                //                 })
+                //             }
+                //         })
+                //     })
+                // }, 200)
+            },
+            immediate: true
+        }
+        // '$route.name' (val) {
+        //     console.log(val)
+        //     let menuList = JSON.parse(localStorage.menuList)
+        //     menuList.forEach((e, eindex) => {
+        //         // console.log(e.url)
+        //         e.children.forEach((r, rindex) => {
+        //             // console.log(r.url + '===' + val)
+        //             if (r.url === val) {
+        //                 this.menuActive = rindex + ''
+        //                 // console.log(r.url + '===' + val)
+        //                 // console.log(this.menuActive)
+        //                 // this.menuOpeneds = []
+        //                 this.$store.commit('setTabsIndex', eindex + 1)
+        //             }
+        //             r.children && r.children.forEach((t, tindex) => {
+        //                 if (t.url === val) {
+        //                     // console.log(tindex)
+        //                     this.menuActive = rindex + '' + tindex
+        //                     // this.menuOpeneds = [rindex + '']
+        //                     // console.log(this.menuActive)
+        //                     this.$store.commit('setTabsIndex', eindex + 1)
+        //                 }
+        //             })
+        //         })
+        //     })
+        //     console.log(val)
+        // }
+    },
+    created () {
+        // this.getLoginMenun()
+        // console.log(this.$route.name)
+    },
+    mounted () {
+        // 根据主题切换
+        // if (!localStorage.themeBgColor) {
+        //     document.querySelector('#nav_menu').style.background = '#001529'
+        // } else {
+        //     document.querySelector('#nav_menu').style.background = 'transparent'
+        // }
+    },
+    methods: {
+        goto (val) {
+            // console.log(val)
+            if (val === 'p21' || val === 'p22' || val === 'p23' || val === 'p24') {
+                this.$router.push('block')
+                // return
+            } else {
+                this.$router.push(val)
+            }
+        },
+        // 路由跳转
+        routerLinkTo (path) {
+            this.$router.push(path)
+        }
+    }
+}
+</script>
+
+<style lang='less' scoped>
+.nav-menu {
+    background-size: cover!important;
+    // background: #fff;
+    width: 239px;
+    min-height: 300px;
+    overflow: auto;
+    position: absolute;
+    float: left;
+    left: 0px;
+    top: 0;
+    bottom: 0;
+    transition: all 1s;
+    // border-right: 1px solid #E8ECEF;
+    .icon-menu {
+        display: inline-block;
+        // height: 24px;
+        // width: 24px;
+        // background-size: 100% 100%;
+        font-size: 24px;
+        margin: 0px 6px;
+        // margin-top: -3px;
+        // &.busIcon {
+        //     background-image: url('../assets/img/busIcon.svg');
+        // }
+        // &.financeIcon {
+        //     background-image: url('../assets/img/financeIcon.svg');
+        // }
+        // &.dataIcon {
+        //     background-image: url('../assets/img/dataIcon.svg');
+        // }
+        // &.settingIcon {
+        //     background-image: url('../assets/img/settingIcon.svg');
+        // }
+    }
+    // .is-active {
+    //     .icon-home-normal {
+    //         background-image: url('../assets/img/homeIcon.png');
+    //     }
+    //     .icon-data-normal  {
+    //         background-image: url('../assets/img/financeIcon.png');
+    //     }
+    //     .icon-setting-normal {
+    //         background-image: url('../assets/img/financeIcon.png');
+    //     }
+    // }
+    .menu-title {
+        font-size: 18px;
+        color: #778CA2;
+        text-align: center;
+        height: 50px;
+        line-height: 50px;
+        margin-top: 16px;
+        // font-weight: normal;
+    }
+}
+@media screen and (max-width: 1400px) {
+    .nav-menu {
+        width: 179px;
+        // .el-submenu__title {
+        //     padding-left: 15px!important;
+        // }
+        .el-submenu .el-menu-item {
+            min-width: 179px;
+            padding-left: 40px!important;
+        }
+    }
+}
+</style>
+<style lang="less">
+.nav-menu {
+    .el-menu {
+        border-right: none;
+        background: transparent;
+    }
+    .nav-menu .el-submenu .el-menu-item {
+        background: transparent!important;
+    }
+    .el-menu-item-group__title {
+        padding: 0;
+    }
+    // .el-submenu .el-menu-item {
+    //     background: #F7FAFB;
+    // }
+    .el-menu-item {
+        color: rgba(255, 255, 255, .8);
+        &.is-active {
+            color: #ffffff;
+            background: rgba(255, 255, 255, .2);
+        }
+        &:hover {
+            background: rgba(255, 255, 255, .2);
+        }
+    }
+    .el-submenu__title {
+        height: 50px;
+        line-height: 50px;
+        // padding-left: 12px!important;
+        font-weight: 600;
+        color: rgba(255, 255, 255, .8);
+        &:hover {
+            color: #ffffff;
+            background: rgba(0, 0, 0, .2);
+        }
+    }
+    .el-submenu__title i {
+        color: inherit;
+    }
+    .el-submenu .el-menu-item {
+        padding-left: 50px!important;
+        color: rgba(255, 255, 255, .8);
+        &.is-active {
+            color: #ffffff;
+            background: rgba(255, 255, 255, .2);
+        }
+        &:hover {
+            background: rgba(255, 255, 255, .2);
+        }
+    }
+    .el-submenu__title:focus, .el-submenu__title:hover {
+        background-color: rgba(255, 255, 255, .2)!important;
+    }
+    // .el-menu-item:focus {
+    //     // background-color: inherit;
+    // }
+    .el-menu-item:hover {
+        color: #ffffff;
+        // background-color: var(--activeColor)!important;
+        // color: var(--themeFontColorAL)!important;
+    }
+    // .el-menu-item.is-active {
+    //     color: #ffffff;
+    //     // background: var(--activeColor)!important;
+    //     // color: var(--themeFontColorAL)!important;
+    // }
+    // .el-submenu__title {
+    //     &:hover {
+    //         color: #ffffff;
+    //         background: rgba(0, 0, 0, .2);
+    //     }
+    // }
+}
+</style>

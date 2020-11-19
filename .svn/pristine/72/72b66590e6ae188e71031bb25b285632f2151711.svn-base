@@ -1,0 +1,602 @@
+var plateColor = [
+    {
+        value: '1',
+        label: '蓝色'
+    },
+    {
+        value: '2',
+        label: '黄色'
+    },
+    {
+        value: '3',
+        label: '农黄'
+    },
+    {
+        value: '4',
+        label: '绿色'
+    },
+    {
+        value: '5',
+        label: '黑色'
+    },
+    {
+        value: '6',
+        label: '白色'
+    },
+    {
+        value: '7',
+        label: '渐变绿'
+    },
+    {
+        value: '8',
+        label: '黄绿'
+    }
+]
+
+var carBodyColor = [
+    {
+        value: 'A',
+        label: '白色'
+    },
+    {
+        value: 'B',
+        label: '灰色'
+    },
+    {
+        value: 'C',
+        label: '黄色'
+    },
+    {
+        value: 'D',
+        label: '粉色'
+    },
+    {
+        value: 'E',
+        label: '红色'
+    },
+    {
+        value: 'F',
+        label: '紫色'
+    },
+    {
+        value: 'G',
+        label: '绿色'
+    },
+    {
+        value: 'H',
+        label: '蓝色'
+    },
+    {
+        value: 'I',
+        label: '棕色'
+    },
+    {
+        value: 'J',
+        label: '黑色'
+    },
+    {
+        value: 'Y',
+        label: '白绿'
+    },
+    {
+        value: 'Z',
+        label: '其他'
+    }
+]
+
+var carTypeGuo = [
+    {
+        value: '01',
+        label: '小型车'
+    },
+    {
+        value: '02',
+        label: '大中型客车'
+    },
+    {
+        value: '03',
+        label: '大型货车'
+    },
+    {
+        value: '99',
+        label: '其他'
+    }
+]
+
+var operateState = [
+    {
+        value: '01',
+        label: '营业'
+    },
+    {
+        value: '02',
+        label: '停业'
+    },
+    {
+        value: '03',
+        label: '整顿'
+    },
+    {
+        value: '04',
+        label: '停业整顿'
+    },
+    {
+        value: '05',
+        label: '歇业'
+    },
+    {
+        value: '06',
+        label: '注销'
+    },
+    {
+        value: '99',
+        label: '其他'
+    }
+]
+// 燃油类别
+var powerType = [
+    {
+        value: 'A',
+        label: '汽油'
+    },
+    {
+        value: 'B',
+        label: '柴油'
+    },
+    {
+        value: 'C',
+        label: '电（以电能驱动的汽车）'
+    },
+    {
+        value: 'D',
+        label: '混合油'
+    },
+    {
+        value: 'E',
+        label: '天然气'
+    },
+    {
+        value: 'F',
+        label: '液化石油气'
+    },
+    {
+        value: 'L',
+        label: '甲醇'
+    },
+    {
+        value: 'M',
+        label: '乙醇'
+    },
+    {
+        value: 'N',
+        label: '太阳能'
+    },
+    {
+        value: 'O',
+        label: '混合动力'
+    },
+    {
+        value: 'Y',
+        label: '无（仅限全挂车等无动力的）'
+    },
+    {
+        value: 'Z',
+        label: '其他'
+    }
+]
+
+var bussinessCategory = [
+    {
+        value: '01',
+        label: '一类维修经营业务'
+    },
+    {
+        value: '02',
+        label: '二类维修经营业务'
+    },
+    {
+        value: '03',
+        label: '三类维修经营业务'
+    }
+]
+
+var economicsList = [
+    {
+        value: '100',
+        label: '内资'
+    },
+    {
+        value: '110',
+        label: '国有全资'
+    },
+    {
+        value: '120',
+        label: '集体全资'
+    },
+    {
+        value: '130',
+        label: '股份合作'
+    },
+
+    {
+        value: '140',
+        label: '联营'
+    },
+    {
+        value: '141',
+        label: '国有联营'
+    },
+
+    {
+        value: '142',
+        label: '集体联营'
+    },
+    {
+        value: '143',
+        label: '国有与集体联营'
+    },
+    {
+        value: '149',
+        label: '其他联营'
+    },
+    {
+        value: '150',
+        label: '有限责任(公司)'
+    },
+    {
+        value: '159',
+        label: '其他有限责任(公司)'
+    },
+    {
+        value: '160',
+        label: '股份有限(公司)'
+    },
+    {
+        value: '170',
+        label: '私有'
+    },
+    {
+        value: '171',
+        label: '私有独资'
+    },
+    {
+        value: '172',
+        label: '私有合伙'
+    },
+    {
+        value: '173',
+        label: '私营有限责任(公司)'
+    },
+    {
+        value: '174',
+        label: '私营股份有限(公司)'
+    },
+    {
+        value: '175',
+        label: '个体经营'
+    },
+    {
+        value: '179',
+        label: '其他私有'
+    },
+    {
+        value: '190',
+        label: '其他内资'
+    },
+    {
+        value: '200',
+        label: '港、澳、台投资'
+    },
+    {
+        value: '210',
+        label: '内地和港、澳或台合资'
+    },
+    {
+        value: '220',
+        label: '内地和港、澳或台合作'
+    },
+    {
+        value: '230',
+        label: '港、澳或台独资'
+    },
+    {
+        value: '240',
+        label: '港、澳或台投资股份有限(公司)'
+    },
+    {
+        value: '290',
+        label: '其他港澳台投资'
+    },
+    {
+        value: '300',
+        label: '国外投资'
+    },
+    {
+        value: '310',
+        label: '中外合资'
+    },
+    {
+        value: '320',
+        label: '中外合作'
+    },
+    {
+        value: '330',
+        label: '外资'
+    },
+    {
+        value: '340',
+        label: '国外投资股份有限(公司)'
+    },
+    {
+        value: '390',
+        label: '其他国外投资'
+    },
+    {
+        value: '900',
+        label: '其他'
+    }
+]
+
+// 检测等级
+var jcGradeList = [
+    {
+        value: '1',
+        label: 'A级站'
+    },
+    {
+        value: '2',
+        label: 'B级站'
+    },
+    {
+        value: '3',
+        label: 'C级站'
+    }
+]
+
+var uploadStatusType = [
+    {
+        value: '0',
+        label: '失败'
+    },
+    {
+        value: '1',
+        label: '成功'
+    },
+    {
+        value: '2',
+        label: '未上传,省网账号密码为空'
+    },
+    {
+        value: '3',
+        label: 'java代码异常'
+    },
+    {
+        value: '4',
+        label: '链接响应异常'
+    },
+    {
+        value: '5',
+        label: '数据不存在不上传'
+    },
+    {
+        value: '99',
+        label: '异常'
+    }
+]
+
+// 评价等级
+var evaluateLevel = [
+    {
+        value: '1',
+        label: '非常差'
+    },
+    {
+        value: '2',
+        label: '差'
+    },
+    {
+        value: '3',
+        label: '一般'
+    },
+    {
+        value: '4',
+        label: '满意'
+    },
+    {
+        value: '5',
+        label: '非常满意'
+    }
+]
+// 维修类别
+var repairType = [
+    {
+        value: '01',
+        label: '零件修理'
+    },
+    {
+        value: '02',
+        label: '汽车小修'
+    },
+    {
+        value: '03',
+        label: '总成修理'
+    },
+    {
+        value: '04',
+        label: '汽车大修'
+    },
+    {
+        value: '05',
+        label: '日常维护'
+    },
+    {
+        value: '06',
+        label: '一级维护'
+    },
+    {
+        value: '07',
+        label: '二级维护'
+    },
+    {
+        value: '99',
+        label: '尾气专项维修'
+    }
+]
+// 变更类型1企业名称2经济类型3废业企业经营状态-注销4歇业企业经营状态-歇业 5延续许可变更6法人变更7经营地址变更8经营范围9企业备案审核
+var changeType = [
+    {
+        value: 1,
+        label: '企业名称变更'
+    },
+    {
+        value: 2,
+        label: '经济类型变更'
+    },
+    {
+        value: 3,
+        label: '废业申请变更'
+    },
+    {
+        value: 4,
+        label: '歇业申请变更'
+    },
+    {
+        value: 5,
+        label: '延续许可变更'
+    },
+    {
+        value: 6,
+        label: '法人变更'
+    },
+    {
+        value: 7,
+        label: '经营地址变更'
+    },
+    {
+        value: 8,
+        label: '经营范围变更'
+    },
+    {
+        value: 9,
+        label: '企业备案审核'
+    }
+]
+// 投诉类别
+var complaintCategory = [
+    {
+        value: '',
+        label: '全部'
+    },
+    {
+        value: '1',
+        label: '维修质量'
+    },
+    {
+        value: '2',
+        label: '维修效率'
+    },
+    {
+        value: '3',
+        label: '价格透明度'
+    },
+    {
+        value: '4',
+        label: '服务态度'
+    },
+    {
+        value: '5',
+        label: '店面环境'
+    },
+    {
+        value: '6',
+        label: '其他'
+    }
+]
+
+// 主营项目
+var mainCampType = [
+    {
+        value: '1',
+        label: '洗车美容'
+    },
+    {
+        value: '2',
+        label: '汽车保养'
+    },
+    {
+        value: '3',
+        label: '轮胎轮毂'
+    },
+    {
+        value: '4',
+        label: '整车修理'
+    },
+    {
+        value: '5',
+        label: '二级维护'
+    },
+    {
+        value: '6',
+        label: '车身系统维修'
+    },
+    {
+        value: '7',
+        label: '空调电器系统维修'
+    },
+    {
+        value: '8',
+        label: '发动机系统维修'
+    },
+    {
+        value: '9',
+        label: '底盘系统维修'
+    }
+]
+
+var testType = [
+    {
+        value: '1',
+        label: '双怠速法'
+    },
+    {
+        value: '2',
+        label: '稳态工况法'
+    },
+    {
+        value: '3',
+        label: '自由加速法'
+    },
+    {
+        value: '4',
+        label: '减速法'
+    }
+]
+
+var inquestType = [
+    { value: 0, label: '全部' },
+    { value: 0, label: '待勘验' },
+    { value: 0, label: '已勘验' },
+    { value: 0, label: '待整改' },
+    { value: 0, label: '已整改' },
+    { value: 0, label: '勘验超时' },
+    { value: 0, label: '整改超时' }
+]
+
+export {
+    inquestType,
+    carBodyColor,
+    carTypeGuo,
+    operateState,
+    changeType,
+    plateColor,
+    jcGradeList,
+    powerType,
+    economicsList,
+    evaluateLevel,
+    uploadStatusType,
+    repairType,
+    complaintCategory,
+    bussinessCategory,
+    mainCampType,
+    testType
+}

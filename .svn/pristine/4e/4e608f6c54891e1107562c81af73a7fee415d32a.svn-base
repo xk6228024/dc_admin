@@ -1,0 +1,1313 @@
+<!-- 编辑代理商 -->
+<template>
+    <div class="inspectionCityOpenDetail" id="cityOpenDetail2">
+        <h3 class="detail-title">开通城市信息<el-button class="fr back" @click="goBack">返回</el-button></h3>
+        <el-form ref="form" class="form" :inline="true" :model="form" label-width="150px">
+            <div class="form_header">
+                开通城市配置
+            </div>
+            <div class="form_content">
+                <el-form-item label="选择开通城市：" label-width="150px" prop="marketAreaId" :rules="$validate({required:true})">
+                    <el-select v-model="form.marketAreaId" style="width:350px;" placeholder="城市">
+                        <el-option
+                        v-for="item in areaList"
+                        :key="item.areaId"
+                        :label="item.areaName"
+                        :value="item.areaId">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="状态：" label-width="150px" prop="marketAreaId" :rules="$validate({required:true})">
+                    <el-select v-model="form.marketAreaId" style="width:350px;" placeholder="请选择">
+                        <el-option
+                            v-for="item in [{value:0,label:'关闭'},{value:1,label:'开通'}]"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value"
+                            clearable >
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+            </div>
+            <div class="form_header">
+                维修企业开通
+            </div>
+            <div class="form_content">
+                <el-form-item label="规则：" label-width="150px" class="mb20" prop="marketAreaId" :rules="$validate({required:true})">
+                    <el-select v-model="form.marketAreaId" style="width:350px;" placeholder="请选择">
+                        <el-option
+                            v-for="item in [{value:0,label:'关闭'},{value:1,label:'开通'}]"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value"
+                            clearable >
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+            </div>
+            <div class="form_header">
+                徽标配置
+            </div>
+            <div class="form_content">
+                <el-form-item prop="marketAreaId" :rules="$validate({required:true})">
+                    <label class="form_label">
+                        <span class="red">*</span>
+                        备
+                        <el-tooltip class="icon_item" effect="dark"  content="备案申报" placement="top">
+                            <img class="vam" src="../../../assets/img/tips.png">
+                        </el-tooltip>
+                        ：
+                    </label>
+                    <el-select v-model="form.marketAreaId" style="width:160px;" placeholder="请选择">
+                        <el-option
+                            v-for="item in [{value:0,label:'关闭'},{value:1,label:'开通'}]"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value"
+                            clearable >
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="规则：" label-width="150px" prop="marketAreaId" :rules="$validate({required:true})">
+                    <el-select v-model="form.marketAreaId" style="width:160px;" placeholder="请选择">
+                        <el-option
+                            v-for="item in [{value:0,label:'关闭'},{value:1,label:'开通'}]"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value"
+                            clearable >
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <br/>
+                <el-form-item prop="marketAreaId" :rules="$validate({required:true})">
+                    <label class="form_label">
+                        <span class="red">*</span>
+                        协
+                        <el-tooltip class="icon_item" effect="dark"  content="协会会员" placement="top">
+                            <img class="vam" src="../../../assets/img/tips.png">
+                        </el-tooltip>
+                        ：
+                    </label>
+                    <el-select v-model="form.marketAreaId" style="width:160px;" placeholder="请选择">
+                        <el-option
+                            v-for="item in [{value:0,label:'关闭'},{value:1,label:'开通'}]"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value"
+                            clearable >
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="规则：" label-width="150px" prop="marketAreaId" :rules="$validate({required:true})">
+                    <el-select v-model="form.marketAreaId" style="width:160px;" placeholder="请选择">
+                        <el-option
+                            v-for="item in [{value:0,label:'关闭'},{value:1,label:'开通'}]"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value"
+                            clearable >
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <br/>
+                <el-form-item prop="marketAreaId" :rules="$validate({required:true})">
+                    <label class="form_label">
+                        <span class="red">*</span>
+                        会
+                        <el-tooltip class="icon_item" effect="dark"  content="养车修车网会员" placement="top">
+                            <img class="vam" src="../../../assets/img/tips.png">
+                        </el-tooltip>
+                        ：
+                    </label>
+                    <el-select v-model="form.marketAreaId" style="width:160px;" placeholder="请选择">
+                        <el-option
+                            v-for="item in [{value:0,label:'关闭'},{value:1,label:'开通'}]"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value"
+                            clearable >
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="规则：" label-width="150px" prop="marketAreaId" :rules="$validate({required:true})">
+                    <el-select v-model="form.marketAreaId" style="width:160px;" placeholder="请选择">
+                        <el-option
+                            v-for="item in [{value:0,label:'关闭'},{value:1,label:'开通'}]"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value"
+                            clearable >
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <br/>
+                <el-form-item prop="marketAreaId" :rules="$validate({required:true})">
+                    <label class="form_label">
+                        <span class="red">*</span>
+                        认
+                        <el-tooltip class="icon_item" effect="dark"  content="技师认证" placement="top">
+                            <img class="vam" src="../../../assets/img/tips.png">
+                        </el-tooltip>
+                        ：
+                    </label>
+                    <el-select v-model="form.marketAreaId" style="width:160px;" placeholder="请选择">
+                        <el-option
+                            v-for="item in [{value:0,label:'关闭'},{value:1,label:'开通'}]"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value"
+                            clearable >
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="规则：" label-width="150px" prop="marketAreaId" :rules="$validate({required:true})">
+                    <el-select v-model="form.marketAreaId" style="width:160px;" placeholder="请选择">
+                        <el-option
+                            v-for="item in [{value:0,label:'关闭'},{value:1,label:'开通'}]"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value"
+                            clearable >
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <br/>
+                <el-form-item prop="marketAreaId" :rules="$validate({required:true})">
+                    <label class="form_label">
+                        <span class="red">*</span>
+                        4S
+                        <el-tooltip class="icon_item" effect="dark"  content="4S店认证" placement="top">
+                            <img class="vam" src="../../../assets/img/tips.png">
+                        </el-tooltip>
+                        ：
+                    </label>
+                    <el-select v-model="form.marketAreaId" style="width:160px;" placeholder="请选择">
+                        <el-option
+                            v-for="item in [{value:0,label:'关闭'},{value:1,label:'开通'}]"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value"
+                            clearable >
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="规则：" label-width="150px" prop="marketAreaId" :rules="$validate({required:true})">
+                    <el-select v-model="form.marketAreaId" style="width:160px;" placeholder="请选择">
+                        <el-option
+                            v-for="item in [{value:0,label:'关闭'},{value:1,label:'开通'}]"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value"
+                            clearable >
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <br/>
+                <el-form-item prop="marketAreaId" :rules="$validate({required:true})">
+                    <label class="form_label">
+                        <span class="red">*</span>
+                        M
+                        <el-tooltip class="icon_item" effect="dark"  content="M站备案申报" placement="top">
+                            <img class="vam" src="../../../assets/img/tips.png">
+                        </el-tooltip>
+                        ：
+                    </label>
+                    <el-select v-model="form.marketAreaId" style="width:160px;" placeholder="请选择">
+                        <el-option
+                            v-for="item in [{value:0,label:'关闭'},{value:1,label:'开通'}]"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value"
+                            clearable >
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="规则：" label-width="150px" prop="marketAreaId" :rules="$validate({required:true})">
+                    <el-select v-model="form.marketAreaId" style="width:160px;" placeholder="请选择">
+                        <el-option
+                            v-for="item in [{value:0,label:'关闭'},{value:1,label:'开通'}]"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value"
+                            clearable >
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <br/>
+                <el-form-item prop="marketAreaId" :rules="$validate({required:true})">
+                    <label class="form_label">
+                        <span class="red">*</span>
+                        保
+                        <el-tooltip class="icon_item" effect="dark"  content="具备机动车保险销售资质" placement="top">
+                            <img class="vam" src="../../../assets/img/tips.png">
+                        </el-tooltip>
+                        ：
+                    </label>
+                    <el-select v-model="form.marketAreaId" style="width:160px;" placeholder="请选择">
+                        <el-option
+                            v-for="item in [{value:0,label:'关闭'},{value:1,label:'开通'}]"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value"
+                            clearable >
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="规则：" label-width="150px" prop="marketAreaId" :rules="$validate({required:true})">
+                    <el-select v-model="form.marketAreaId" style="width:160px;" placeholder="请选择">
+                        <el-option
+                            v-for="item in [{value:0,label:'关闭'},{value:1,label:'开通'}]"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value"
+                            clearable >
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <br/>
+                <el-form-item prop="marketAreaId" :rules="$validate({required:true})">
+                    <label class="form_label">
+                        <span class="red">*</span>
+                        公
+                        <el-tooltip class="icon_item" effect="dark"  content="公务车定点维修" placement="top">
+                            <img class="vam" src="../../../assets/img/tips.png">
+                        </el-tooltip>
+                        ：
+                    </label>
+                    <el-select v-model="form.marketAreaId" style="width:160px;" placeholder="请选择">
+                        <el-option
+                            v-for="item in [{value:0,label:'关闭'},{value:1,label:'开通'}]"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value"
+                            clearable >
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="规则：" label-width="150px" prop="marketAreaId" :rules="$validate({required:true})">
+                    <el-select v-model="form.marketAreaId" style="width:160px;" placeholder="请选择">
+                        <el-option
+                            v-for="item in [{value:0,label:'关闭'},{value:1,label:'开通'}]"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value"
+                            clearable >
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <br/>
+                <el-form-item prop="marketAreaId" :rules="$validate({required:true})">
+                    <label class="form_label">
+                        <span class="red">*</span>
+                        授
+                        <el-tooltip class="icon_item" effect="dark"  content="品牌授权销售" placement="top">
+                            <img class="vam" src="../../../assets/img/tips.png">
+                        </el-tooltip>
+                        ：
+                    </label>
+                    <el-select v-model="form.marketAreaId" style="width:160px;" placeholder="请选择">
+                        <el-option
+                            v-for="item in [{value:0,label:'关闭'},{value:1,label:'开通'}]"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value"
+                            clearable >
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="规则：" label-width="150px" prop="marketAreaId" :rules="$validate({required:true})">
+                    <el-select v-model="form.marketAreaId" style="width:160px;" placeholder="请选择">
+                        <el-option
+                            v-for="item in [{value:0,label:'关闭'},{value:1,label:'开通'}]"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value"
+                            clearable >
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <br/>
+                <el-form-item prop="marketAreaId" :rules="$validate({required:true})">
+                    <label class="form_label">
+                        <span class="red">*</span>
+                        实
+                        <el-tooltip class="icon_item" effect="dark"  content="汽车维修学校实训基地" placement="top">
+                            <img class="vam" src="../../../assets/img/tips.png">
+                        </el-tooltip>
+                        ：
+                    </label>
+                    <el-select v-model="form.marketAreaId" style="width:160px;" placeholder="请选择">
+                        <el-option
+                            v-for="item in [{value:0,label:'关闭'},{value:1,label:'开通'}]"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value"
+                            clearable >
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="规则：" label-width="150px" prop="marketAreaId" :rules="$validate({required:true})">
+                    <el-select v-model="form.marketAreaId" style="width:160px;" placeholder="请选择">
+                        <el-option
+                            v-for="item in [{value:0,label:'关闭'},{value:1,label:'开通'}]"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value"
+                            clearable >
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <br/>
+                <el-form-item prop="marketAreaId" :rules="$validate({required:true})">
+                    <label class="form_label">
+                        <span class="red">*</span>
+                        固
+                        <el-tooltip class="icon_item" effect="dark"  content="具有'四废'物质收集、处理措施" placement="top">
+                            <img class="vam" src="../../../assets/img/tips.png">
+                        </el-tooltip>
+                        ：
+                    </label>
+                    <el-select v-model="form.marketAreaId" style="width:160px;" placeholder="请选择">
+                        <el-option
+                            v-for="item in [{value:0,label:'关闭'},{value:1,label:'开通'}]"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value"
+                            clearable >
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="规则：" label-width="150px" prop="marketAreaId" :rules="$validate({required:true})">
+                    <el-select v-model="form.marketAreaId" style="width:160px;" placeholder="请选择">
+                        <el-option
+                            v-for="item in [{value:0,label:'关闭'},{value:1,label:'开通'}]"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value"
+                            clearable >
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+            </div>
+            <div class="form_header">
+                商业功能配置
+            </div>
+            <div class="form_content">
+                <el-form-item prop="marketAreaId" :rules="$validate({required:true})">
+                    <label class="form_label">
+                        <span class="red">*</span>
+                        车辆保险
+                        <el-tooltip class="icon_item" effect="dark"  content="备案申报" placement="top">
+                            <img class="vam" src="../../../assets/img/tips.png">
+                        </el-tooltip>
+                        ：
+                    </label>
+                    <el-select v-model="form.marketAreaId" style="width:160px;" placeholder="请选择">
+                        <el-option
+                            v-for="item in [{value:0,label:'关闭'},{value:1,label:'开通'}]"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value"
+                            clearable >
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="规则：" label-width="150px" prop="marketAreaId" :rules="$validate({required:true})">
+                    <el-select v-model="form.marketAreaId" style="width:160px;" placeholder="请选择">
+                        <el-option
+                            v-for="item in [{value:0,label:'关闭'},{value:1,label:'开通'}]"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value"
+                            clearable >
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <br/>
+                <el-form-item prop="marketAreaId" :rules="$validate({required:true})">
+                    <label class="form_label">
+                        <span class="red">*</span>
+                        ETC充值
+                        <el-tooltip class="icon_item" effect="dark" content="ETC卡充值" placement="top">
+                            <img class="vam" src="../../../assets/img/tips.png">
+                        </el-tooltip>
+                        ：
+                    </label>
+                    <el-select v-model="form.marketAreaId" style="width:160px;" placeholder="请选择">
+                        <el-option
+                            v-for="item in [{value:0,label:'关闭'},{value:1,label:'开通'}]"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value"
+                            clearable >
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="规则：" label-width="150px" prop="marketAreaId" :rules="$validate({required:true})">
+                    <el-select v-model="form.marketAreaId" style="width:160px;" placeholder="请选择">
+                        <el-option
+                            v-for="item in [{value:0,label:'关闭'},{value:1,label:'开通'}]"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value"
+                            clearable >
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <br/>
+                <el-form-item prop="marketAreaId" :rules="$validate({required:true})">
+                    <label class="form_label">
+                        <span class="red">*</span>
+                        油卡充值
+                        <el-tooltip class="icon_item" effect="dark" content="加油卡充值" placement="top">
+                            <img class="vam" src="../../../assets/img/tips.png">
+                        </el-tooltip>
+                        ：
+                    </label>
+                    <el-select v-model="form.marketAreaId" style="width:160px;" placeholder="请选择">
+                        <el-option
+                            v-for="item in [{value:0,label:'关闭'},{value:1,label:'开通'}]"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value"
+                            clearable >
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="规则：" label-width="150px" prop="marketAreaId" :rules="$validate({required:true})">
+                    <el-select v-model="form.marketAreaId" style="width:160px;" placeholder="请选择">
+                        <el-option
+                            v-for="item in [{value:0,label:'关闭'},{value:1,label:'开通'}]"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value"
+                            clearable >
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+            </div>
+            <div class="form_header">
+                运输车维护配置
+            </div>
+            <div class="form_content">
+                <el-form-item  label="运输车维护：" label-width="150px" prop="marketAreaId" :rules="$validate({required:true})">
+                    <el-select v-model="form.marketAreaId" style="width:160px;" placeholder="请选择">
+                        <el-option
+                            v-for="item in [{value:0,label:'关闭'},{value:1,label:'开通'}]"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value"
+                            clearable >
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item  label="合格证发放规则：" label-width="150px" prop="marketAreaId" :rules="$validate({required:true})">
+                    <el-select v-model="form.marketAreaId" style="width:160px;" placeholder="请选择">
+                        <el-option
+                            v-for="item in [{value:0,label:'关闭'},{value:1,label:'开通'}]"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value"
+                            clearable >
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <br/>
+                <el-form-item  label="维护超期锁定：" label-width="150px" prop="marketAreaId" :rules="$validate({required:true})">
+                    <el-select v-model="form.marketAreaId" style="width:160px;" placeholder="请选择">
+                        <el-option
+                            v-for="item in [{value:0,label:'关闭'},{value:1,label:'开通'}]"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value"
+                            clearable >
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item  label="锁定区域：" label-width="150px" prop="marketAreaId" :rules="$validate({required:true})">
+                    <el-select v-model="form.marketAreaId" style="width:160px;" placeholder="请选择">
+                        <el-option
+                            v-for="item in [{value:0,label:'关闭'},{value:1,label:'开通'}]"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value"
+                            clearable >
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <br/>
+                <el-form-item  label="识别卡购买：" label-width="150px" prop="marketAreaId" :rules="$validate({required:true})">
+                    <el-select v-model="form.marketAreaId" style="width:160px;" placeholder="请选择">
+                        <el-option
+                            v-for="item in [{value:0,label:'关闭'},{value:1,label:'开通'}]"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value"
+                            clearable >
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item  label="识别卡价格：" label-width="150px" prop="marketAreaId" :rules="$validate({required:true})">
+                    <el-input v-model="form.marketAreaId" disabled style="width:160px;" placeholder="请选择"></el-input>
+                </el-form-item>
+                <br/>
+                <el-form-item  label="二级维护竣工合格证样式：" label-width="220px" prop="marketAreaId" :rules="$validate({required:true})">
+                    <el-input v-model="form.marketAreaId" style="width:410px;" placeholder="请录入维护竣工合格证地址（系统将校验地址准确性）"></el-input>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<el-button size="small">预览</el-button>
+                </el-form-item>
+                <br/>
+                <el-form-item  label="新版维护竣工合格证样式：" label-width="220px" prop="marketAreaId" :rules="$validate({required:''})">
+                    <el-input v-model="form.marketAreaId" style="width:410px;" placeholder="请录入尾气治理合格证地址（系统将校验地址准确性）"></el-input>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<el-button size="small">预览</el-button>
+                </el-form-item>
+                <br/>
+                <el-form-item  label="尾气治理合格证样式：" class="mb20" label-width="220px" prop="marketAreaId" :rules="$validate({required:''})">
+                    <el-input v-model="form.marketAreaId" style="width:410px;" placeholder="请录入尾气治理合格证地址（系统将校验地址准确性）"></el-input>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<el-button size="small">预览</el-button>
+                </el-form-item>
+            </div>
+            <div class="form_header">
+                运输企业开通
+            </div>
+            <div class="form_content">
+                <el-form-item  label="规则：" class="mb20" label-width="150px" prop="marketAreaId" :rules="$validate({required:true})">
+                    <el-select v-model="form.marketAreaId" style="width:480px;" placeholder="请选择">
+                        <el-option
+                            v-for="item in [{value:0,label:'关闭'},{value:1,label:'开通'}]"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value"
+                            clearable >
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+            </div>
+            <div class="form_header">
+                运输企业配置
+            </div>
+            <div class="form_content">
+                <el-form-item  label="运输企业开通：" label-width="150px" prop="marketAreaId" :rules="$validate({required:''})">
+                    <el-select v-model="form.marketAreaId" style="width:160px;" placeholder="请选择">
+                        <el-option
+                            v-for="item in [{value:0,label:'关闭'},{value:1,label:'开通'}]"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value"
+                            clearable >
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item  label="等级评定超期锁定：" label-width="150px" prop="marketAreaId" :rules="$validate({required:''})">
+                    <el-select v-model="form.marketAreaId" style="width:160px;" placeholder="请选择">
+                        <el-option
+                            v-for="item in [{value:0,label:'关闭'},{value:1,label:'开通'}]"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value"
+                            clearable >
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <br/>
+                <el-form-item  label="归集服务费配置：" label-width="150px" prop="marketAreaId" :rules="$validate({required:''})">
+                    <el-select v-model="form.marketAreaId" style="width:96px;margin-right:8px;" placeholder="请选择">
+                        <el-option
+                            v-for="item in [{value:0,label:'关闭'},{value:1,label:'开通'}]"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value"
+                            clearable >
+                        </el-option>
+                    </el-select>
+                    <el-button size="small" @click="showConfig">配置</el-button>
+                </el-form-item>
+                <el-form-item  label="车辆维护作业配置：" label-width="150px" prop="marketAreaId" :rules="$validate({required:''})">
+                    <el-button size="small" @click="showConfig2">配置</el-button>
+                </el-form-item>
+                <br/>
+                <el-form-item  label="识别卡购买：" label-width="150px" prop="marketAreaId" :rules="$validate({required:''})">
+                    <el-select v-model="form.marketAreaId" style="width:160px;" placeholder="请选择">
+                        <el-option
+                            v-for="item in [{value:0,label:'关闭'},{value:1,label:'开通'}]"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value"
+                            clearable >
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item  label="识别卡价格：" label-width="150px" prop="marketAreaId" :rules="$validate({required:''})">
+                    <el-select v-model="form.marketAreaId" style="width:160px;" placeholder="请选择">
+                        <el-option
+                            v-for="item in [{value:0,label:'关闭'},{value:1,label:'开通'}]"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value"
+                            clearable >
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <br/>
+                <el-form-item  label="车辆建档审核：" label-width="150px" prop="marketAreaId" :rules="$validate({required:''})">
+                    <el-select v-model="form.marketAreaId" style="width:160px;" placeholder="请选择">
+                        <el-option
+                            v-for="item in [{value:0,label:'关闭'},{value:1,label:'开通'}]"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value"
+                            clearable >
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item  label="车辆综合查询：" label-width="150px" prop="marketAreaId" :rules="$validate({required:''})">
+                    <el-select v-model="form.marketAreaId" style="width:160px;" placeholder="请选择">
+                        <el-option
+                            v-for="item in [{value:0,label:'关闭'},{value:1,label:'开通'}]"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value"
+                            clearable >
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <br/>
+            </div>
+            <div class="form_header">
+                检测企业开通
+            </div>
+            <div class="form_content">
+                <el-form-item  label="规则：" class="mb20" label-width="150px" prop="marketAreaId" :rules="$validate({required:true})">
+                    <el-select v-model="form.marketAreaId" style="width:480px;" placeholder="请选择">
+                        <el-option
+                            v-for="item in [{value:0,label:'关闭'},{value:1,label:'开通'}]"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value"
+                            clearable >
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+            </div>
+            <div class="form_header">
+                检测企业配置
+            </div>
+            <div class="form_content">
+                <el-form-item  label="检测企业开通：" label-width="150px" prop="marketAreaId" :rules="$validate({required:''})">
+                    <el-select v-model="form.marketAreaId" style="width:160px;" placeholder="请选择">
+                        <el-option
+                            v-for="item in [{value:0,label:'关闭'},{value:1,label:'开通'}]"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value"
+                            clearable >
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item  label="允许创建车辆档案：" label-width="150px" prop="marketAreaId" :rules="$validate({required:''})">
+                    <el-select v-model="form.marketAreaId" style="width:160px;" placeholder="请选择">
+                        <el-option
+                            v-for="item in [{value:0,label:'关闭'},{value:1,label:'开通'}]"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value"
+                            clearable >
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <br/>
+                <el-form-item  label="判断车辆锁定状态：" label-width="150px" prop="marketAreaId" :rules="$validate({required:''})">
+                    <el-select v-model="form.marketAreaId" style="width:160px;" placeholder="请选择">
+                        <el-option
+                            v-for="item in [{value:0,label:'关闭'},{value:1,label:'开通'}]"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value"
+                            clearable >
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item  label="识别卡购买：" label-width="150px" prop="marketAreaId" :rules="$validate({required:''})">
+                    <el-select v-model="form.marketAreaId" style="width:160px;" placeholder="请选择">
+                        <el-option
+                            v-for="item in [{value:0,label:'关闭'},{value:1,label:'开通'}]"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value"
+                            clearable >
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <br/>
+                <el-form-item  label="识别卡价格：" label-width="150px" prop="marketAreaId" :rules="$validate({required:''})">
+                    <el-select v-model="form.marketAreaId" style="width:160px;" placeholder="请选择">
+                        <el-option
+                            v-for="item in [{value:0,label:'关闭'},{value:1,label:'开通'}]"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value"
+                            clearable >
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <br/>
+            </div>
+            <div class="form_header">
+                作业图片数据项配置
+            </div>
+            <div class="table_box" style="">
+                <table class="myTable" border="none">
+                    <tr>
+                        <td width="480">
+                            <label class="label" for="">作业现场图片:</label>
+                            <el-radio v-model="form.inspectPicStation" :label="0">非必填</el-radio>
+                            <el-radio v-model="form.inspectPicStation" :label="1">必填</el-radio>
+                            <el-radio v-model="form.inspectPicStation" :label="-1">隐藏</el-radio>
+                        </td>
+                        <td width="480">
+                            <label class="label" for="">送检人身份证:</label>
+                            <el-radio v-model="form.inspectPicIdcard" :label="0">非必填</el-radio>
+                            <el-radio v-model="form.inspectPicIdcard" :label="1">必填</el-radio>
+                            <el-radio v-model="form.inspectPicIdcard" :label="-1">隐藏</el-radio>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="480">
+                            <label class="label" for="">综合性能检测报告单:</label>
+                            <el-radio v-model="form.inspectPicAllInspection" :label="0">非必填</el-radio>
+                            <el-radio v-model="form.inspectPicAllInspection" :label="1">必填</el-radio>
+                            <el-radio v-model="form.inspectPicAllInspection" :label="-1">隐藏</el-radio>
+                        </td>
+                        <td width="480">
+                            <label class="label" for="">人工检验记录单:</label>
+                            <el-radio v-model="form.inspectPicManual" :label="0">非必填</el-radio>
+                            <el-radio v-model="form.inspectPicManual" :label="1">必填</el-radio>
+                            <el-radio v-model="form.inspectPicManual" :label="-1">隐藏</el-radio>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="480">
+                            <label class="label" for="">性能检验记录单:</label>
+                            <el-radio v-model="form.inspectPicPerformance" :label="0">非必填</el-radio>
+                            <el-radio v-model="form.inspectPicPerformance" :label="1">必填</el-radio>
+                            <el-radio v-model="form.inspectPicPerformance" :label="-1">隐藏</el-radio>
+                        </td>
+                        <td width="480">
+                            <label class="label" for="">安检合格标识:</label>
+                            <el-radio v-model="form.inspectPicSafeMark" :label="0">非必填</el-radio>
+                            <el-radio v-model="form.inspectPicSafeMark" :label="1">必填</el-radio>
+                            <el-radio v-model="form.inspectPicSafeMark" :label="-1">隐藏</el-radio>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="480">
+                            <label class="label" for="">环保检验记录单第一页:</label>
+                            <el-radio v-model="form.inspectPicEnvironmentalInspectl" :label="0">非必填</el-radio>
+                            <el-radio v-model="form.inspectPicEnvironmentalInspectl" :label="1">必填</el-radio>
+                            <el-radio v-model="form.inspectPicEnvironmentalInspectl" :label="-1">隐藏</el-radio>
+                        </td>
+                        <td width="480">
+                            <label class="label" for="">环保检验记录单第二页:</label>
+                            <el-radio v-model="form.inspectPicEnvironmentalInspect2" :label="0">非必填</el-radio>
+                            <el-radio v-model="form.inspectPicEnvironmentalInspect2" :label="1">必填</el-radio>
+                            <el-radio v-model="form.inspectPicEnvironmentalInspect2" :label="-1">隐藏</el-radio>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="480">
+                            <label class="label" for="">道路运输证:</label>
+                            <el-radio v-model="form.inspectPicRoadTransportCert" :label="0">非必填</el-radio>
+                            <el-radio v-model="form.inspectPicRoadTransportCert" :label="1">必填</el-radio>
+                            <el-radio v-model="form.inspectPicRoadTransportCert" :label="-1">隐藏</el-radio>
+                        </td>
+                        <td width="480">
+                            <label class="label" for="">道路运输达标核查记录表:</label>
+                            <el-radio v-model="form.inspectPicRoadTransportCertStandard" :label="0">非必填</el-radio>
+                            <el-radio v-model="form.inspectPicRoadTransportCertStandard" :label="1">必填</el-radio>
+                            <el-radio v-model="form.inspectPicRoadTransportCertStandard" :label="-1">隐藏</el-radio>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="480">
+                            <label class="label" for="">安检报告单:</label>
+                            <el-radio v-model="form.inspectPicSafeCheck" :label="0">非必填</el-radio>
+                            <el-radio v-model="form.inspectPicSafeCheck" :label="1">必填</el-radio>
+                            <el-radio v-model="form.inspectPicSafeCheck" :label="-1">隐藏</el-radio>
+                        </td>
+                        <td width="480">
+                            <label class="label" for="">安检人工检验单:</label>
+                            <el-radio v-model="form.inspectPicSafePerson" :label="0">非必填</el-radio>
+                            <el-radio v-model="form.inspectPicSafePerson" :label="1">必填</el-radio>
+                            <el-radio v-model="form.inspectPicSafePerson" :label="-1">隐藏</el-radio>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="480">
+                            <label class="label" for="">安检仪器报告单:</label>
+                            <el-radio v-model="form.inspectPicNacktscanner" :label="0">非必填</el-radio>
+                            <el-radio v-model="form.inspectPicNacktscanner" :label="1">必填</el-radio>
+                            <el-radio v-model="form.inspectPicNacktscanner" :label="-1">隐藏</el-radio>
+                        </td>
+                        <!-- <td width="480">
+                            <label class="label" for="">营运证:</label>
+                            <el-radio v-model="form.inspectPicCertificateNo" :label="0">非必填</el-radio>
+                            <el-radio v-model="form.inspectPicCertificateNo" :label="1">必填</el-radio>
+                            <el-radio v-model="form.inspectPicCertificateNo" :label="-1">隐藏</el-radio>
+                        </td> -->
+                        <td width="480">
+                            <label class="label" for="">环检检测报告:</label>
+                            <el-radio v-model="form.inspectPicStation" :label="0">非必填</el-radio>
+                            <el-radio v-model="form.inspectPicStation" :label="1">必填</el-radio>
+                            <el-radio v-model="form.inspectPicStation" :label="-1">隐藏</el-radio>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="480">
+                            <label class="label" for="">营运证:</label>
+                            <el-radio v-model="form.inspectPicCertificateNo" :label="0">非必填</el-radio>
+                            <el-radio v-model="form.inspectPicCertificateNo" :label="1">必填</el-radio>
+                            <el-radio v-model="form.inspectPicCertificateNo" :label="-1">隐藏</el-radio>
+                        </td>
+                        <td width="480">
+                            <label class="label" for="">车辆行驶证:</label>
+                            <el-radio v-model="form.inspectPicDrivinglicense" :label="0">非必填</el-radio>
+                            <el-radio v-model="form.inspectPicDrivinglicense" :label="1">必填</el-radio>
+                            <el-radio v-model="form.inspectPicDrivinglicense" :label="-1">隐藏</el-radio>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </el-form>
+        <div class="btn" style="padding-left:40px;">
+            <el-button @click="save" type="primary" :disabled="!$checkAuth('vtisSysCity:edit')">保存</el-button>
+        </div>
+        <modal
+            :title="'二级维护检验信息归档'"
+            :width="750"
+            :alert="showAlert"
+            @alertConfirm="confirmOk"
+            @alertCancel="confirmCancel">
+            <div class="detail_box alertBox clearfix" style="padding-bottom:0;">
+                <div class="alertTitle">
+                    <span class="red">*</span>
+                    二级维护检验信息归档：
+                </div>
+                <div class="alertForm">
+                    <label for="">金额：</label>
+                    <el-input-number v-model="form.num" controls-position="right" style="width:100px" size="small" @change="handleChange" :min="0" :max="10"></el-input-number>
+                    元&nbsp;&nbsp;&nbsp;&nbsp;
+                    <label for="">运输企业分摊费用：</label>
+                    <el-input-number v-model="form.num" controls-position="right" style="width:100px" size="small" @change="handleChange" :min="0" :max="10"></el-input-number>
+                    元&nbsp;&nbsp;&nbsp;&nbsp;
+                    <label for="">维修企业分摊费用：</label>
+                    <el-input-number v-model="form.num" controls-position="right" style="width:100px" size="small" @change="handleChange" :min="0" :max="10"></el-input-number>
+                    元
+                </div>
+                 <div class="alertTitle">
+                    <span class="red">*</span>
+                    运输车辆维护检验信息归集：
+                </div>
+                <div class="alertForm">
+                    <label for="">金额：</label>
+                    <el-input-number v-model="form.num" controls-position="right" style="width:100px" size="small" @change="handleChange" :min="0" :max="10"></el-input-number>
+                    元&nbsp;&nbsp;&nbsp;&nbsp;
+                    <label for="">运输企业分摊费用：</label>
+                    <el-input-number v-model="form.num" controls-position="right" style="width:100px" size="small" @change="handleChange" :min="0" :max="10"></el-input-number>
+                    元&nbsp;&nbsp;&nbsp;&nbsp;
+                    <label for="">维修企业分摊费用：</label>
+                    <el-input-number v-model="form.num" controls-position="right" style="width:100px" size="small" @change="handleChange" :min="0" :max="10"></el-input-number>
+                    元
+                </div>
+                 <div class="alertTitle">
+                    <span class="red">*</span>
+                    等级评定信息归集：
+                </div>
+                <div class="alertForm">
+                    <label for="">金额：</label>
+                    <el-input-number v-model="form.num" controls-position="right" style="width:100px" size="small" @change="handleChange" :min="0" :max="10"></el-input-number>
+                    元&nbsp;&nbsp;&nbsp;&nbsp;
+                    <label for="">运输企业分摊费用：</label>
+                    <el-input-number v-model="form.num" controls-position="right" style="width:100px" size="small" @change="handleChange" :min="0" :max="10"></el-input-number>
+                    元&nbsp;&nbsp;&nbsp;&nbsp;
+                    <label for="">维修企业分摊费用：</label>
+                    <el-input-number v-model="form.num" controls-position="right" style="width:100px" size="small" @change="handleChange" :min="0" :max="10"></el-input-number>
+                    元
+                </div>
+                 <div class="alertTitle">
+                    <span class="red">*</span>
+                    异地维护/检测记录信息归集：
+                </div>
+                <div class="alertForm">
+                    <label for="">金额：</label>
+                    <el-input-number v-model="form.num" controls-position="right" style="width:100px" size="small" @change="handleChange" :min="0" :max="10"></el-input-number>
+                    元&nbsp;&nbsp;&nbsp;&nbsp;
+                    <label for="">运输企业分摊费用：</label>
+                    <el-input-number v-model="form.num" controls-position="right" style="width:100px" size="small" @change="handleChange" :min="0" :max="10"></el-input-number>
+                </div>
+            </div>
+        </modal>
+        <modal
+            :title="'二级维护检验信息归档'"
+            :width="750"
+            :alert="showAlert2"
+            @alertConfirm="confirmOk2"
+            @alertCancel="confirmCancel2">
+            <div class="detail_box alertBox clearfix" style="padding-bottom:0;">
+                <div class="alertTitle">
+                    <span class="red">*</span>
+                    二级维护检验信息归档：
+                </div>
+                <div class="alertForm">
+                    <br>
+                    <div>
+                        &nbsp;&nbsp;&nbsp;&nbsp;<el-radio v-model="radio" label="1">包月</el-radio>
+                        &nbsp;&nbsp;&nbsp;&nbsp;<el-radio v-model="radio" label="2">包记录</el-radio>
+                        &nbsp;&nbsp;&nbsp;&nbsp;<el-radio v-model="radio" label="32">包年</el-radio>
+                    </div>
+                    <br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<label for="">费用：</label>
+                    <el-input-number v-model="form.num" controls-position="right" style="width:100px" size="small" @change="handleChange" :min="0" :max="100"></el-input-number>
+                </div>
+                <div class="alertTitle">
+                    <!-- <span class="red">*</span> -->
+                    按车打包收费期限：
+                </div>
+                <div class="alertForm">
+                    <br>
+                    <div>
+                        &nbsp;&nbsp;&nbsp;&nbsp;<el-radio v-model="radio" label="1">自动归档</el-radio>
+                        &nbsp;&nbsp;&nbsp;&nbsp;<el-radio v-model="radio" label="2">手动归档</el-radio>
+                    </div>
+                </div>
+            </div>
+        </modal>
+    </div>
+</template>
+
+<script>
+// import { CodeToText } from 'element-china-area-data'
+import Modal from '@/components/Modal'
+export default {
+    name: 'inspectionCityOpenDetail',
+    data () {
+        return {
+            showAlert: false,
+            showAlert2: false,
+            areaList: [], // 大区列表
+            radio: '1',
+            uploadUrl: window.uploadURL,
+            dateRegion: [],
+            valite: true,
+            form: {
+                num: 0,
+                provinceId: '',
+                cityId: '',
+                cityDomain: '',
+                marketAreaId: '',
+                cityServicePersonName: '',
+                cityServicePersonTel: '',
+                cityServiceComplaintTel: '',
+                inspectPicStation: 0,
+                inspectPicIdcard: 0,
+                inspectPicDrivinglicense: 0,
+                inspectPicCertificateNo: 0,
+                inspectPicAllInspection: 0,
+                inspectPicSafePerson: 0,
+                inspectPicSafeMark: 0,
+                inspectPicNacktscanner: 0,
+                inspectPicManual: 0,
+                inspectPicPerformance: 0,
+                inspectPicSafeCheck: 0,
+                inspectPicRoadTransportCert: 0,
+                inspectPicRoadTransportCertStandard: 0,
+                inspectPicEnvironmentalInspectl: 0,
+                inspectPicEnvironmentalInspect2: 0
+            },
+            provinceList: [],
+            cityList: [],
+            regionList: []
+        }
+    },
+    components: {
+        Modal
+    },
+    watch: {
+    },
+    created () {
+        // this.$refs['form'].resetFields()
+        this.getProvinceList()
+        this.$get('comm/area').then(res => {
+            this.areaList = res.data
+        })
+        // if (this.$route.query.id) {
+        //     this.$post('vtis/syscity/view', {
+        //         data: {
+        //             cityDomain: this.$route.query.id
+        //         }
+        //     }).then(res => {
+        //         this.$refs['form'].resetFields()
+        //         if (res.data.provinceId) {
+        //             this.getCityList(res.data.provinceId)
+        //         }
+        //         this.form = res.data
+        //     })
+        // }
+    },
+    methods: {
+        handleChange () {},
+        showConfig () {
+            this.showAlert = true
+        },
+        showConfig2 () {
+            // this.showAlert2 = true
+            this.$router.push('/vehicleMaintenanceConfig')
+        },
+        confirmOk () {
+            this.confirmCancel()
+        },
+        confirmCancel () {
+            this.showAlert = false
+        },
+        confirmOk2 () {
+            this.confirmCancel2()
+        },
+        confirmCancel2 () {
+            this.showAlert2 = false
+        },
+        provinceChange () {
+            let val = this.form.provinceId
+            if (val) {
+                this.getCityList(val)
+                this.form.cityId = ''
+                this.cityList = []
+            } else {
+                this.cityList = []
+                this.form.cityId = ''
+            }
+        },
+        // cityChange () {
+        //     let val = this.form.agentCity
+        //     if (val) {
+        //         this.getRegionList(val)
+        //         this.form.agentRegion = ''
+        //     } else {
+        //         this.cityList = []
+        //         this.form.agentRegion = ''
+        //     }
+        // },
+        save () {
+            this.$refs.form.validate((valid) => {
+                if (valid) {
+                    let url, msg
+                    if (this.$route.query.id) {
+                        this.form.cityDomain = this.$route.query.id
+                        url = 'vtis/syscity/edit'
+                        msg = '编辑成功！'
+                    } else {
+                        url = 'vtis/syscity/add'
+                        msg = '添加成功！'
+                    }
+                    this.$post(url, { data: this.form })
+                        .then(res => {
+                            if (res.code === 0) {
+                                this.$message({
+                                    type: 'success',
+                                    message: msg
+                                })
+                                this.$store.dispatch('closePage', {
+                                    nextPath: '/inspectionCityOpen',
+                                    refresh: 'inspectionCityOpen'
+                                })
+                            }
+                        })
+                }
+            })
+        },
+        goBack () {
+            // this.$router.push('/inspectionCityOpen')
+            this.$store.dispatch('closePage', {
+                nextPath: '/vtamsEnterprise2'
+            })
+        },
+        // 获取省列表
+        getProvinceList (id) {
+            this.areaId = id
+            this.$get('list/regionProvinceList?type=1').then(res => {
+                if (res.code === 0) {
+                    this.provinceList = res.data
+                }
+            })
+        },
+        // 获取城市列表
+        getCityList (id) {
+            this.$get('list/regioncityList?provinceRegionId=' + id).then(res => {
+                if (res.code === 0) {
+                    this.cityList = res.data
+                }
+            })
+        }
+    }
+}
+</script>
+
+<style lang='less' scoped>
+// #cityOpenDetail2 {
+//     .el-input__inner {
+//         line-height: 33px;
+//         height: inherit;
+//     }
+// }
+.inspectionCityOpenDetail {
+    overflow: auto;
+    h5 {
+        color: #252631;
+        font-size: 14px;
+    }
+    .detail-title {
+        height: 74px;
+        line-height: 74px;
+        padding: 0 36px;
+        // border-bottom: 1px solid #E8ECEF;
+        font-size: 16px;
+        color: #666666;
+        .back {
+            margin-top:20px;
+            height: 36px;
+            padding: 0;
+            width: 78px;
+            margin-right: 24px;
+        }
+    }
+    .form {
+        // margin-top: 30px;
+        color: #666;
+        .item-title {
+            color: #252631;
+            font-size: 14px;
+            margin-left: 56px;
+            line-height: 50px;
+            margin-top: 10px;
+        }
+        .w120 {
+            width: 120px;
+        }
+        .small-input {
+            .el-select {
+                width: 110px;
+            }
+        }
+        .myTable {
+            border: none!important;
+            line-height: 44px;
+            .label {
+                display: inline-block;
+                width: 160px;
+                text-align: right;
+                padding-right: 20px;
+            }
+            td {
+                border: none!important;
+            }
+        }
+    }
+    .btn {
+        margin: 20px 0 40px;
+        // padding: 6px 0 20px 116px;
+        .el-button {
+            height: 36px;
+            padding: 0;
+            width: 78px;
+            margin-right: 24px;
+        }
+    }
+    .form_header {
+        height: 54px;
+        line-height: 54px;
+        background: #FAFAFA;
+        border-top: 1px solid #EBEBEB;
+        border-bottom: 1px solid #EBEBEB;
+        padding-left: 24px;
+    }
+    .form_content {
+        padding-top: 20px;
+        .form_label {
+            padding-right: 12px;
+            width: 138px;
+            text-align: right;
+            display: inline-block;
+        }
+    }
+    .mb20 {
+        margin-bottom: 20px!important;
+    }
+    .alertBox {
+        padding: 0 25px;
+        .alertTitle {
+            color: #333333;
+            font-weight: bold;
+            margin: 5px 0;
+        }
+        .alertForm {
+            padding: 10px 0;
+        }
+    }
+}
+</style>
+<style lang="less">
+.inspectionCityOpenDetail {
+    .el-input-number.is-controls-right .el-input-number__increase {
+        margin-top: 1px;
+    }
+    .el-input-number.is-controls-right .el-input-number__decrease {
+        bottom: 2px;
+    }
+    .el-form {
+        .el-form-item:last-child {
+            margin-bottom: 20px;
+        }
+    }
+    .name {
+        .el-input__inner {
+            width: 160px;
+        }
+    }
+    .w350 {
+        width: 160px;
+    }
+    .w260 {
+        width: 260px;
+    }
+    .w300 {
+        width: 300px;
+    }
+    .avatar-uploader .el-upload {
+        border: 1px dashed #d9d9d9;
+        border-radius: 6px;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+    }
+    .avatar-uploader .el-upload:hover {
+        border-color: #409EFF;
+    }
+    .avatar-uploader-icon {
+        font-size: 28px;
+        color: #8c939d;
+        width: 120px;
+        height: 120px;
+        line-height: 120px;
+        text-align: center;
+    }
+    .avatar {
+        width: 120px;
+        height: 120px;
+        display: block;
+    }
+}
+#cityOpenDetail2 {
+    .el-input__inner {
+        line-height: inherit;
+        height: inherit;
+    }
+}
+</style>

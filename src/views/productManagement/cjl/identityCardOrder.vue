@@ -1,0 +1,814 @@
+
+<template>
+    <div class="certificateProvide" id="certificateProvide">
+        <breadcrumb>
+            <label for="">所属区域:</label>
+            <el-cascader
+                placeholder="请选择"
+                v-model="areaId"
+                clearable
+                :options="allCityList"
+                change-on-select
+                filterable>
+            </el-cascader>
+            <label for="">订单号:</label>
+            <el-input style="width:160px;" class="search-text" v-model="searchKey" placeholder=""></el-input>
+            <label for="">状态:</label>
+            <el-select class="w120_input" clearable v-model="chargeStatus" placeholder="请选择">
+                <el-option
+                v-for="item in [{value:'ToPayment',label:'待支付'},{value:'ToAudit',label:'待审核'},{value:'ToStorage',label:'待入库'},{value:'ToCard',label:'待发卡'},{value:'finished',label:'已完结'}]"
+                :key="item.value"
+                :label="item.label"
+                clearable
+                :value="item.value">
+                </el-option>
+            </el-select>
+            <div class="dlb">
+                <label for="">日期范围:</label>
+                <el-date-picker
+                    v-model="dateRegion"
+                    type="daterange"
+                    unlink-panels
+                    range-separator="至"
+                    start-placeholder="开始日期"
+                    class="search-text vam"
+                    value-format="yyyy-MM-dd"
+                    end-placeholder="结束日期">
+                </el-date-picker>
+                <el-button class="search" @click="search">查 询</el-button>
+            </div>
+            <div class="dlb fr">
+                <el-button class="fr mt17"  type="primary" :disabled="!$checkAuth('rfid:order:export')" @click="exportEXC">导出</el-button>
+            </div>
+        </breadcrumb>
+        <div class="table">
+            <el-table
+                border
+                :data="tableData"
+                v-loading="loading"
+                class="computeHeight tableBorder"
+                style="width: 100%;">
+                <el-table-column
+                prop="num"
+                align="left"
+                label="序号"
+                min-width="5%">
+                </el-table-column>
+                <el-table-column
+                prop="areaName"
+                align="left"
+                min-width="8%"
+                label="大区">
+                </el-table-column>
+                <el-table-column
+                prop="provinceName"
+                align="left"
+                min-width="8%"
+                label="省份">
+                </el-table-column>
+                <el-table-column
+                prop="cityName"
+                align="left"
+                min-width="8%"
+                label="城市">
+                </el-table-column>
+                <el-table-column
+                prop="orderNo"
+                align="left"
+                min-width="15%"
+                label="订单编号">
+                </el-table-column>
+                <el-table-column
+                prop="enterpriseName"
+                align="left"
+                min-width="10%"
+                label="企业名称">
+                </el-table-column>
+                <el-table-column
+                prop="orderNumber"
+                align="left"
+                min-width="10%"
+                label="购买数量">
+                </el-table-column>
+                 <el-table-column
+                prop="inputNumber"
+                align="left"
+                min-width="10%"
+                label="发卡数量">
+                </el-table-column>
+                <el-table-column
+                prop="issuedNumber"
+                align="left"
+                min-width="10%"
+                label="绑定车辆数量">
+                </el-table-column>
+                <el-table-column
+                prop="paymentMethod"
+                align="left"
+                min-width="10%"
+                label="支付方式">
+                </el-table-column>
+                <el-table-column
+                prop="paymentType"
+                align="left"
+                min-width="10%"
+                label="支付类型">
+                </el-table-column>
+                <el-table-column
+                prop="amount"
+                align="left"
+                min-width="10%"
+                label="支付金额">
+                </el-table-column>
+                <el-table-column
+                prop="orderStatus"
+                align="left"
+                min-width="10%"
+                label="状态">
+                </el-table-column>
+                <el-table-column
+                prop="paymentTime"
+                align="left"
+                min-width="10%"
+                label="订单支付时间">
+                </el-table-column>
+                <el-table-column
+                prop="chargeTime"
+                align="left"
+                min-width="13%"
+                label="操作">
+                    <template slot-scope="scope">
+                        <el-button @click="showDetail(scope.row.orderNo,2)" type="text" size="small"
+                        :disabled="!$checkAuth('rfid:order:view')">详情</el-button>
+                        <el-button @click="showDetail(scope.row.orderNo,1)" type="text" size="small"
+                        :disabled="!$checkAuth('rfid:order:audit')" v-if="scope.row.orderStatus=='待审核'">审核</el-button>
+                        <el-button @click="showDetail(scope.row.orderNo,3)" type="text" size="small"
+                        :disabled="!$checkAuth('rfid:order:release')" v-if="scope.row.orderStatus=='待发卡'">发卡</el-button>
+                    </template>
+                </el-table-column>
+            </el-table>
+            <div class="pagination clearfix">
+                <el-pagination
+                    style="float:right"
+                    @size-change="handleSizeChange"
+                    @current-change="handleCurrentChange"
+                    :current-page="pageNum"
+                    :page-sizes="[10, 20, 30, 40, 50, 100]"
+                    :page-size="pageSize"
+                    layout="total, sizes, prev, pager, next, jumper, slot"
+                    :total="total">
+                </el-pagination>
+                <!-- <p class="bottom-data fl" style="">本期数据&nbsp;&nbsp;&nbsp;总充值用户：{{userCount}}人&nbsp;&nbsp;&nbsp;总充值金额：{{chargeMoneyCount}}元</p> -->
+            </div>
+        </div>
+        <modal
+            :title="'待入库审核详情'"
+            :width="900"
+            :alert="showAlert"
+            @alertConfirm="alertConfirm"
+            confirmText='审核通过'
+            @alertCancel="alertCancel">
+            <div class="detail_box clearfix">
+                <h5>订单信息</h5>
+                <div class="clearfix">
+                    <div class="detail_item">
+                        <label for="">订单编号：</label>
+                        <span>{{detailObj.orderNo}}</span>
+                    </div>
+                    <div class="detail_item">
+                        <label for="">创建时间：</label>
+                        <span>{{detailObj.createTime}}</span>
+                    </div>
+                    <div class="detail_item">
+                        <label for="">支付方式：</label>
+                        <span>{{detailObj.paymentMethod}}</span>
+                    </div>
+                    <div class="detail_item">
+                        <label for="">支付类型：</label>
+                        <span>{{detailObj.paymentType}}</span>
+                    </div>
+                    <div class="detail_item">
+                        <label for="">状态：</label>
+                        <span>{{detailObj.orderStatusName}}</span>
+                    </div>
+                    <div class="detail_item">
+                        <label for="">所在城市：</label>
+                        <span>{{detailObj.cityName}}</span>
+                    </div>
+                    <div class="detail_item">
+                        <label for="">购买数量：</label>
+                        <span>{{detailObj.orderNumber}}</span>
+                    </div>
+                    <div class="detail_item">
+                        <label for="">支付金额：</label>
+                        <span>{{detailObj.amount}}</span>
+                    </div>
+                    <div class="detail_item">
+                        <label for="">企业名称：</label>
+                        <span>{{detailObj.enterpriseName}}</span>
+                    </div>
+                </div>
+                <h5 >线下汇款信息</h5>
+                <div class="clearfix">
+                    <div class="detail_item">
+                        <label for="">汇款日期：</label>
+                        <span>{{remittanceObj.remittanceDate}}</span>
+                    </div>
+                    <div class="detail_item">
+                        <label for="">汇款金额：</label>
+                        <span>{{remittanceObj.amount}}</span>
+                    </div>
+                    <div class="detail_item">
+                        <label for="">汇款流水号：</label>
+                        <span>{{remittanceObj.pipelineNumber}}</span>
+                    </div>
+                    <div class="detail_item detail_item2">
+                        <label for="">汇款凭证：</label>
+                        <span class="dlb">
+                            <img :src="remittanceObj.documentUrl" width="88" height="88" class="imgBoder" @click="$lookImg(remittanceObj.documentUrl)">
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </modal>
+        <modal
+            :title="'订单详情'"
+            :width="900"
+            :alert="showAlert2"
+            @alertConfirm="alertConfirm2"
+            @alertCancel="alertCancel2">
+            <div class="detail_box clearfix">
+                <h5>订单信息</h5>
+                <div class="clearfix">
+                    <div class="detail_item">
+                        <label for="">订单编号：</label>
+                        <span>{{detailObj.orderNo}}</span>
+                    </div>
+                    <div class="detail_item">
+                        <label for="">创建时间：</label>
+                        <span>{{detailObj.createTime}}</span>
+                    </div>
+                    <div class="detail_item">
+                        <label for="">支付方式：</label>
+                        <span>{{detailObj.paymentMethod}}</span>
+                    </div>
+                    <div class="detail_item">
+                        <label for="">支付类型：</label>
+                        <span>{{detailObj.paymentType}}</span>
+                    </div>
+                    <div class="detail_item">
+                        <label for="">状态：</label>
+                        <span>{{detailObj.orderStatusName}}</span>
+                    </div>
+                    <div class="detail_item">
+                        <label for="">所在城市：</label>
+                        <span>{{detailObj.cityName}}</span>
+                    </div>
+                    <div class="detail_item">
+                        <label for="">购买数量：</label>
+                        <span>{{detailObj.orderNumber}}</span>
+                    </div>
+                    <div class="detail_item">
+                        <label for="">支付金额：</label>
+                        <span>{{detailObj.amount}}</span>
+                    </div>
+                    <div class="detail_item">
+                        <label for="">发卡数量：</label>
+                        <span>{{detailObj.inputNumber}}</span>
+                    </div>
+                    <!-- <div class="detail_item">
+                        <label for="">入库数量：</label>
+                        <span>{{detailObj.inputNumber}}</span>
+                    </div> -->
+                    <div class="detail_item">
+                        <label for="">企业名称：</label>
+                        <span>{{detailObj.enterpriseName}}</span>
+                    </div>
+                </div>
+                <h5>
+                    识别卡发放记录
+                    <div class="h_tabs">
+                        <div :class="{'active': detailIndex===1}" @click="detailIndex=1">已绑定车辆识别卡</div>
+                        <div :class="{'active': detailIndex===2}" @click="detailIndex=2">未绑定车辆识别卡</div>
+                    </div>
+                </h5>
+                <div class="card_info" v-if="detailIndex===1">
+                    <p v-for="item in cardList.boundData" :key="item.cardNumber">1,识别卡ID：{{item.cardNumber}} {{item.vehiclePlate}} {{item.plateColor}}</p>
+                </div>
+                <div class="card_info" v-if="detailIndex===2">
+                    <p v-for="item in cardList.unboundData" :key="item">1,识别卡ID：{{item}}</p>
+                </div>
+            </div>
+        </modal>
+        <modal
+            :title="'订单详情'"
+            :width="900"
+            :alert="showAlert3"
+            @alertConfirm="alertConfirm3"
+            @alertCancel="alertCancel3">
+            <div class="detail_box clearfix" style="padding-bottom:0;">
+                <h5>采购信息</h5>
+                <div class="clearfix">
+                    <div class="detail_item">
+                        <label for="">订单编号：</label>
+                        <span>{{detailObj.orderNo}}</span>
+                    </div>
+                    <div class="detail_item">
+                        <label for="">创建时间：</label>
+                        <span>{{detailObj.createTime | filterTime('yyyy-mm-dd hh:ff:ss')}}</span>
+                    </div>
+                    <div class="detail_item">
+                        <label for="">支付方式：</label>
+                        <span>{{detailObj.paymentMethod}}</span>
+                    </div>
+                    <div class="detail_item">
+                        <label for="">支付类型：</label>
+                        <span>{{detailObj.paymentType}}</span>
+                    </div>
+                    <div class="detail_item">
+                        <label for="">状态：</label>
+                        <span>{{detailObj.orderStatusName}}</span>
+                    </div>
+                    <div class="detail_item">
+                        <label for="">所在城市：</label>
+                        <span>{{detailObj.cityName}}</span>
+                    </div>
+                    <div class="detail_item">
+                        <label for="">购买数量：</label>
+                        <span>{{detailObj.orderNumber}}</span>
+                    </div>
+                    <div class="detail_item">
+                        <label for="">企业名称：</label>
+                        <span>{{detailObj.enterpriseName}}</span>
+                    </div>
+                </div>
+                <h5>识别卡发放</h5>
+                <div class="clearfix">
+                    <div class="detail_item detail_item2 detail_item3" >
+                        <label>串口号：</label>
+                        <el-input style="width:140px" placeholder="请输入" v-model="commPort"></el-input>
+                        <label>设备ID：</label>
+                        <el-input style="width:140px" placeholder="请输入" v-model="deviceId"></el-input>
+                        <label>读卡器：</label>
+                        <el-select style="width:140px" clearable v-model="deviceName" placeholder="请选择">
+                            <el-option
+                            v-for="item in [{value:'ZK',label:'中科'},{value:'JT',label:'捷通'}]"
+                            :key="item.value"
+                            :label="item.label"
+                            clearable
+                            :value="item.value">
+                            </el-option>
+                        </el-select>
+                        <el-button size="mini" class="btn" type="primary" plain @click="readCard(deviceName,commPort,deviceId)">连接设备</el-button>
+                    </div>
+                </div>
+                <div class="clearfix">
+                    <el-form :model="form3"  ref="form3">
+                        <el-form-item  prop="text">
+                            <div class="detail_item detail_item2" style="margin-top:15px;">
+                                <label for="">操作提示：</label>
+                                <div class="text_info" ref="readCardInfo" v-html="readCardInfo"></div>
+                                <p class="handle_info">已发卡 {{this.detailObj.inputNumber}}</p>
+                            </div>
+                        </el-form-item>
+                    </el-form>
+                </div>
+            </div>
+        </modal>
+        <div id="zk"></div><div id="JieTong"></div>
+        <object style="position: absolute; top: 0;" width="0" height="0" id="ZhongCheRfid" classid="clsid:FAF6299A-CA50-4D91-9F31-B8FB1D4E1164" >
+        </object>
+    </div>
+</template>
+
+<script>
+import Breadcrumb from '@/components/Breadcrumb'
+import Modal from '@/components/Modal'
+import toReadCard from '@/utils/readCard.js'
+export default {
+    name: 'certificateProvide',
+    data () {
+        return {
+            cardList: {},
+            form3: {},
+            deviceName: '',
+            commPort: '',
+            deviceId: '',
+            readCardInfo: '',
+            showAlert3: false,
+            remittanceObj: {},
+            detailObj: '',
+            detailIndex: 1,
+            showAlert2: false,
+            form: {},
+            allCityList: [],
+            multipleSelection: [],
+            chargeStatusList: [
+                {
+                    label: '成功',
+                    value: 1
+                },
+                {
+                    label: '失败',
+                    value: 0
+                }
+            ],
+            chargeStatus: '',
+            chargeMoneyCount: 0,
+            userCount: 0,
+            loading: false,
+            areaList: [],
+            cityList: [],
+            regionId: '',
+            areaId: [], // 大区Id
+            searchKey: '',
+            auditRadio: '1', // 弹窗审核结果
+            certStatus: 0,
+            certStatusList: [
+                {
+                    value: 0,
+                    label: '全部'
+                },
+                {
+                    value: 1,
+                    label: '通过'
+                },
+                {
+                    value: 2,
+                    label: '未通过'
+                }
+            ],
+            dateRegion: [],
+            value: '',
+            options: [],
+            total: 0,
+            showAlert: false,
+            pageNum: 1,
+            pageSize: 10,
+            tableData: [{}]
+        }
+    },
+    components: {
+        Breadcrumb,
+        Modal
+    },
+    created () {
+        // this.getAreaList()
+        this.getDataList()
+        this.getAllCity()
+    },
+    watch: {
+    },
+    methods: {
+        readCard (deviceName, commPort, deviceId) {
+            this.readCardInfo += '<p>连接设备.....</p>'
+            let res = toReadCard({ deviceName, commPort, deviceId })
+            if (res.code === 200) {
+                this.$post(`/product/cjl/rfid/cards/orders/${this.detailObj.orderNo}/${res.content}?enterpriseId=${this.detailObj.enterpriseId}`).then(response => {
+                    if (response.code === 0) {
+                        this.readCardInfo += `<p class="green">识别卡录入,识别卡ID：${res.content}</p>`
+                        this.detailObj.inputNumber += 1
+                    } else {
+                        this.readCardInfo += `<p>${response.msg}</p>`
+                    }
+                    this.$nextTick(() => {
+                        this.$refs.readCardInfo.scrollTop = this.$refs.readCardInfo.scrollHeight
+                    })
+                })
+            } else {
+                this.readCardInfo += `<p>${res.content}</p>`
+                this.$nextTick(() => {
+                    this.$refs.readCardInfo.scrollTop = this.$refs.readCardInfo.scrollHeight
+                })
+            }
+        },
+        exportEXC () {
+            // this.$get('/product/cjl/rfid/cards/orders/export', obj).then(res => {
+            //     let content = res
+            //     let elink = document.createElement('a')
+            //     elink.download = 'cc.xlsx'
+            //     elink.style.display = 'none'
+            //     let blob = new Blob([content])
+            //     elink.href = URL.createObjectURL(blob)
+            //     document.body.appendChild(elink)
+            //     elink.click()
+            //     document.body.removeChild(elink)
+            // })
+            let href = `${window.uploadURL}product/cjl/rfid/cards/orders/export?areaCode=${this.areaId[0] || ''}&provinceCode=${this.areaId[1] || ''}&cityCode=${this.areaId[2] || ''}&status=${this.chargeStatus}&orderNo=${this.searchKey || ''}`
+            console.log(href)
+            if (this.dateRegion && this.dateRegion.length) {
+                href = href + '&startTime=' + this.dateRegion[0]
+                href = href + '&endTime=' + this.dateRegion[1]
+            }
+            window.open(href)
+        },
+        changeStatus (cityDomain, status) {
+            this.$post('syscity/status', {
+                data: {
+                    cityDomain,
+                    deleteStatus: status
+                }
+            }).then(res => {
+                if (res.code === 0) {
+                    this.$message({
+                        type: 'success',
+                        message: '操作成功'
+                    })
+                    this.getDataList()
+                }
+            })
+        },
+        // 检测线设置
+        goSetting (id) {
+            this.$router.push('/cjlEnterpriseArchivesDetail?id=' + id)
+        },
+        // 获取区域列表
+        getAllCity () {
+            this.$get('comm/citys/areas/tree').then(res => {
+                if (res.code === 0) {
+                    res.data.forEach(e => {
+                        e.label = e.areaName
+                        e.value = e.areaCode
+                        e.children && e.children.forEach(f => {
+                            f.label = f.provinceName
+                            f.value = f.provinceCode
+                            f.children && f.children.forEach(g => {
+                                g.label = g.cityName
+                                g.value = g.cityCode
+                            })
+                        })
+                    })
+                    this.allCityList = res.data
+                }
+            })
+        },
+        // 获取所有数据
+        getDataList () {
+            this.loading = true
+            let obj = {
+                areaCode: this.areaId[0],
+                provinceCode: this.areaId[1],
+                cityCode: this.areaId[2],
+                status: this.chargeStatus,
+                startTime: this.dateRegion && this.dateRegion[0],
+                orderNo: this.searchKey,
+                endTime: this.dateRegion && this.dateRegion[1]
+            }
+            this.$post('/product/cjl/rfid/cards/orders/list?page=' + this.pageNum + '&size=' + this.pageSize, obj)
+                .then(res => {
+                    if (res && res.code === 0) {
+                        this.tableData = this.$setNum(res.data, this.pageNum, this.pageSize)
+                        this.total = res.total
+                    }
+                    this.loading = false
+                }).catch(err => {
+                    console.log(err)
+                    this.loading = false
+                })
+        },
+        // 打开详情弹窗
+        showDetail (id, type) {
+            this.$get(`/product/cjl/rfid/cards/orders/${id}`).then(res => {
+                if (res.code === 0) {
+                    if (type === 1) this.showAlert = true
+                    if (type === 2) this.showAlert2 = true
+                    if (type === 3) this.showAlert3 = true
+                    this.detailObj = res.data
+                }
+            })
+            type === 1 && this.$get(`/product/cjl/rfid/cards/orders/${id}/remittance`).then(res => {
+                if (res.code === 0) {
+                    this.remittanceObj = res.data || ''
+                }
+            })
+            if (type === 2) {
+                this.$get(`/product/cjl/rfid/cards/orders/${id}/vehicles`).then(res => {
+                    if (res.code === 0) {
+                        this.cardList = res.data
+                    }
+                })
+            }
+        },
+        // 弹窗确认
+        alertConfirm () {
+            this.$get(`/product/cjl/rfid/cards/orders/audit/${this.detailObj.orderNo}`).then(res => {
+                if (res.code === 0) {
+                    this.$message({
+                        message: '审核成功',
+                        type: 'success'
+                    })
+                    this.showAlert = false
+                    this.getDataList()
+                }
+            })
+        },
+        // 弹窗取消
+        alertCancel () {
+            this.showAlert = false
+        },
+        alertConfirm2 () {
+            this.alertCancel2()
+        },
+        alertConfirm3 () {
+            this.alertCancel3()
+        },
+        alertCancel3 () {
+            this.showAlert3 = false
+        },
+        alertCancel2 () {
+            this.showAlert2 = false
+        },
+        search () {
+            this.pageNum = 1
+            this.pageSize = 10
+            this.getDataList()
+        },
+        handleSizeChange (val) {
+            this.pageSize = val
+            this.pageNum = 1
+            this.getDataList()
+        },
+        handleCurrentChange (val) {
+            this.pageNum = val
+            this.getDataList()
+        }
+    }
+}
+</script>
+
+<style lang='less' scoped>
+.certificateProvide {
+    .table {
+        margin: 20px;
+        margin-top: 0;
+    }
+    .tips {
+        position: absolute;
+        top: 0;
+        line-height: 40px;
+        color: #98A9BC;
+        font-size: 14px;
+        font-weight: normal;
+    }
+    .detail_box {
+        padding: 0 70px;
+        h5 {
+            font-size: 16px;
+            color: #000000;
+            font-weight: 500;
+            line-height: 30px;
+            margin-bottom: 20px;
+        }
+        .detail_item {
+            float: left;
+            width: 33%;
+            // margin-bottom: 20px;
+            min-height: 40px;
+            label {
+                color: #262626;
+            }
+            span {
+                color: #595959;
+            }
+            img {
+                vertical-align: top;
+                cursor: pointer;
+                margin-right: 30px;
+            }
+        }
+        .detail_item2 {
+            width: 66%;
+        }
+        .detail_item2 {
+            width: 100%;
+        }
+        .detail_item3 {
+            label {
+                display: inline-block;
+                width: 70px;
+                text-align: right;
+            }
+            .btn {
+                margin-left: 20px;
+                vertical-align: top;
+            }
+        }
+        .text_info {
+            width: 620px;
+            display: inline-block;
+            vertical-align: top;
+            height: 80px;
+            border: 1px solid #dddddd;
+            overflow-y: auto;
+            line-height: 20px;
+            padding: 10px 20px;
+        }
+        .handle_info {
+            padding-left: 80px;
+            color: #52C31A;
+        }
+        .ipt {
+            width: 550px;
+            vertical-align: top;
+        }
+        .h_tabs {
+            display: inline-block;
+            color: #595959;
+            font-size: 14px;
+            // margin-left: 20px;
+            div {
+                display: inline-block;
+                width: 150px;
+                margin-left: 20px;
+                text-align: center;
+                border-bottom: 1px solid #D9D9D9;
+                cursor: pointer;
+                &.active {
+                    color: #4D7CFE;
+                    border-bottom: 2px solid #4D7CFE;
+                }
+            }
+        }
+        .card_info {
+            height: 150px;
+            border: 1px solid #dddddd;
+            border-radius: 5px;
+            p {
+                line-height: 26px;
+                padding-left: 10px;
+            }
+        }
+        .ipt {
+            width: 550px;
+            vertical-align: top;
+        }
+    }
+    .alertInner {
+        padding: 0 40px;
+        table {
+            width: 100%;
+            border: none;
+            line-height: 44px;
+            td {
+                padding: 0 10px;
+                box-sizing: border-box;
+            }
+            .blueTilte {
+                background: rgb(242, 244, 246);
+            }
+            .resonInput {
+                line-height: 36px;
+                width: 600px;
+                border: none;
+                outline: none;
+            }
+            .importantIcon {
+                color: red;
+                margin-right: 4px;
+            }
+        }
+    }
+    .bottom-data {
+        color:#98A9BC;
+        font-weight: normal;
+    }
+    .pagination {
+        position: relative;
+        .bottom-data {
+            line-height: 36px;
+            color:#98A9BC;
+            font-weight: normal;
+            margin-top: 20px;
+            // position: absolute;
+            // left:0;
+            // top: 9px;
+        }
+    }
+}
+</style>
+<style lang='less'>
+.certificateProvide {
+    .small_input {
+        .el-input__inner {
+            width: 140px;
+        }
+    }
+    .w200_input {
+        width: 220px;
+    }
+    .w120_input {
+        width: 100px;
+    }
+    .el-pagination {
+        position: relative;
+    }
+}
+#certificateProvide {
+    .el-table--enable-row-transition .el-table__body .el-table__row td:nth-child(1) {
+        padding-left: 0!important;
+    }
+    .el-table__header .has-gutter th:nth-child(1) {
+        padding-left: 0!important;
+    }
+}
+</style>

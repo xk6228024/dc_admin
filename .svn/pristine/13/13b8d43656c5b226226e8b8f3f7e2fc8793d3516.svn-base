@@ -1,0 +1,139 @@
+<!-- 布局组件 -->
+<script>
+import NavMenu from '@/components/NavMenu'
+import HeaderTop from '@/components/Header'
+import Tabs from '@/components/Tabs'
+// import { setTimeout } from 'timers';
+export default {
+    data () {
+        return {
+            isIE: !!window.ActiveXObject || 'ActiveXObject' in window
+        }
+    },
+    components: {
+        NavMenu,
+        Tabs,
+        HeaderTop
+    },
+    computed: {
+        excludeComponents () {
+            return this.$store.state.excludeComponents
+        }
+    },
+    watch: {
+        // 页面切换时 滚动条需要重新适配
+        // '$route.name' (val) {
+        //     if (document.getElementById('scrollbar')) {
+        //         setTimeout(() => {
+        //             document.getElementById('scrollbar').__vue__.update()
+        //         }, 1000)
+        //     }
+        // }
+    },
+    mounted () {
+        // console.log(this.$refs.scrollbar)
+    },
+    render () {
+        return (
+            <div class="layout">
+                <header-top></header-top>
+                <div class="container">
+                    <nav-menu ></nav-menu>
+                    <div class="wrap">
+                        <tabs></tabs>
+                        <div class={this.$route.name !== 'home1' ? 'inner_wrap' : ''}
+                            // 设置背景色，防止有滚动条时出现白边
+                            style={'background:' + (['home', 'operateBoard', 'dataBoard', 'repairEnterpriseSys', 'servicePersonal', 'performanceStatistics', 'carDataStatistics', 'owerDataStatistics', 'enterpriseDataStatistics', 'maintenanceDataStatistics'].includes(this.$route.name) ? '#F0F2F5' : '#ffffff')}>
+                            {
+                                this.isIE
+                                    ? <keep-alive exclude={this.excludeComponents}>
+                                        <router-view></router-view>
+                                    </keep-alive>
+                                    : <transition name="el-fade-in-linear" mode="out-in">
+                                        <keep-alive exclude={this.excludeComponents}>
+                                            <router-view></router-view>
+                                        </keep-alive>
+                                    </transition>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        )
+    },
+    methods: {
+    }
+}
+</script>
+
+<style lang='less' scoped>
+.layout {
+    height: 100%;
+    width:100%;
+    display: flex;
+    flex-direction: column;
+    .container {
+        position: absolute;
+        top: 65px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        width:100%;
+        overflow: auto;
+        .wrap {
+            transition: .1s all ease-out;
+            position:absolute;
+            top: 0;
+            bottom: 0;
+            right: 0;
+            left: 240px;
+            .inner_wrap {
+                overflow-y: auto;
+                overflow-x: hidden;
+                border: 20px solid #F0F2F5;
+                background: #ffffff;
+                position: absolute;
+                left: 0;
+                top: 49px;
+                right: 0;
+                bottom: 0;
+                &::-webkit-scrollbar {/*滚动条整体样式*/
+                    width: 8px;     /*高宽分别对应横竖滚动条的尺寸*/
+                    height: 1px;
+                }
+                &::-webkit-scrollbar-thumb {/*滚动条里面小方块*/
+                    border-radius: 8px;
+                    background: #cccccc;
+                }
+                &::-webkit-scrollbar-track {/*滚动条里面轨道*/
+                    border-radius: 8px;
+                    background: #eeeeee;
+                }
+            }
+        }
+    }
+}
+@media screen and (max-width: 1400px) {
+    .layout {
+        .container {
+            .wrap {
+                left: 180px;
+                .inner_wrap {
+                }
+            }
+        }
+    }
+}
+</style>
+<style lang="less">
+.layout {
+    .el-scrollbar__wrap {
+        overflow: auto;
+        padding-right: 17px;
+        // width: 100%;
+    }
+    .el-scrollbar__view {
+        height: 100%;
+    }
+}
+</style>

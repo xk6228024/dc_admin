@@ -1,0 +1,539 @@
+
+<template>
+    <div class="certificateProvide" id="certificateProvide">
+        <search v-model='searchValue' :options='searchOption' @search='search()'>
+            <!-- <el-button type="primary" size="mini"  @click="showAlert=true">识别卡查询</el-button> -->
+        </search>
+        <div class="table">
+            <el-table
+                border
+                :data="tableData"
+                v-loading="loading"
+                class="computeHeight tableBorder"
+                style="width: 100%;">
+                <el-table-column
+                prop="num"
+                align="left"
+                label="序号"
+                min-width="5%">
+                </el-table-column>
+                <el-table-column
+                prop="cityCode"
+                align="left"
+                min-width="10%"
+                label="所属城市">
+                </el-table-column>
+                <el-table-column
+                prop="winId"
+                align="left"
+                min-width="10%"
+                label="系统名称">
+                </el-table-column>
+                <el-table-column
+                prop="qacardName"
+                align="left"
+                min-width="10%"
+                label="参数名称">
+                </el-table-column>
+                <el-table-column
+                prop="createId"
+                align="left"
+                min-width="10%"
+                label="创建人">
+                </el-table-column>
+                <el-table-column
+                prop="createTime"
+                align="left"
+                min-width="15%"
+                label="创建时间">
+                    <template slot-scope="scope">
+                        {{scope.row.createTime | filterTime('yyyy-mm-dd hh:ff:ss')}}
+                    </template>
+                </el-table-column>
+                <el-table-column
+                prop="updateId"
+                align="left"
+                min-width="12%"
+                label="最后修改人">
+                </el-table-column>
+                <el-table-column
+                prop="updateTime"
+                align="left"
+                min-width="15%"
+                label="最后修改时间">
+                    <template slot-scope="scope">
+                        {{scope.row.updateTime | filterTime('yyyy-mm-dd hh:ff:ss')}}
+                    </template>
+                </el-table-column>
+                <el-table-column
+                prop="chargeTime"
+                align="left"
+                min-width="12%"
+                label="操作">
+                    <template slot-scope="scope">
+                        <el-button @click="getDetail(scope.row.qacardCode)" type="text" size="small" >编辑</el-button>
+                    </template>
+                </el-table-column>
+            </el-table>
+            <div class="pagination clearfix">
+                <el-pagination
+                    style="float:right"
+                    @size-change="handleSizeChange"
+                    @current-change="handleCurrentChange"
+                    :current-page="pageNum"
+                    :page-sizes="[10, 20, 30, 40, 50, 100]"
+                    :page-size="pageSize"
+                    layout="total, sizes, prev, pager, next, jumper, slot"
+                    :total="total">
+                </el-pagination>
+                <!-- <p class="bottom-data fl" style="">本期数据&nbsp;&nbsp;&nbsp;总充值用户：{{userCount}}人&nbsp;&nbsp;&nbsp;总充值金额：{{chargeMoneyCount}}元</p> -->
+            </div>
+        </div>
+        <modal
+            :title="'参数配置'"
+            :width="777"
+            :alert="showAlert"
+            @alertConfirm="alertConfirm"
+            @alertCancel="alertCancel">
+            <div class="alertInner">
+                <h4 class="mb20">参数配置</h4>
+                <el-row>
+                    <el-col :span="12" class="mb20">
+                        <span class="c3">参数编号：</span>
+                        <span class="c6">{{form.qacardCode}}</span>
+                    </el-col>
+                    <el-col :span="12" class="mb20">
+                        <span class="c3">参数名称：</span>
+                        <span class="c6">{{form.qacardName}}</span>
+                    </el-col>
+                    <el-col :span="12" class="mb20">
+                        <span class="c3">所在城市：</span>
+                        <span class="c6">{{form.cityCode}}</span>
+                    </el-col>
+                    <el-col :span="12" class="mb20">
+                        <span class="c3">系统名称：</span>
+                        <span class="c6">{{form.winId}}</span>
+                    </el-col>
+                </el-row>
+                <h4 class="mb20">控制范围</h4>
+                <div>
+                    <h5 style="margin-bottom:10px;">汽车和危险货物运输车辆</h5>
+                    <el-table
+                        border
+                        :data="innerTable"
+                        style="width: 100%;">
+                        <el-table-column
+                        prop="name"
+                        align="left"
+                        label="维修类别"
+                        min-width="5%">
+                        </el-table-column>
+                        <el-table-column
+                        prop="num"
+                        align="left"
+                        label="质量保证期"
+                        min-width="10%">
+                        <template slot-scope="scope">
+                            车辆行驶<el-input v-model="scope.row.mile" style="width:100px" type="number" size="mini"></el-input>公里或<el-input v-model="scope.row.time" type="number" size="mini" style="width:100px"></el-input>日
+                        </template>
+                        </el-table-column>
+                    </el-table>
+                    <h5 style="margin:10px 0;">摩托车</h5>
+                    <el-table
+                        border
+                        :data="innerTable2"
+                        style="width: 100%;">
+                        <el-table-column
+                        prop="name"
+                        align="left"
+                        label="维修类别"
+                        min-width="5%">
+                        </el-table-column>
+                        <el-table-column
+                        prop="num"
+                        align="left"
+                        label="质量保证期"
+                        min-width="10%">
+                        <template slot-scope="scope">
+                            车辆行驶<el-input v-model="scope.row.mile" style="width:100px" type="number" size="mini"></el-input>公里或<el-input v-model="scope.row.time" type="number" size="mini" style="width:100px"></el-input>日
+                        </template>
+                        </el-table-column>
+                    </el-table>
+                    <h5 style="margin:10px 0;">其他机动车</h5>
+                    <el-table
+                        border
+                        :data="innerTable3"
+                        style="width: 100%;">
+                        <el-table-column
+                        prop="name"
+                        align="left"
+                        label="维修类别"
+                        min-width="5%">
+                        </el-table-column>
+                        <el-table-column
+                        prop="num"
+                        align="left"
+                        label="质量保证期"
+                        min-width="10%">
+                        <template slot-scope="scope">
+                            车辆行驶<el-input v-model="scope.row.mile" style="width:100px" type="number" size="mini"></el-input>公里或<el-input v-model="scope.row.time" type="number" size="mini" style="width:100px"></el-input>日
+                        </template>
+                        </el-table-column>
+                    </el-table>
+                </div>
+            </div>
+        </modal>
+    </div>
+</template>
+
+<script>
+// import Breadcrumb from '@/components/Breadcrumb'
+import Modal from '@/components/Modal'
+import Search from '@/components/search'
+export default {
+    name: 'certificateProvide',
+    data () {
+        return {
+            innerTable: [
+                {
+                    name: '整车修理/总成修理',
+                    mile: 20000,
+                    time: 100
+                },
+                {
+                    name: '二级维护',
+                    mile: 5000,
+                    time: 30
+                },
+                {
+                    name: '一级维护、小修、专项修理',
+                    mile: 2000,
+                    time: 10
+                }
+            ],
+            innerTable2: [
+                {
+                    name: '整车修理/总成修理',
+                    mile: 7000,
+                    time: 80
+                },
+                {
+                    name: '一级维护、小修、专项修理',
+                    mile: 800,
+                    time: 10
+                }
+            ],
+            innerTable3: [
+                {
+                    name: '整车修理/总成修理',
+                    mile: 6000,
+                    time: 60
+                },
+                {
+                    name: '一级维护、小修、专项修理',
+                    mile: 700,
+                    time: 7
+                }
+            ],
+            editId: '',
+            searchOption: [
+                {
+                    label: '选择地区',
+                    type: 'regionSelect',
+                    key: 'region'
+                },
+                {
+                    label: '系统名称',
+                    type: 'select',
+                    list: [
+                        {
+                            label: '维修系统',
+                            value: '1'
+                        }
+                    ],
+                    key: 'winId'
+                },
+                {
+                    label: '参数编码',
+                    type: 'input',
+                    key: 'qacardCode'
+                },
+                {
+                    label: '参数名称',
+                    type: 'input',
+                    key: 'qacardName'
+                }
+            ],
+            searchValue: {},
+            searchList: [],
+            searchLoading: false,
+            allCityList: [],
+            multipleSelection: [],
+            chargeStatusList: [
+                {
+                    label: '成功',
+                    value: 1
+                },
+                {
+                    label: '失败',
+                    value: 0
+                }
+            ],
+            form: {
+                qacardCode: '',
+                qacardName: '',
+                cityCode: '',
+                winId: '',
+                qacardVehicleTotalFixMileage: 2000,
+                qacardVehicleTotalFixDate: 100,
+                qacardVehicleFix2Mileage: 0,
+                qacardVehicleFix2Date: 0,
+                qacardVehicleFix1Mileage: 0,
+                qacardVehicleFix1Date: 0,
+                qacardMotorcycleTotalFixMileage: 0,
+                qacardMotorcycleTotalFixDate: 0,
+                qacardMotorcycleFixMileage: 0,
+                qacardMotorcycleFixDate: 0,
+                qacardOtherTotalFixMileage: 0,
+                qacardOtherTotalFixDate: 0,
+                qacardOtherFixMileage: 0,
+                qacardOtherFixDate: 0
+            },
+            chargeStatus: '',
+            chargeMoneyCount: 0,
+            userCount: 0,
+            loading: false,
+            areaList: [],
+            cityList: [],
+            regionId: '',
+            areaId: '', // 大区Id
+            enterpriseNamekey: '',
+            auditRadio: '1', // 弹窗审核结果
+            certStatus: 0,
+            certStatusList: [
+                {
+                    value: 0,
+                    label: '全部'
+                },
+                {
+                    value: 1,
+                    label: '通过'
+                },
+                {
+                    value: 2,
+                    label: '未通过'
+                }
+            ],
+            dateRegion: [],
+            value: '',
+            options: [],
+            total: 0,
+            showAlert: false,
+            pageNum: 1,
+            pageSize: 10,
+            tableData: []
+        }
+    },
+    // computed: {
+    //     enterpriseCertificateNum () {
+    //         return this.form.enterpriseCertificateE - this.form.enterpriseCertificateS + 1
+    //     }
+    // },
+    components: {
+        Search,
+        Modal
+    },
+    created () {
+        // this.getAreaList()
+        this.getDataList()
+        // this.getAllCity()
+    },
+    watch: {
+    },
+    methods: {
+        // 获取所有数据
+        getDataList () {
+            this.loading = true
+            let obj = this.searchValue
+            if (this.searchValue.region && this.searchValue.region.length >= 3) {
+                obj.cityCode = this.searchValue.region[2]
+            } else {
+                obj.cityCode = ''
+            }
+            this.$post('admin/sysCityConfigQacardParam/findSysCityConfigQacardParam?page=' + this.pageNum + '&size=' + this.pageSize, obj)
+                .then(res => {
+                    if (res && res.code === 0) {
+                        this.tableData = this.$setNum(res.datas.records, this.pageNum, this.pageSize)
+                        this.total = res.datas.total
+                        // this.chargeMoneyCount = res.data.totalMoney
+                        // console.log(this.chargeMoneyCount)
+                        // this.userCount = res.data.userCount
+                        // console.log(this.userCount)
+                    }
+                    this.loading = false
+                }).catch(err => {
+                    console.log(err)
+                    this.loading = false
+                })
+        },
+        // 打开详情弹窗
+        getDetail (id) {
+            this.$post('/admin/sysCityConfigQacardParam/findSysCityConfigQacardParamById', {
+                qacardCode: id
+            }).then(res => {
+                if (res.code === 0) {
+                    this.innerTable[0].mile = res.data.qacardVehicleTotalFixMileage
+                    this.innerTable[0].time = res.data.qacardVehicleTotalFixDate
+                    this.innerTable[1].mile = res.data.qacardVehicleFix2Mileage
+                    this.innerTable[1].time = res.data.qacardVehicleFix2Date
+                    this.innerTable[2].mile = res.data.qacardVehicleFix1Mileage
+                    this.innerTable[2].time = res.data.qacardVehicleFix1Date
+                    this.innerTable2[0].mile = res.data.qacardMotorcycleTotalFixMileage
+                    this.innerTable2[0].time = res.data.qacardMotorcycleTotalFixDate
+                    this.innerTable2[1].mile = res.data.qacardMotorcycleFixMileage
+                    this.innerTable2[1].time = res.data.qacardMotorcycleFixDate
+                    this.innerTable3[0].mile = res.data.qacardOtherTotalFixMileage
+                    this.innerTable3[0].time = res.data.qacardOtherTotalFixDate
+                    this.innerTable3[1].mile = res.data.qacardOtherFixMileage
+                    this.innerTable3[1].time = res.data.qacardOtherFixDate
+                    this.form = res.data
+                    this.showAlert = true
+                }
+            })
+        },
+        // 弹窗确认
+        alertConfirm () {
+            // this.showAlert = false
+            // this.alertCancel()
+            let obj = this.form
+            obj.qacardVehicleTotalFixMileage = this.innerTable[0].mile
+            obj.qacardVehicleTotalFixDate = this.innerTable[0].time
+            obj.qacardVehicleFix2Mileage = this.innerTable[1].mile
+            obj.qacardVehicleFix2Date = this.innerTable[1].time
+            obj.qacardVehicleFix1Mileage = this.innerTable[2].mile
+            obj.qacardVehicleFix1Date = this.innerTable[2].time
+            obj.qacardMotorcycleTotalFixMileage = this.innerTable2[0].mile
+            obj.qacardMotorcycleTotalFixDate = this.innerTable2[0].time
+            obj.qacardMotorcycleFixMileage = this.innerTable2[1].mile
+            obj.qacardMotorcycleFixDate = this.innerTable2[1].time
+            obj.qacardOtherTotalFixMileage = this.innerTable3[0].mile
+            obj.qacardOtherTotalFixDate = this.innerTable3[0].time
+            obj.qacardOtherFixMileage = this.innerTable3[1].mile
+            obj.qacardOtherFixDate = this.innerTable3[1].time
+            this.$post('/admin/sysCityConfigQacardParam/updateSysCityConfigQacardParam', {
+                data: {
+                    ...obj
+                }
+            }).then(res => {
+                if (res.code === 0) {
+                    this.$message.success('操作成功')
+                    this.alertCancel()
+                }
+            })
+        },
+        // 弹窗取消
+        alertCancel () {
+            this.showAlert = false
+            // this.$refs.form.resetFields()
+        },
+        search () {
+            this.pageNum = 1
+            this.pageSize = 10
+            this.getDataList()
+        },
+        handleSizeChange (val) {
+            this.pageSize = val
+            this.pageNum = 1
+            this.getDataList()
+        },
+        handleCurrentChange (val) {
+            this.pageNum = val
+            this.getDataList()
+        }
+    }
+}
+</script>
+
+<style lang='less' scoped>
+.certificateProvide {
+    .table {
+        margin: 20px;
+        margin-top: 0;
+    }
+    .tips {
+        position: absolute;
+        top: 0;
+        line-height: 40px;
+        color: #98A9BC;
+        font-size: 14px;
+        font-weight: normal;
+    }
+    .alertInner {
+        padding: 0 40px 20px;
+        table {
+            width: 100%;
+            border: none;
+            line-height: 44px;
+            td {
+                padding: 0 10px;
+                box-sizing: border-box;
+            }
+            .blueTilte {
+                background: rgb(242, 244, 246);
+            }
+            .resonInput {
+                line-height: 36px;
+                width: 600px;
+                border: none;
+                outline: none;
+            }
+            .importantIcon {
+                color: red;
+                margin-right: 4px;
+            }
+        }
+    }
+    .bottom-data {
+        color:#98A9BC;
+        font-weight: normal;
+    }
+    .pagination {
+        position: relative;
+        .bottom-data {
+            line-height: 36px;
+            color:#98A9BC;
+            font-weight: normal;
+            margin-top: 20px;
+            // position: absolute;
+            // left:0;
+            // top: 9px;
+        }
+    }
+}
+</style>
+<style lang='less'>
+.certificateProvide {
+    .small_input {
+        .el-input__inner {
+            width: 140px;
+        }
+    }
+    .w200_input {
+        width: 220px;
+    }
+    .w120_input {
+        width: 100px;
+    }
+    .el-pagination {
+        position: relative;
+    }
+}
+#certificateProvide {
+    .el-table--enable-row-transition .el-table__body .el-table__row td:nth-child(1) {
+        padding-left: 0!important;
+    }
+    .el-table__header .has-gutter th:nth-child(1) {
+        padding-left: 0!important;
+    }
+}
+</style>

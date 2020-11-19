@@ -1,0 +1,413 @@
+<template>
+    <div class="search-template" :style="{'border-bottom':hasTitle&&'1px solid #eee'}">
+        <!-- <div class="page_title">{{pageTitle}}</div> -->
+        <div style="line-height:72px;float:left;">
+            <slot name="title">
+            </slot>
+        </div>
+        <el-form class="form clearfix" ref="form" :model="value" :inline-message='false' :inline='true' v-if="hasBtn" :style="{'width':hasTitle&&'auto','float':hasTitle&&'right'}">
+            <div v-for="(item, index) in listOptions" :key="index" class="search_item" >
+                <el-form-item  :label="`${item.label}：`" :prop="item.key">
+                    <el-input v-if="item.type === 'input'" v-model="value[item.key]" size="mini" clearable placeholder="请输入"></el-input>
+                    <el-select v-else-if="item.type === 'select' && item.list" size="mini" v-model="value[item.key]" placeholder="请选择" clearable>
+                        <el-option
+                        v-for="child in item.list"
+                        :key="child[item.list_value] || child.value"
+                        :label="child[item.list_key] || child.label"
+                        :value="child[item.list_value] || child.value" >
+                        </el-option>
+                    </el-select>
+                    <el-select v-else-if="item.type === 'city'" size="mini" v-model="value[item.key]" placeholder="请选择" clearable>
+                        <el-option
+                        v-for="child in regionList"
+                        :key="child.regionId"
+                        :label="child.regionName"
+                        :value="child.regionId" >
+                        </el-option>
+                    </el-select>
+                    <el-cascader
+                        v-else-if="item.type === 'regionSelect'"
+                        placeholder="请选择"
+                        size="mini"
+                        v-model="value[item.key]"
+                        clearable
+                        :options="allCityList"
+                        change-on-select
+                        filterable>
+                    </el-cascader>
+                    <el-date-picker
+                        v-else-if="item.type === 'date'"
+                        v-model="value[item.key]"
+                        type="daterange"
+                        size="mini"
+                        align="right"
+                        unlink-panels
+                        range-separator="至"
+                        start-placeholder="开始日期"
+                        end-placeholder="结束日期"
+                        :value-format="item.valueFormat || 'timestamp'"
+                        >
+                    </el-date-picker>
+                    <el-date-picker
+                        v-else-if="item.type === 'year'"
+                        v-model="value[item.key]"
+                        :clearable=false
+                        :editable=false
+                        size="mini"
+                        type="year"
+                        placeholder="请选择"
+                        :value-format="item.valueFormat || 'yyyy'">
+                    </el-date-picker>
+                </el-form-item>
+            </div>
+                    <span class="moreBtn" @click="drawer=true" v-if="options.length>3">更多筛选></span>
+                    <el-button type="" :disabled="getDisabled" size="mini" @click="query" v-if="hasBtn">查询</el-button>
+                    <el-button @click="reset" size="mini" v-if="hasBtn">清空</el-button>
+                    <el-button @click="reset" size="mini" v-if="hasBtn">导出</el-button>
+            <div style="float:right;line-height:72px;">
+                <slot></slot>
+            </div>
+            <el-drawer
+                title="高级筛选"
+                :visible.sync="drawer"
+                direction="rtl">
+                <div class="drawWrap">
+                    <div>
+                        <div v-for="(item, index) in options" :key="index" class="search_item" >
+                            <el-form-item  :label="`${item.label}：`" :prop="item.key" label-width="350" :inline='false'>
+                                <el-input v-if="item.type === 'input'" v-model="value[item.key]"  size="mini" class="w350" clearable placeholder="请输入"></el-input>
+                                <el-select v-else-if="item.type === 'select' && item.list" size="mini" v-model="value[item.key]" placeholder="请选择" class="w350" clearable>
+                                    <el-option
+                                    v-for="child in item.list"
+                                    :key="child[item.list_value] || child.value"
+                                    :label="child[item.list_key] || child.label"
+                                    :value="child[item.list_value] || child.value" >
+                                    </el-option>
+                                </el-select>
+                                <el-select v-else-if="item.type === 'city'" size="mini" v-model="value[item.key]" placeholder="请选择" class="w350" clearable>
+                                    <el-option
+                                    v-for="child in regionList"
+                                    :key="child.regionId"
+                                    :label="child.regionName"
+                                    :value="child.regionId" >
+                                    </el-option>
+                                </el-select>
+                                <el-cascader
+                                    v-else-if="item.type === 'regionSelect'"
+                                    class="w350"
+                                    placeholder="请选择"
+                                    size="mini"
+                                    v-model="value[item.key]"
+                                    clearable
+                                    :options="allCityList"
+                                    change-on-select
+                                    filterable>
+                                </el-cascader>
+                                <el-date-picker
+                                    v-else-if="item.type === 'date'"
+                                    v-model="value[item.key]"
+                                    class="w350"
+                                    type="daterange"
+                                    size="mini"
+                                    align="right"
+                                    unlink-panels
+                                    range-separator="至"
+                                    start-placeholder="开始日期"
+                                    end-placeholder="结束日期"
+                                    :value-format="item.valueFormat || 'timestamp'"
+                                    >
+                                </el-date-picker>
+                                <el-date-picker
+                                    v-else-if="item.type === 'year'"
+                                    v-model="value[item.key]"
+                                    :clearable=false
+                                    class="w350"
+                                    :editable=false
+                                    size="mini"
+                                    type="year"
+                                    placeholder="请选择"
+                                    :value-format="item.valueFormat || 'yyyy'">
+                                </el-date-picker>
+                            </el-form-item>
+                        </div>
+                    </div>
+                    <div class="btnBottom">
+                        <el-button class="fl" type="warning" @click="query" style="background-color:#998B6F;">查询</el-button>
+                        <el-button class="fr" @click="reset">导出</el-button>
+                        <el-button class="fr" @click="reset">清空</el-button>
+                    </div>
+                </div>
+            </el-drawer>
+        </el-form>
+    </div>
+</template>
+
+<script>
+import { mapGetters } from 'vuex'
+export default {
+    name: 'searchTemplate',
+    props: {
+        /**
+         * list: 指定集合
+         * list_key: 指定key值 默认label
+         * list_value: 指定value 默认value
+         * defaultValue: 设置默认值
+         * valueFormat: 设置el-date-picker的格式化样式
+         */
+        options: {
+            type: Array,
+            // required: true,
+            default: () => {
+                return []
+            }
+        },
+        value: {
+            type: Object,
+            default: () => {}
+        },
+        hasBtn: {
+            type: Boolean,
+            default: () => true
+        },
+        hasTitle: {
+            type: Boolean,
+            default: () => false
+        },
+        permission: {
+            type: String,
+            default: () => {
+                return ''
+            }
+        }
+    },
+    data () {
+        return {
+            drawer: false,
+            pageTitle: '',
+            listOptions: [],
+            labelLength: '0px'
+        }
+    },
+    watch: {
+        '$route': {
+            handler: function (val) {
+                console.log(val)
+                this.pageTitle = val.meta.title
+            },
+            immediate: true
+        },
+        options: {
+            handler: function (val) {
+                if (val && val.length) {
+                    // var vals = JSON.parse(JSON.stringify(this.value))
+                    let vals = this.value
+                    // let colIndex1 = [0, 3, 6, 9]
+                    // let colIndex2 = [1, 4, 7, 10]
+                    // let colIndex3 = [2, 5, 8, 11]
+                    // let colLength1 = 0
+                    // let colLength2 = 0
+                    // let colLength3 = 0
+                    // val.forEach((element, index) => {
+                    //     if (colIndex1.find(item => item === index) !== undefined && element.label.length > colLength1) {
+                    //         colLength1 = element.label.length
+                    //     }
+                    //     if (colIndex2.find(item => item === index) !== undefined && element.label.length > colLength2) {
+                    //         colLength2 = element.label.length
+                    //     }
+                    //     if (colIndex3.find(item => item === index) !== undefined && element.label.length > colLength3) {
+                    //         colLength3 = element.label.length
+                    //     }
+                    //     if (element.defaultValue) {
+                    //         vals[element.key] = element.defaultValue
+                    //     } else {
+                    //         vals[element.key] = ''
+                    //     }
+                    // })
+                    val.forEach(e => {
+                        if (e.type === 'select' && e.typeList) {
+                            e.list = require('../../utils/type')[e.typeList] || []
+                        }
+                    })
+                    this.$emit('input', vals)
+                    // 默认收起
+                    this.listOptions = val.slice(0, 3)
+                }
+            },
+            immediate: true
+        },
+        listOptions: {
+            handler: function (val) {
+                this.$nextTick(() => {
+                    // let content = document.querySelectorAll('.el-form-item__content')
+                    // content = Array.prototype.slice.call(content) // 兼容ie
+                    // content.forEach((c, i) => {
+                    //     c.style.width = 'calc(100% - ' + val[i].labelWidth + ')'
+                    // })
+                })
+            },
+            immediate: true
+        }
+    },
+    computed: {
+        ...mapGetters(['regionList']),
+        allCityList () {
+            console.log(this.$store.state)
+            return this.$store.state.allCityList
+        },
+        getDisabled () {
+            if (this.permission === '') {
+                return false
+            } else {
+                return !this.$checkAuth(this.permission)
+            }
+        }
+    },
+    methods: {
+        query () {
+            this.$emit('search', this.value)
+        },
+        reset () {
+            this.options.forEach(element => {
+                if (element.defaultValue && this.value[element.key]) {
+                    this.value[element.key] = element.defaultValue
+                } else {
+                    this.value[element.key] = ''
+                }
+            })
+            this.$emit('input', this.value)
+        }
+    }
+}
+</script>
+
+<style lang="less">
+.search-template {
+    padding: 0 24px 0;
+    height: 72px;
+    .moreBtn {
+        color: #998B6F;
+        margin: 0 10px;
+        cursor: pointer;
+    }
+    .page_title {
+        line-height: 72px;
+        float: left;
+        font-size: 16px;
+        font-weight: bold;
+        // padding-left: 24px;
+    }
+    .search_item {
+        display: inline-block;
+        float: left;
+    }
+    .el-form {
+        float: left;
+        line-height: 72px;
+        width: 100%;
+        .el-col {
+            height: 56px;
+            box-sizing: border-box;
+            &:nth-child(3n + 1) {
+                padding-right: 4%;
+                .el-form-item {
+                    text-align: left;
+                }
+            }
+            &:nth-child(3n - 1) {
+                padding: 0 2%;
+                .el-form-item {
+                    text-align: center;
+                }
+            }
+            &:nth-child(3n) {
+                padding-left: 4%;
+                .el-form-item {
+                    text-align: right;
+                }
+            }
+            .el-form-item {
+                width: 100%;
+                margin-bottom: 16px;
+                .el-form-item__label {
+                    box-sizing: border-box;
+                    padding-right: 5px;
+                    text-align: right;
+                    // text-align: justify;
+                    // text-align-last: justify;
+                }
+                .el-form-item__content{
+                    // line-height: 72px!important;
+                    .el-input__inner {
+                        width: 100%;
+                    }
+                    .el-select {
+                        width: 100%;
+                    }
+                    .el-date-editor {
+                        width: 100%;
+                        margin-top: 3px;
+                        .el-input__icon, .el-range-separator {
+                            line-height: 26px;
+                        }
+                    }
+                }
+            }
+        }
+        .btns {
+            box-sizing: border-box;
+            text-align: left !important;
+            margin-top: 4px;
+        }
+    }
+    .el-form-item__content {
+        line-height: 72px!important;
+    }
+    .drawWrap {
+        padding: 0 20px;
+        height: 100%;
+        position: relative;
+        // min-width: 490px;
+        .btnBottom {
+            position: absolute;
+            bottom: 0;
+            width: 360px;
+            padding-bottom: 24px;
+        }
+    }
+    .w350 {
+        width: 350px;
+    }
+    .el-form--inline .el-form-item {
+        margin-right: 20px;
+    }
+    .el-form-item__label {
+        padding: 0;
+    }
+}
+.el-drawer__wrapper {
+    .el-drawer {
+        width: 400px!important;
+    }
+    .el-drawer__header {
+        margin-bottom: 0;
+        span {
+            outline: none;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        button {
+            outline: none;
+        }
+    }
+    .el-form-item__label {
+        display: block;
+        text-align: left;
+    }
+    .el-form-item {
+        line-height: 50px;
+    }
+    .el-form-item__content {
+        line-height: 36px!important;
+    }
+}
+</style>

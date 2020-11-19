@@ -1,0 +1,1135 @@
+<!-- 登录 -->
+<template>
+    <div class="login login_type2">
+        <img src="../assets/img/logo2.png" class="logo">
+        <div class="center">
+            <img v-show="!bgload" :src="bgUrl" @load="bgonload" class="map">
+            <img v-show="bgload" src="../assets/img/map2.png" class="map">
+            <!-- <img v-show="!isIE && !bgload" src="../assets/img/map.png" @load="bgonload" class="map"> -->
+            <!-- <img v-show="!isIE && bgload" src="../assets/img/map2.png" class="map"> -->
+            <div class="formBox">
+                <h4>中车信息服务运营系统</h4>
+                <div class="input" ref="loginBox">
+                    <div class="user input_box">
+                        <img class="icon" src="../assets/images/user-text.png" alt="">
+                        <input class="btn" type="text" v-model="username" name="" placeholder="请输入用户名">
+                    </div>
+                    <div class="password input_box">
+                        <img class="icon" src="../assets/images/psw.png" alt="">
+                        <input class="btn" type="password" v-model="password" name="" placeholder="请输入密码" >
+                    </div>
+                    <div class="password input_box" style="width:210px;display:inline-block;">
+                        <img class="icon" src="../assets/images/psw.png" alt="">
+                        <input class="btn" type="text" v-model="checkcode" name="" style="width:140px;" placeholder="请输入验证码">
+                    </div>
+                     <img :src="imgCode" class="code-img" @click="getCheckCode">
+                    <div class="check_box">
+                        <el-checkbox v-model="checked">记住密码</el-checkbox>
+                        <el-button class="fr" type="text" @click="$router.push('/findPassword')">找回密码</el-button>
+                    </div>
+                    <div class="login_btn" @click="login" v-if="!loginFlag" >登&nbsp;&nbsp;&nbsp;录</div>
+                    <div class="login_btn" style="background:#dddddd" v-else>登&nbsp;&nbsp;&nbsp;录</div>
+                </div>
+            </div>
+        </div>
+        <!-- <div class="logo-img">
+            <img src="../assets/images/logo.png">
+        </div>
+        <div class="content">
+            <h3 class="title clearfix">
+                <div class="yellow fl">中车信息</div>
+                <div class="subtitle fl">
+                    <div class="white">服务运营系统</div>
+                    <div class="en">ZhongChe Operational Services System</div>
+                </div>
+            </h3>
+            <div class="login-text">
+                <div class="name">管理登录</div>
+                <div class="line"></div>
+                <div class="input" ref="loginBox">
+                    <div class="user">
+                        <img class="icon" src="../assets/images/user-text.png" alt="">
+                        <input class="btn" type="text" v-model="username" name="" placeholder="请输入用户名">
+                    </div>
+                    <div class="password">
+                        <img class="icon" src="../assets/images/psw.png" alt="">
+                        <input class="btn" type="password" v-model="password" name="" placeholder="请输入密码">
+                    </div>
+                </div>
+                <div class="login-btn" :class="{active:loginFlag=== true}" @click="login">登&nbsp;录</div>
+            </div>
+        </div>
+        <div class="copyright">© 2019 深圳市中车信息科技开发有限公司</div> -->
+        <modal
+            :title="'密码找回'"
+            :width="600"
+            :height="400"
+            :alert="showAlert"
+            :showBtn="false"
+            @alertConfirm="confirmOk"
+            @alertCancel="confirmCancel">
+            <div class="alertBox" >
+                <el-steps :active="active" finish-status="success">
+                    <el-step title="账号验证"></el-step>
+                    <el-step title="身份验证"></el-step>
+                    <el-step title="修改密码"></el-step>
+                </el-steps>
+                <el-form ref="forms" class="form" :inline="false" :model="forms" label-width="100px" style="padding:20px;">
+                    <el-form-item label="账号：" prop="cityAgreementYearFee" :rules="$validate({required:true})">
+                        <el-input v-model="forms.cityAgreementYearFee" style="width:350px;"></el-input>
+                    </el-form-item>
+                    <el-form-item label="验证码：" prop="cityAgreementYearFee" :rules="$validate({required:true})">
+                        <el-input v-model="forms.cityAgreementYearFee" style="width:300px;"></el-input>
+                        <img :src="imgCode" class="code-img" @click="getCheckCode">
+                    </el-form-item>
+                </el-form>
+                <div class="bottomBtn">
+                    <el-button @click="nextStep" type="primary">下一步</el-button>
+                </div>
+            </div>
+        </modal>
+    </div>
+</template>
+
+<script type="text/javascript">
+import { setCookie } from '@/utils/cookie.js'
+import { makeMenuTree } from '@/utils/utils.js'
+import Modal from '@/components/Modal'
+export default {
+    name: 'login',
+    // 组件属性、变量、用于接收父组件的传值
+    props: {},
+    // 变量
+    data () {
+        return {
+            imgToken: '',
+            checkcode: '',
+            imgCode: '',
+            forms: {},
+            active: 0,
+            showAlert: false,
+            isLogin: false,
+            isIE: false, // 是否为ie浏览器
+            checked: false, // 是否记住密码
+            bgload: false, // 背景是否加载
+            bgUrl: process.env.BASE_URL + 'img/map.png',
+            username: '', // 用户名
+            codeValue: '', // 验证码
+            password: '', // 密码
+            loginFlag: false,
+            title: '',
+            staticMenu: [ // 静态菜单
+                {
+                    name: '数据管理',
+                    children: [
+                        {
+                            name: '数据看板',
+                            url: 'dataBoard',
+                            icon: 'iconkanban'
+                        },
+                        {
+                            name: '数据查询',
+                            icon: 'iconshujuchaxun',
+                            children: [
+                                {
+                                    name: '维修企业勘验数据',
+                                    url: 'inquestDataManage'
+                                },
+                                {
+                                    name: '维修企业备案数据',
+                                    url: 'recordDataManage'
+                                },
+                                {
+                                    name: '车辆数据',
+                                    url: 'carData'
+                                },
+                                {
+                                    name: '维修数据',
+                                    url: 'maintenanceData'
+                                },
+                                {
+                                    name: '检测数据',
+                                    url: 'detectionData'
+                                },
+
+                                {
+                                    name: '企业数据',
+                                    url: 'maintenanceOfEnterpriseArchives'
+                                },
+
+                                {
+                                    name: '车主数据',
+                                    url: 'ownerInformation'
+                                },
+                                {
+                                    name: '从业人员数据',
+                                    url: 'employeeInformation'
+                                }
+                            ]
+                        },
+                        {
+                            name: '统计分析',
+                            icon: 'icontongjifenxi',
+                            children: [
+                                {
+                                    name: '车辆数据统计',
+                                    url: 'carDataStatistics'
+                                },
+                                {
+                                    name: '维修企业数据统计',
+                                    url: 'enterpriseDataStatistics'
+                                },
+                                {
+                                    name: '检测企业数据统计',
+                                    url: 'jcDataStatistics'
+                                },
+                                {
+                                    name: '车主数据统计',
+                                    url: 'owerDataStatistics'
+                                },
+                                {
+                                    name: '维修数据统计',
+                                    url: 'maintenanceDataStatistics'
+                                }
+
+                            ]
+                        }
+                    ]
+                },
+                {
+                    name: '产品管理',
+                    children: [
+                        {
+                            name: '业务管理',
+                            icon: 'icontongjifenxi',
+                            children: [
+                                {
+                                    name: '运输车辆综合查询',
+                                    url: 'comprehensiveQuery'
+                                },
+                                {
+                                    name: '车辆单位',
+                                    url: 'vehicleUnit'
+                                },
+                                {
+                                    name: '车辆合并',
+                                    url: 'vehicleConsolidation'
+                                },
+                                {
+                                    name: '检测超期解锁',
+                                    url: 'detectOverdueUnlocking'
+                                },
+                                {
+                                    name: '维护归档查询',
+                                    url: 'maintainArchiveQuery'
+                                },
+                                {
+                                    name: '检测归档查询',
+                                    url: 'inspectionArchiveQuery'
+                                }
+                            ]
+                        },
+                        // {
+                        //     name: '查好车',
+                        //     icon: 'iconcar',
+                        //     children: [
+                        //         {
+                        //             name: '数据统计',
+                        //             url: 'transactionStatistics'
+                        //         },
+                        //         {
+                        //             name: '认证审核',
+                        //             url: 'certAudit'
+                        //         },
+                        //         {
+                        //             name: '产品配置',
+                        //             url: 'productConfig'
+                        //         },
+                        //         {
+                        //             name: '充值活动管理',
+                        //             url: 'rechargeActivitieMagm'
+                        //         },
+                        //         {
+                        //             name: '消费查询统计',
+                        //             url: 'consumeQuery'
+                        //         },
+                        //         {
+                        //             name: '充值查询统计',
+                        //             url: 'rechargeQuery'
+                        //         },
+                        //         {
+                        //             name: '代理商管理',
+                        //             url: 'agentQuery'
+                        //         },
+                        //         {
+                        //             name: '代理交易额统计',
+                        //             url: 'agencySatistics'
+                        //         },
+                        //         {
+                        //             name: '用户查询统计',
+                        //             url: 'userQueryStatistics'
+                        //         },
+                        //         {
+                        //             name: '使用帮助',
+                        //             url: 'useHelp'
+                        //         },
+                        //         {
+                        //             name: '用户反馈',
+                        //             url: 'userFeedback'
+                        //         }
+                        //     ]
+                        // },
+                        {
+                            name: '超级骊',
+                            icon: 'iconiconweixiuqiye',
+                            children: [
+                                {
+                                    name: '广告发布',
+                                    url: 'advertRelease'
+                                },
+                                {
+                                    name: '复工健康弹窗配置',
+                                    url: 'healthPopupDispose'
+                                },
+                                {
+                                    name: '企业用户管理',
+                                    url: 'enterpriseUserManagement'
+                                },
+                                {
+                                    name: '用户管理',
+                                    url: 'cjlUserManage'
+                                },
+                                {
+                                    name: '维修数据上传排名',
+                                    url: 'enterpriseUploadDataRank'
+                                },
+                                {
+                                    name: '城市开通',
+                                    url: 'cjlCityOpen'
+                                },
+                                {
+                                    name: '企业档案管理',
+                                    url: 'cjlEnterpriseArchives'
+                                },
+                                {
+                                    name: '二维合格证发放',
+                                    url: 'certificateProvide'
+                                },
+                                {
+                                    name: '合格证发放',
+                                    url: 'certificateIssuance'
+                                },
+                                {
+                                    name: '识别卡采购',
+                                    url: 'identityCardPurchase'
+                                },
+                                {
+                                    name: '识别卡订单管理',
+                                    url: 'identityCardOrder'
+                                },
+                                {
+                                    name: '识别卡管理',
+                                    url: 'identityCardManage'
+                                },
+                                {
+                                    name: '线下汇款管理',
+                                    url: 'off-lineRemittance'
+                                },
+                                {
+                                    name: '识别卡补发',
+                                    url: 'identityCardReplacement'
+                                },
+                                {
+                                    name: '银行信息',
+                                    url: 'bankInfo'
+                                }
+                            ]
+                        },
+                        {
+                            name: '检测企业服务系统',
+                            icon: 'iconiconjianceqiye',
+                            children: [
+                                {
+                                    name: '城市业务开通',
+                                    url: 'inspectionCityOpen'
+                                },
+                                {
+                                    name: '检测企业开通',
+                                    url: 'inspectionEnterpriseOpening'
+                                }
+                            ]
+                        },
+                        {
+                            name: '运输企业服务系统',
+                            icon: 'iconiconjianceqiye',
+                            children: [
+                                {
+                                    name: '城市业务开通',
+                                    url: 'vtamsCityConfig'
+                                },
+                                {
+                                    name: '企业业务开通',
+                                    url: 'vtamsEnterprise'
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    name: '运营管理',
+                    children: [
+                        {
+                            name: '运营看板',
+                            icon: 'iconkanban',
+                            url: 'operateBoard'
+                        },
+                        {
+                            name: '产品运行情况',
+                            icon: 'iconchanpinguanli',
+                            children: [
+                                {
+                                    name: '维修企业服务系统',
+                                    url: 'repairEnterpriseSys'
+                                }
+                            ]
+                        },
+                        {
+                            name: '业务操作',
+                            icon: 'iconiconzuodaohangyewu',
+                            children: [
+                                {
+                                    name: '外延设备销售',
+                                    url: 'regulatorSell'
+                                },
+                                {
+                                    name: '品牌车系车型维护',
+                                    url: 'carbrand'
+                                }
+                            ]
+                        },
+                        {
+                            name: '服务运营',
+                            icon: 'iconfuwuyunying',
+                            children: [
+                                {
+                                    name: '运营通告',
+                                    url: 'operateNotice'
+                                },
+                                {
+                                    name: '运营短信管理',
+                                    url: 'messageManagement'
+                                },
+                                {
+                                    name: '运营服务记录',
+                                    url: 'operateServiceRecord'
+                                },
+                                {
+                                    name: '评价反馈跟踪',
+                                    url: 'evaluateFeedback'
+                                },
+                                {
+                                    name: '市场区域设置',
+                                    url: 'marketRegion'
+                                },
+                                {
+                                    name: '运营人员管理',
+                                    url: 'servicePersonal'
+                                },
+                                {
+                                    name: '运营人员绩效统计',
+                                    url: 'performanceStatistics'
+                                },
+                                {
+                                    name: '采购出库',
+                                    url: 'purchaseExport'
+                                },
+                                {
+                                    name: '广告管理',
+                                    url: 'advertisingManager'
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    name: 'BI数据统计',
+                    children: [
+                        {
+                            name: '企业消费数据',
+                            icon: 'iconicontongji',
+                            children: [
+                                {
+                                    name: '企业交易统计',
+                                    url: 'enterpriseTransactionStatistics'
+                                }
+                            ]
+                        },
+                        {
+                            name: '企业数据',
+                            icon: 'iconicontongji',
+                            children: [
+                                {
+                                    name: '维修企业数据',
+                                    url: 'maintenanceOfEnterpriseArchives'
+                                },
+                                {
+                                    name: '运输企业数据',
+                                    url: 'ysEnterpriseData'
+                                },
+                                {
+                                    name: '检测企业数据',
+                                    url: 'jcEnterpriseData'
+                                }
+                            ]
+                        },
+                        {
+                            name: '用户数据',
+                            children: [
+                                {
+                                    name: '技师数据',
+                                    url: 'technicianData'
+                                }
+                            ]
+                        },
+                        {
+                            name: '商业业务数据',
+                            children: [
+                                {
+                                    name: '识别卡统计',
+                                    url: 'identificationCardStatistics'
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    name: '统计查询',
+                    children: [
+                        {
+                            name: '统计查询',
+                            icon: 'iconicontongji',
+                            children: [
+                                {
+                                    name: '企业维修统计',
+                                    url: 'maintenanceStatistics'
+                                },
+                                {
+                                    name: '服务交易统计',
+                                    url: 'serviceTransactionStatistics'
+                                },
+                                {
+                                    name: '提现记录统计',
+                                    url: 'receiptRecordStatistics'
+                                },
+                                {
+                                    name: '提现异常记录统计',
+                                    url: 'statisticsOfAnomalyRecords'
+                                },
+                                {
+                                    name: '充值记录统计',
+                                    url: 'rechargeRecordStatistics'
+                                },
+                                {
+                                    name: '开票申请',
+                                    url: 'applicationOpen'
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    name: '综合信息',
+                    children: [
+                        {
+                            name: '业务管理',
+                            icon: 'iconicontongji',
+                            children: [
+                                {
+                                    name: '线下汇款管理',
+                                    url: 'off-lineRemittance'
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    name: '财务管理',
+                    children: [
+                        {
+                            name: '财务操作',
+                            icon: 'iconiconzuodaohangcaiwu',
+                            children: [
+                                {
+                                    name: '企业充值开票',
+                                    url: 'rechargeInvoice'
+                                },
+                                {
+                                    name: '企业汇款充值审核',
+                                    url: 'rechargeAudit'
+                                },
+                                {
+                                    name: '财务异常充值处理',
+                                    url: 'rechargeExceptionHandling'
+                                },
+                                {
+                                    name: '财务异常退款处理',
+                                    url: 'rechargeRefund'
+                                }
+                            ]
+                        },
+                        {
+                            name: '财务报表',
+                            icon: 'iconiconzuodaohangshuju',
+                            children: [
+                                {
+                                    name: '收入分类一览',
+                                    url: 'income'
+                                },
+                                {
+                                    name: '收入各地市统计',
+                                    url: 'incomeStatistics'
+                                },
+                                {
+                                    name: '企业充值明细',
+                                    url: 'rechargeDetail'
+                                },
+                                {
+                                    name: '企业余额查询',
+                                    url: 'balanceQuery'
+                                },
+                                {
+                                    name: '企业欠费查询',
+                                    url: 'arrearsQuery'
+                                },
+                                {
+                                    name: '维护信息消费明细',
+                                    url: 'consumptionOfMaintainDetail'
+                                },
+                                {
+                                    name: '检测信息消费明细',
+                                    url: 'consumptionOfDetectionDetail'
+                                },
+                                {
+                                    name: '归档信息消费明细',
+                                    url: 'consumptionOfArchivedDetail'
+                                },
+                                {
+                                    name: '信息服务财务报表',
+                                    url: 'FinancialStatementsOfInformationServices'
+                                },
+                                {
+                                    name: '外延设备销售明细',
+                                    url: 'regulatorSellDetail'
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    name: '系统管理',
+                    children: [
+                        {
+                            name: '系统管理',
+                            icon: 'iconxitongshezhi',
+                            children: [
+                                {
+                                    name: '用户管理',
+                                    url: 'userManagement'
+                                },
+                                {
+                                    name: '权限管理',
+                                    url: 'authority'
+                                }
+                                // {
+                                //     name: '外延设备管理',
+                                //     url: 'externalEquipment'
+                                // },
+                                // {
+                                //     name: '监管系统服务开通',
+                                //     url: 'regulator'
+                                // }
+                                // {
+                                //     name: '菜单管理',
+                                //     component: 'menuManager',
+                                //     url: 'menuManager'
+                                // }
+                            ]
+                        },
+                        {
+                            name: 'win10配置',
+                            icon: 'iconxitongshezhi',
+                            children: [
+                                {
+                                    name: '应用管理',
+                                    url: 'applicationManage'
+                                },
+                                {
+                                    name: '套餐管理',
+                                    url: 'packageManage'
+                                },
+                                {
+                                    name: '应用角色配置',
+                                    url: 'roleConfig'
+                                },
+                                {
+                                    name: '应用菜单管理',
+                                    url: 'winMenuManage'
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    },
+    created () {
+        this.$store.commit('setTabsIndex', 0)
+        this.$store.dispatch('delAllCache', '/login')
+        setTimeout(() => {
+            if (localStorage.checkUsername) this.username = localStorage.checkUsername
+            if (localStorage.checkPassword) {
+                this.checked = true
+                this.password = localStorage.checkPassword
+            }
+        }, 100)
+        function isIE () {
+            if (/MSIE|Edge/.test(window.navigator.userAgent)) {
+                this.bgUrl = process.env.BASE_URL + 'img/map2.png'
+                return true
+            } else {
+                return false
+            }
+        }
+        this.isIE = isIE()
+        // window.addEventListener('popstate', function (e) {
+        //     console.log('back')
+        // })
+        window.addEventListener('hashchange', () => {
+            let currentPath = window.location.hash.slice(1)
+            if (this.$route.path !== currentPath) {
+                this.$router.push(currentPath)
+            }
+        }, false)
+        this.getCheckCode()
+    },
+    mounted () {
+        this.enterLogin()
+    },
+    computed: {},
+    // 使用其它组件
+    components: {
+        Modal
+    },
+    // 方法
+    watch: {},
+    methods: {
+        getCheckCode () {
+            this.$post('/external/verifycode/captcha')
+                .then(res => {
+                    if (res.code === 0) {
+                        this.imgCode = 'data:image/png;base64,' + res.data.img
+                        this.imgToken = res.data.token
+                    }
+                })
+        },
+        nextStep () {
+            if (this.active < 2) this.active++
+        },
+        confirmOk () {
+            this.confirmCancel()
+        },
+        confirmCancel () {
+            this.showAlert = false
+        },
+        bgonload (e) {
+            if (this.isIE) { return }
+            setTimeout(item => {
+                this.bgload = true
+            }, 2100)
+        },
+        // 回车自动登陆
+        enterLogin () {
+            this.$refs.loginBox.addEventListener('keyup', e => {
+                // console.log(11)
+                e.stopPropagation()
+                if (e.keyCode === 13) {
+                    this.login()
+                }
+            })
+        },
+        login () {
+            localStorage.checkUsername = this.username
+            if (this.checked) {
+                localStorage.checkPassword = this.password
+            } else {
+                localStorage.checkPassword = ''
+            }
+            if (this.loginFlag) {
+                return
+            }
+            if (!this.username) {
+                this.$alert('请输入账号！', '提示')
+                return
+            }
+            if (!this.password) {
+                this.$alert('请输入密码！', '提示')
+                return
+            }
+            this.loginFlag = true
+            this.$post('/login', {
+                'username': this.username,
+                'password': this.password,
+                checkcode: this.checkcode,
+                token: this.imgToken
+            }).then(res => {
+                if (res.code === 0) {
+                    setCookie('token', res.data.token, 1)
+                    setCookie('userName', JSON.stringify(res.data.nickname), 1)
+                    setCookie('user', JSON.stringify(res.data), 1)
+                    sessionStorage.tabIndex = 1
+                    localStorage.tabIndex = 1
+                    // 保存权限
+                    localStorage.authList = JSON.stringify(res.data.menuList || [])
+                    let list = res.data.menuList
+                    list = list.filter(e => {
+                        return !(/首页/.test(e.name))
+                    })
+                    list = makeMenuTree(list)
+                    let dev = process.env.NODE_ENV === 'development'
+                    dev = 'development'
+                    if (dev === 'development') {
+                        sessionStorage.menuList = JSON.stringify(this.staticMenu)
+                        localStorage.menuList = JSON.stringify(this.staticMenu)
+                    } else {
+                        sessionStorage.menuList = JSON.stringify(list)
+                        localStorage.menuList = JSON.stringify(list)
+                    }
+                    // if (process.env.VUE_APP_MODE === 'show') {
+                    //     localStorage.menuList = JSON.stringify(
+                    //         []
+                    //     )
+                    // }
+                    // sessionStorage.menuList = JSON.stringify(list)
+                    // localStorage.menuList = JSON.stringify(list)
+                    // console.log(this.staticMenu)
+                    this.$router.push('/')
+                }
+                this.loginFlag = false
+            }).catch(err => {
+                console.log(err)
+                this.loginFlag = false
+            })
+        },
+        // 获取权限菜单
+        getLoginMenun () {
+            this.$get('list/menuList', {})
+                .then(res => {
+                    if (res.code === 0) {
+                        sessionStorage.authList = JSON.stringify(this.staticMenu)
+                        sessionStorage.menuList = JSON.stringify(this.staticMenu)
+                        this.$router.push('/')
+                    }
+                })
+        }
+    }
+}
+</script>
+
+<style lang="less" scoped>
+.login {
+    background-image: url('../assets/img/background.png');
+    background-size: 100% 100%;
+    background-position: center center;
+    height: 100%;
+    position: relative;
+    // min-height: 650px;
+    .code-img {
+        width: 86px;
+        height: 46px;
+        cursor: pointer;
+    }
+    .alertBox {
+        padding: 0 30px;
+        position: relative;
+        height: 320px;
+        .bottomBtn {
+            position: absolute;
+            bottom: 20px;
+            width: 555px;
+            text-align: center;
+        }
+    }
+    .logo-img {
+        position: absolute;
+        top: 49px;
+        left: 77px;
+        width: 214px;
+        height: 74px;
+        img {
+            width: 100%;
+            height: 100%;
+        }
+    }
+    .content {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        margin-top: -280px;
+        margin-left: -350px;
+        .title {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 120px;
+            .yellow, .subtitle {
+                vertical-align: middle;
+            }
+            .yellow {
+                height: 90px;
+                color: #FFEB08;
+                font-size: 68px;
+                font-weight: bold;
+                margin-right: 18px;
+                letter-spacing: 5px;
+            }
+            .subtitle {
+                height: 90px;
+                .white {
+                    margin-top: 12px;
+                    color: #fff;
+                    font-size: 48px;
+                    font-weight: bold;
+                    line-height: 52px;
+                    letter-spacing: 14px;
+                }
+                .en {
+                    color: #fff;
+                    font-size: 14px;
+                    font-weight: normal;
+                    letter-spacing: 1.4px;
+                }
+            }
+        }
+        .login-text {
+            display: inline-block;
+            .name, .input, .login-btn, .line {
+                vertical-align: middle;
+            }
+            .name {
+                display: inline-block;
+                font-size: 44px;
+                font-weight: bold;
+                color: #ECF4FF;
+                width: 97px;
+                margin-right: 52px;
+                letter-spacing: 4px;
+            }
+            .line {
+                display: inline-block;
+                width: 2px;
+                height: 139px;
+                margin-right: 50px;
+                background-image: url('../assets/images/vertical.png');
+            }
+            .input {
+                display: inline-block;
+                margin-right: 54px;
+                width: 340px;
+                .btn, .icon {
+                    vertical-align: middle;
+                }
+                .btn {
+                    width: 270px;
+                    padding-left: 20px;
+                    font-size: 16px;
+                    border: none;
+                    outline: none;
+                    line-height: 49px;
+                    height: 49px;
+                }
+                .icon {
+                    width: 24px;
+                    height: 24px;
+                    margin-left: 10px;
+                    padding-right: 10px;
+                    border-right: 1px solid #ddd
+                }
+                .user {
+                    width: 340px;
+                    height: 50px;
+                    background: #fff;
+                    margin-bottom: 34px;
+                    border-radius: 4px;
+                }
+                .password {
+                    width: 340px;
+                    height: 50px;
+                    background: #fff;
+                    border-radius: 4px;
+                }
+            }
+        }
+    }
+    .copyright {
+        position: absolute;
+        bottom: 84px;
+        left: 50%;
+        margin-left: -122px;
+        margin-top: -8px;
+        width: 246px;
+        height: 16px;
+        color: #ECF4FF;
+        font-size: 13px;
+    }
+}
+.login_type2 {
+    min-height: 500px;
+    .logo {
+        width: 210px;
+        height: 83px;
+        position: absolute;
+        left: 52px;
+        top: 40px;
+    }
+    .center {
+        position: absolute;
+        top: 50%;
+        margin: 0 auto;
+        width: 1200px;
+        height: 478px;
+        left: 50%;
+        // transform: translateX(-50%) translateY(-50%);
+        margin-top: -239px;
+        margin-left:  -600px;
+        .map {
+            width: 788px;
+            float: left;
+        }
+        .formBox {
+            float: right;
+            margin-top: 20px;
+            margin-left: 20px;
+            width: 390px;
+            background: #ffffff;
+            box-shadow:5px 9px 15px 0px rgba(62,64,66,0.07);
+            border-radius:6px;
+            padding-bottom: 50px;
+            h4 {
+                font-size: 24px;
+                color: #4D7CFE;
+                text-align: center;
+                margin-top: 45px;
+            }
+            .login_btn {
+                background: #4D7CFE;
+                color: #ffffff;
+                width:300px;
+                height:44px;
+                border-radius:4px;
+                line-height: 44px;
+                text-align: center;
+                cursor: pointer;
+            }
+            .input {
+                display: inline-block;
+                margin-left: 40px;
+                margin-top: 30px;
+                width: 300px;
+                .btn, .icon {
+                    vertical-align: middle;
+                }
+                .btn {
+                    width: 230px;
+                    padding-left: 20px;
+                    font-size: 16px;
+                    border: none;
+                    outline: none;
+                    line-height: 44px;
+                    height: 44px;
+                }
+                .icon {
+                    width: 24px;
+                    height: 24px;
+                    margin-left: 10px;
+                    padding-right: 10px;
+                    border-right: 1px solid #ddd
+                }
+                .input_box {
+                    width: 300px;
+                    height: 44px;
+                    background: #fff;
+                    border-radius: 4px;
+                    // margin-bottom: 34px;
+                    border: 1px solid #D9D9D9;
+                    overflow: hidden;
+                }
+                .password {
+                    margin-top: 30px;
+                }
+                .check_box {
+                    margin: 20px 0;
+                }
+            }
+        }
+    }
+}
+@media screen and (max-width: 1300px) {
+    .login {
+        .logo-img {
+            top: 41px;
+            left: 58px;
+            width: 188px;
+            height: 65px;
+        }
+        .content {
+            margin-top: -238px;
+            margin-left: -348px;
+            .title {
+                margin-bottom: 100px;
+                .yellow {
+                    font-size: 52px;
+                    margin-right: 10px;
+                    height: 69px;
+                }
+                .subtitle {
+                    height: 69px;
+                    .white {
+                        margin-top: 6px;
+                        font-size: 36px;
+                        line-height: 44px;
+                        letter-spacing: 14px;
+                    }
+                    .en {
+                        font-size: 13px;
+                        letter-spacing: 1.3px;
+                    }
+                }
+            }
+            .login-text {
+                .name {
+                    width: 88px;
+                    font-size: 40px;
+                }
+                .input {
+                    .btn {
+                        line-height: 44px;
+                        height: 44px;
+                    }
+                    .user {
+                        height: 44px;
+                    }
+                    .password {
+                        height: 44px;
+                    }
+                }
+                .login-btn {
+                    width: 110px;
+                    height: 110px;
+                    line-height: 110px;
+                    font-size: 28px;
+                }
+            }
+        }
+    }
+}
+</style>

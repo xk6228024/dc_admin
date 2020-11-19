@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="11px" height="12px" viewBox="0 0 11 12" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 55.1 (78136) - https://sketchapp.com -->
+    <title>up</title>
+    <desc>Created with Sketch.</desc>
+    <g id="二、运营管理" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="运营看板" transform="translate(-756.000000, -243.000000)">
+            <g id="数据看板" transform="translate(260.000000, 134.000000)">
+                <g id="Group-16" transform="translate(414.000000, 0.000000)">
+                    <g id="up" transform="translate(32.000000, 103.000000)">
+                        <g id="up-2" transform="translate(50.000000, 5.000000)">
+                            <g id="up">
+                                <rect id="矩形" x="0" y="0" width="11" height="12"></rect>
+                                <path d="M2.08117034,7.74379161 L5.09733015,4.10544582 C5.22315859,3.96485139 5.4435445,3.96485139 5.56937294,4.10544582 L8.57064181,7.74379161 C8.75231128,7.94761634 8.60786916,8.27046281 8.33462042,8.27046281 L2.31644718,8.27046281 C2.04394299,8.27046281 1.89875633,7.94761634 2.08117034,7.74379161 Z" id="Shape" fill="#52C31A" fill-rule="nonzero"></path>
+                            </g>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

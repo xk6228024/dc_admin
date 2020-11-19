@@ -1,0 +1,805 @@
+
+<template>
+    <div class="certificateProvide" id="certificateProvide">
+        <div id="zk"></div><div id="JieTong"></div>
+        <object style="position: absolute; top: 0;" width="0" height="0" id="ZhongCheRfid" classid="clsid:FAF6299A-CA50-4D91-9F31-B8FB1D4E1164" >
+        </object>
+        <breadcrumb>
+            <!-- <div class="dlb"> -->
+            <label for="">所属区域:</label>
+            <el-cascader
+                placeholder="请选择"
+                v-model="areaId"
+                clearable
+                :options="allCityList"
+                change-on-select
+                filterable>
+            </el-cascader>
+            <label for="">车牌号码:</label>
+            <el-input style="width:160px;" class="search-text" v-model="searchKey" placeholder="请输入车牌号码" clearable></el-input>
+            <label for="">车主单位:</label>
+            <el-input style="width:160px;" class="search-text" v-model="searchKey2" placeholder="请输入车主单位" clearable></el-input>
+            <label for="">状态:</label>
+            <el-select class="w120_input" clearable v-model="status" placeholder="请选择">
+                <el-option
+                v-for="item in [{value:0,label:'启用'},{value:1,label:'注销'}]"
+                :key="item.value"
+                :label="item.label"
+                clearable
+                :value="item.value">
+                </el-option>
+            </el-select>
+            <div class="dlb">
+                <label for="">车牌颜色:</label>
+                <el-select class="w120_input" clearable v-model="status2" placeholder="请选择">
+                    <el-option
+                    v-for="item in plateColor"
+                    :key="item.value"
+                    :label="item.label"
+                    clearable
+                    :value="item.value">
+                    </el-option>
+                </el-select>
+            </div>
+            <div class="dlb">
+                <label for="">车辆类型:</label>
+                <el-select class="w120_input" filterable clearable v-model="status3" placeholder="请选择">
+                    <el-option
+                    v-for="item in vehicleType"
+                    :key="item.vehicle_type_id"
+                    :label="item.vehicle_type_name"
+                    clearable
+                    :value="item.vehicle_type_id">
+                    </el-option>
+                </el-select>
+            </div>
+            <div class="dlb">
+                <label for="">选择日期:</label>
+                <el-date-picker
+                    v-model="dateRegion"
+                    type="daterange"
+                    unlink-panels
+                    range-separator="至"
+                    start-placeholder="开始日期"
+                    class="search-text vam"
+                    value-format="yyyy-MM-dd"
+                    end-placeholder="结束日期">
+                </el-date-picker>
+                <el-button class="search" @click="search">查 询</el-button>
+            </div>
+            <!-- </div> -->
+            <div class="dlb fr">
+                <el-button class="fr mt17" type="primary" :disabled="!$checkAuth('rfid:manage:view')"  @click="showAlert3=true">识别卡查询</el-button>
+                <!-- <el-dropdown
+                trigger="click" class="fr mt17" @command="batchOperation"
+                :placement="'top'" :disabled="!multipleSelection.length">
+                    <el-button >
+                        批量选择<i class="el-icon-arrow-down el-icon--right"></i>
+                    </el-button>
+                    <el-dropdown-menu slot="dropdown">
+                        <el-dropdown-item :command="'enable'">启用</el-dropdown-item>
+                        <el-dropdown-item :command="'disabled'">关闭</el-dropdown-item>
+                    </el-dropdown-menu>
+                </el-dropdown> -->
+            </div>
+        </breadcrumb>
+        <div class="table">
+            <el-table
+                border
+                :data="tableData"
+                v-loading="loading"
+                class="computeHeight tableBorder"
+                style="width: 100%;">
+                 <!-- <el-table-column
+                type="selection"
+                align="left">
+                </el-table-column> -->
+                <el-table-column
+                prop="num"
+                align="left"
+                label="序号"
+                min-width="5%">
+                </el-table-column>
+                <el-table-column
+                prop="vehiclePlate"
+                align="left"
+                min-width="8%"
+                label="车牌号码">
+                </el-table-column>
+                <el-table-column
+                prop="vehiclePlateColor"
+                align="left"
+                min-width="7%"
+                label="车牌颜色">
+                </el-table-column>
+                <el-table-column
+                prop="cardCode"
+                align="left"
+                min-width="10%"
+                label="识别卡ID">
+                </el-table-column>
+                <el-table-column
+                prop="ownerEntName"
+                align="left"
+                min-width="20%"
+                label="车主单位">
+                </el-table-column>
+                <el-table-column
+                prop="vehicleType"
+                align="left"
+                min-width="10%"
+                label="车辆类别">
+                </el-table-column>
+                <el-table-column
+                prop="boundTime"
+                align="left"
+                min-width="10%"
+                label="绑卡时间">
+                </el-table-column>
+                <el-table-column
+                prop="boundStatus"
+                align="left"
+                min-width="5%"
+                label="状态">
+                    <template slot-scope="scope">
+                        {{scope.row.boundStatus===0?'启用':'注销'}}
+                    </template>
+                </el-table-column>
+                <el-table-column
+                prop="chargeTime"
+                align="left"
+                min-width="6%"
+                label="操作">
+                    <template slot-scope="scope">
+                        <el-button @click="changeStatus(scope.row, 1)" type="text" size="small"
+                        :disabled="!$checkAuth('rfid:manage:binding:unbinding')" v-if="scope.row.boundStatus===0">注销</el-button>
+                        <el-button @click="changeStatus(scope.row, 2)" type="text" size="small"
+                        :disabled="!$checkAuth('rfid:manage:binding:unbinding')" v-if="scope.row.boundStatus===1">启用</el-button>
+                    </template>
+                </el-table-column>
+            </el-table>
+            <div class="pagination clearfix">
+                <el-pagination
+                    style="float:right"
+                    @size-change="handleSizeChange"
+                    @current-change="handleCurrentChange"
+                    :current-page="pageNum"
+                    :page-sizes="[10, 20, 30, 40, 50, 100]"
+                    :page-size="pageSize"
+                    layout="total, sizes, prev, pager, next, jumper, slot"
+                    :total="total">
+                </el-pagination>
+                <!-- <p class="bottom-data fl" style="">本期数据&nbsp;&nbsp;&nbsp;总充值用户：{{userCount}}人&nbsp;&nbsp;&nbsp;总充值金额：{{chargeMoneyCount}}元</p> -->
+            </div>
+        </div>
+        <modal
+            :title="'绑定识别卡'"
+            :width="900"
+            :alert="showAlert2"
+            :confirmText="'绑定'"
+            @alertConfirm="alertConfirm2"
+            @alertCancel="alertCancel2">
+            <div class="detail_box clearfix">
+                <div class="detail_item detail_itemS">
+                    <label for="">车牌号码：</label>
+                    <span>{{detailObj.vehiclePlate}}</span>
+                </div>
+                <div class="detail_item detail_itemS">
+                    <label for="">车牌颜色：</label>
+                    <span>{{detailObj.vehiclePlateColor}}</span>
+                </div>
+                <div class="detail_item detail_itemS">
+                    <label for="">VIN码：</label>
+                    <span>{{detailObj.vehicleId}}</span>
+                </div>
+                <div class="detail_item detail_itemS">
+                    <label for="">车主单位：</label>
+                    <span>{{detailObj.ownerEntName}}</span>
+                </div>
+                <div>
+                    <div class="clearfix">
+                        <div class="detail_item detail_item2 detail_item3">
+                            <label>串口号：</label>
+                            <el-input style="width:140px" placeholder="请输入" v-model="commPort"></el-input>
+                            <label>设备ID：</label>
+                            <el-input style="width:140px" placeholder="请输入" v-model="deviceId"></el-input>
+                            <label>读卡器：</label>
+                            <el-select style="width:140px" clearable v-model="deviceName" placeholder="请选择">
+                                <el-option
+                                v-for="item in [{value:'ZK',label:'中科'},{value:'JT',label:'捷通'}]"
+                                :key="item.value"
+                                :label="item.label"
+                                clearable
+                                :value="item.value">
+                                </el-option>
+                            </el-select>
+                            <el-button size="mini" class="btn" type="primary" plain @click="bindCard(deviceName,commPort,deviceId)">连接设备</el-button>
+                        </div>
+                    </div>
+                    <div class="clearfix">
+                        <el-form :model="form3"  ref="form3">
+                            <el-form-item  prop="text">
+                                <div class="detail_item detail_item2">
+                                    <label for="">操作提示：</label>
+                                    <div class="text_info" v-html="readCardInfo"></div>
+                                </div>
+                            </el-form-item>
+                        </el-form>
+                    </div>
+                </div>
+            </div>
+        </modal>
+        <modal
+            :title="'识别卡查询'"
+            :width="900"
+            :alert="showAlert3"
+            @alertConfirm="alertConfirm3"
+            @alertCancel="alertCancel3">
+            <div class="detail_box clearfix" style="padding-bottom:0;">
+                <div class="clearfix" v-if="!isDetail">
+                    <div class="detail_item detail_item2 detail_item3">
+                        <label>串口号：</label>
+                        <el-input style="width:140px" placeholder="请输入" v-model="commPort"></el-input>
+                        <label>设备ID：</label>
+                        <el-input style="width:140px" placeholder="请输入" v-model="deviceId"></el-input>
+                        <label>读卡器：</label>
+                        <el-select style="width:140px" clearable v-model="deviceName" placeholder="请选择">
+                            <el-option
+                            v-for="item in [{value:'ZK',label:'中科'},{value:'JT',label:'捷通'}]"
+                            :key="item.value"
+                            :label="item.label"
+                            clearable
+                            :value="item.value">
+                            </el-option>
+                        </el-select>
+                        <el-button size="mini" class="btn" type="primary" plain @click="readCard(deviceName,commPort,deviceId)">连接设备</el-button>
+                    </div>
+                </div>
+                <div class="clearfix">
+                    <el-form :model="form3"  ref="form3">
+                        <el-form-item  prop="text">
+                            <div class="detail_item detail_item2">
+                                <label for="">操作提示：</label>
+                                <div class="text_info" v-html="readCardInfo"></div>
+                            </div>
+                        </el-form-item>
+                    </el-form>
+                </div>
+            </div>
+        </modal>
+    </div>
+</template>
+
+<script>
+import Breadcrumb from '@/components/Breadcrumb'
+import Modal from '@/components/Modal'
+import toReadCard from '@/utils/readCard.js'
+import { plateColor, carTypeGuo } from '@/utils/type.js'
+export default {
+    name: 'certificateProvide',
+    data () {
+        return {
+            vehicleType: [],
+            cardCode: '',
+            carTypeGuo,
+            plateColor,
+            isDetail: false,
+            orderNo: '',
+            readCardInfo: '',
+            deviceName: '',
+            commPort: '',
+            deviceId: '',
+            detailObj: {},
+            uploadUrl: window.uploadURL,
+            form3: {
+                a: ''
+            },
+            showAlert3: false,
+            form2: {
+                text: ''
+            },
+            showAlert2: false,
+            form: {
+                areaList: [],
+                orderNum: '',
+                orderPerson: '',
+                orderRemark: '',
+                picList: []
+            },
+            adId: '',
+            allCityList: [],
+            multipleSelection: [],
+            status: '',
+            status2: '',
+            status3: '',
+            chargeMoneyCount: 0,
+            userCount: 0,
+            loading: false,
+            areaList: [],
+            cityList: [],
+            regionId: '',
+            areaId: [], // 大区Id
+            searchKey: '',
+            searchKey2: '',
+            auditRadio: '1', // 弹窗审核结果
+            certStatus: 0,
+            certStatusList: [
+                {
+                    value: 0,
+                    label: '全部'
+                },
+                {
+                    value: 1,
+                    label: '通过'
+                },
+                {
+                    value: 2,
+                    label: '未通过'
+                }
+            ],
+            dateRegion: [],
+            value: '',
+            options: [],
+            total: 0,
+            showAlert: false,
+            pageNum: 1,
+            pageSize: 10,
+            tableData: [{}]
+        }
+    },
+    components: {
+        Modal,
+        Breadcrumb
+    },
+    created () {
+        // this.getAreaList()
+        this.getDataList()
+        this.getAllCity()
+        this.$get('comm/vehicle/types/1').then(res => {
+            if (res.code === 0) {
+                this.vehicleType = res.data
+            }
+        })
+    },
+    watch: {
+    },
+    methods: {
+        changeStatus (obj, type) {
+            if (type === 1) {
+                // this.showAlert3 = true
+                this.$confirm('确定注销该条记录吗？', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    this.$post('/product/cjl/rfid/cards/manage/unbinding', {
+                        cardCode: obj.cardCode
+                    }).then(res => {
+                        if (res.code === 0) {
+                            this.$message({
+                                type: 'success',
+                                message: '操作成功'
+                            })
+                            this.getDataList()
+                        }
+                    })
+                }).catch(() => {})
+            }
+            if (type === 2) {
+                this.detailObj = obj
+                this.showAlert2 = true
+            }
+        },
+        bindCard (deviceName, commPort, deviceId) {
+            this.readCardInfo += '<p>连接设备.....</p>'
+            let res = toReadCard({ deviceName, commPort, deviceId })
+            if (res.code === 200) {
+                this.$get(`/product/cjl/rfid/purchase/orders/${this.orderNo}/${res.content}`).then(response => {
+                    if (response.code === 0) {
+                        this.readCardInfo += `<p>识别卡录入,识别卡ID：${res.content}</p>`
+                        this.cardCode = res.content
+                    } else {
+                        this.readCardInfo += `<p>${response.msg}</p>`
+                    }
+                })
+            } else {
+                this.readCardInfo += `<p>${res.content}</p>`
+            }
+        },
+        readCard (deviceName, commPort, deviceId) {
+            this.readCardInfo += '<p>连接设备.....</p>'
+            let res = toReadCard({ deviceName, commPort, deviceId })
+            // res = {
+            //     code: 200,
+            //     content: '0139FB000433C637'
+            // }
+            if (res.code === 200) {
+                this.$get(`/product/cjl/rfid/cards/manage/cards/${res.content}`).then(response => {
+                    if (response.code === 0) {
+                        this.readCardInfo += `<p>识别卡录入,识别卡ID：${res.content}</p>`
+                        if (response.data.buyCardOrder.orderCode) this.readCardInfo += `<p>采购订单编号：${response.data.buyCardOrder.orderCode}；`
+                        // 绑定企业名称：${res.content};所属城市：${res.content};企业类型：${res.content};绑定车辆：${res.content};车牌颜色：${res.content};车辆VIN码：${res.content};
+                        if (response.data.sendCardOrder.enterpriseName) this.readCardInfo += `绑定企业名称：${response.data.sendCardOrder.enterpriseName}；`
+                        if (response.data.sendCardOrder.city) this.readCardInfo += `所属城市：${response.data.sendCardOrder.city}；`
+                        if (response.data.sendCardOrder.entType) this.readCardInfo += `企业类型：${response.data.sendCardOrder.entType}；`
+                        if (response.data.bindingVehicle.vehiclePlate) this.readCardInfo += `绑定车辆：${response.data.bindingVehicle.vehiclePlate}；`
+                        if (response.data.bindingVehicle.vehiclePlateColor) this.readCardInfo += `车牌颜色：${response.data.bindingVehicle.vehiclePlateColor}；`
+                        if (response.data.bindingVehicle.vehicleVIN) this.readCardInfo += `车辆VIN码：${response.data.bindingVehicle.vehicleVIN}；`
+                        this.readCardInfo += '</p>'
+                    }
+                })
+            } else {
+                this.readCardInfo += `<p>${res.content}</p>`
+            }
+        },
+        getDetail (orderNo) {
+            this.$get(`/product/cjl/rfid/purchase/orders/${orderNo}`).then(res => {
+                if (res.code === 0) {
+                    this.detailObj = res.data
+                }
+            })
+        },
+        getAllCity () {
+            this.$get('comm/citys/areas/tree').then(res => {
+                if (res.code === 0) {
+                    res.data.forEach(e => {
+                        e.label = e.areaName
+                        e.value = e.areaCode
+                        e.children && e.children.forEach(f => {
+                            f.label = f.provinceName
+                            f.value = f.provinceCode
+                            f.children && f.children.forEach(g => {
+                                g.label = g.cityName
+                                g.value = g.cityCode
+                            })
+                        })
+                    })
+                    this.allCityList = res.data
+                }
+            })
+        },
+        // 获取所有数据
+        getDataList () {
+            this.loading = true
+            let obj = {
+                areaCode: this.areaId[0],
+                provinceCode: this.areaId[1],
+                cityCode: this.areaId[2],
+                status: this.status,
+                startTime: this.dateRegion && this.dateRegion[0],
+                ownerEnt: this.searchKey2,
+                endTime: this.dateRegion && this.dateRegion[1],
+                vehicleType: this.status3,
+                vehiclePlate: this.searchKey,
+                vehiclePlateColor: this.status2
+            }
+            this.$post('/product/cjl/rfid/cards/manage/vehicles?page=' + this.pageNum + '&size=' + this.pageSize, obj)
+                .then(res => {
+                    if (res && res.code === 0) {
+                        this.tableData = this.$setNum(res.data, this.pageNum, this.pageSize)
+                        this.total = res.total
+                        // this.chargeMoneyCount = res.data.totalMoney
+                        // console.log(this.chargeMoneyCount)
+                        // this.userCount = res.data.userCount
+                        // console.log(this.userCount)
+                    }
+                    this.loading = false
+                }).catch(err => {
+                    console.log(err)
+                    this.loading = false
+                })
+        },
+        // 打开详情弹窗
+        goDetail (id) {
+            this.showAlert = true
+        },
+        // 弹窗确认
+        alertConfirm () {
+            this.$refs['form'].validate((valid) => {
+                if (valid) {
+                    let obj = {
+                        areaCode: this.form.areaList[0],
+                        provinceCode: this.form.areaList[1],
+                        cityCode: this.form.areaList[2],
+                        orderNum: this.form.orderNum,
+                        orderPerson: this.form.orderPerson,
+                        orderRemark: this.form.orderRemark,
+                        approvalUrl1: this.form.picList[0],
+                        approvalUrl2: this.form.picList[1],
+                        approvalUrl3: this.form.picList[2]
+                    }
+                    this.$post('/product/cjl/rfid/purchase/orders/add', obj).then(res => {
+                        if (res.code === 0) {
+                            this.alertCancel()
+                            this.$message({
+                                message: '添加成功',
+                                type: 'success'
+                            })
+                            this.getDataList()
+                        }
+                    })
+                }
+            })
+            // this.showAlert = false
+        },
+        alertConfirm2 () {
+            // this.cardCode = '0139FB000433C637'
+            if (!this.cardCode) {
+                this.readCardInfo += '<p class="red">请先读卡！</p>'
+                return
+            }
+            this.$post('/product/cjl/rfid/cards/manage/binding', {
+                vehicleId: this.detailObj.vehicleId,
+                cardCode: this.cardCode
+            }).then(res => {
+                if (res.code === 0) {
+                    this.$message({
+                        message: '绑卡成功',
+                        type: 'success'
+                    })
+                    this.alertCancel2()
+                    this.getDataList()
+                }
+            })
+        },
+        alertConfirm3 () {
+            this.alertCancel3()
+        },
+        // 弹窗取消
+        alertCancel () {
+            this.showAlert = false
+        },
+        alertCancel2 () {
+            this.showAlert2 = false
+            this.detailObj = {}
+            this.orderNo = ''
+            this.readCardInfo = ''
+            this.deviceName = ''
+            this.commPort = ''
+            this.deviceId = ''
+            this.cardCode = ''
+        },
+        alertCancel3 () {
+            this.showAlert3 = false
+            this.detailObj = {}
+            this.orderNo = ''
+            this.readCardInfo = ''
+            this.deviceName = ''
+            this.commPort = ''
+            this.deviceId = ''
+        },
+        search () {
+            this.pageNum = 1
+            this.pageSize = 10
+            this.getDataList()
+        },
+        handleSizeChange (val) {
+            this.pageSize = val
+            this.pageNum = 1
+            this.getDataList()
+        },
+        handleCurrentChange (val) {
+            this.pageNum = val
+            this.getDataList()
+        }
+    }
+}
+</script>
+
+<style lang='less' scoped>
+.certificateProvide {
+    .mb20 {
+        margin-bottom: 20px;
+    }
+    .form {
+        padding: 0 20px;
+    }
+    .avatar-uploader, .avatar-uploader-tips {
+        vertical-align: middle;
+    }
+    .avatar-uploader-tips {
+        display: inline-block;
+        width: 236px;
+        margin-left: 16px;
+        h6 {
+            color:#778CA2;
+            font-size: 14px;
+        }
+        p {
+            color: #98A9BC;
+            font-size: 12px;
+            line-height: 22px;
+        }
+    }
+    .table {
+        margin: 20px;
+        margin-top: 0;
+    }
+    .tips {
+        position: absolute;
+        top: 0;
+        line-height: 40px;
+        color: #98A9BC;
+        font-size: 14px;
+        font-weight: normal;
+    }
+    .detail_box {
+        padding: 0 70px 30px;
+        h5 {
+            font-size: 16px;
+            color: #000000;
+            font-weight: 500;
+            line-height: 30px;
+            margin-bottom: 10px;
+        }
+        .detail_item {
+            float: left;
+            width: 33%;
+            margin-bottom: 15px;
+            label {
+                color: #262626;
+            }
+            span {
+                color: #595959;
+            }
+            img {
+                vertical-align: top;
+                cursor: pointer;
+                margin-right: 30px;
+                position: relative;
+                top: -15px;
+            }
+        }
+        .detail_item2 {
+            width: 100%;
+        }
+        .detail_item3 {
+            label {
+                display: inline-block;
+                width: 70px;
+                text-align: right;
+            }
+            .btn {
+                margin-left: 20px;
+                vertical-align: top;
+            }
+        }
+        .detail_itemS {
+            width: 50%;
+            label {
+                display: inline-block;
+                width: 70px;
+                text-align: right;
+            }
+        }
+        .btnS {
+            margin-left: 10px;
+            vertical-align: bottom;
+        }
+        .text_info {
+            width: 627px;
+            display: inline-block;
+            vertical-align: top;
+            height: 180px;
+            border: 1px solid #dddddd;
+            overflow-y: auto;
+            line-height: 20px;
+            padding: 10px 20px;
+        }
+        .handle_info {
+            padding-left: 80px;
+            color: #52C31A;
+        }
+        .ipt {
+            width: 550px;
+            vertical-align: top;
+        }
+    }
+    .alertInner {
+        padding: 0 40px;
+        table {
+            width: 100%;
+            border: none;
+            line-height: 44px;
+            td {
+                padding: 0 10px;
+                box-sizing: border-box;
+            }
+            .blueTilte {
+                background: rgb(242, 244, 246);
+            }
+            .resonInput {
+                line-height: 36px;
+                width: 600px;
+                border: none;
+                outline: none;
+            }
+            .importantIcon {
+                color: red;
+                margin-right: 4px;
+            }
+        }
+    }
+    .bottom-data {
+        color:#98A9BC;
+        font-weight: normal;
+    }
+    .pagination {
+        position: relative;
+        .bottom-data {
+            line-height: 36px;
+            color:#98A9BC;
+            font-weight: normal;
+            margin-top: 20px;
+        }
+    }
+}
+</style>
+<style lang='less'>
+.certificateProvide {
+    .el-upload-list--picture-card .el-upload-list__item {
+        width: 104px;
+        height: 104px;
+    }
+    .el-upload--picture-card {
+        width: 104px;
+        height: 104px;
+        line-height: 104px;
+    }
+    .avatar-uploader{
+        height: 100px;
+        display: inline-block;
+        .el-upload {
+            border: 1px dashed #d9d9d9;
+            border-radius: 6px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            height: 104px;
+            width: 104px;
+            img {
+                width:100%;
+                height: 100%;
+            }
+        }
+        .el-upload-list {
+            position: absolute;
+            bottom: -20px;
+            left: 10px;
+        }
+        .el-upload:hover {
+            border-color: #4D7CFE;
+        }
+        .avatar-uploader-icon {
+            font-size: 28px;
+            color: #8c939d;
+            width: 104px;
+            height: 104px;
+            line-height: 104px;
+            text-align: center;
+        }
+    }
+    .small_input {
+        .el-input__inner {
+            width: 140px;
+        }
+    }
+    .w200_input {
+        width: 220px;
+    }
+    .w120_input {
+        width: 100px;
+    }
+    .el-pagination {
+        position: relative;
+    }
+}
+#certificateProvide {
+    .el-table--enable-row-transition .el-table__body .el-table__row td:nth-child(1) {
+        padding-left: 0!important;
+    }
+    .el-table__header .has-gutter th:nth-child(1) {
+        padding-left: 0!important;
+    }
+}
+</style>

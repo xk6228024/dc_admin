@@ -1,0 +1,299 @@
+<!-- 标签页组件 -->
+<template>
+    <div class="tabs-components" v-if="$store.state.tabShow" @contextmenu.prevent="showMenu">
+        <el-tabs v-model="editableTabsValue" type="card" @tab-remove="removeTab" @tab-click="tabClick">
+            <el-tab-pane
+                v-for="item in $store.state.tabsList"
+                :key="item.name"
+                :label="item.title"
+                :closable="item.name !== 'home'"
+                :name="item.name">
+            </el-tab-pane>
+        </el-tabs>
+        <div class="line" ref="line"></div>
+        <ul
+            v-show="visible"
+            :style="{left:left+'px', top:top+'px'}"
+            class="contextmenu">
+            <li @click="refreshSelectedTag">刷新</li>
+            <li @click="closeSelectedTag" v-show="tabName !== 'home'">关闭</li>
+            <li @click="closeRightTags" v-show="tabIndex < tablength - 1">关闭右侧所有</li>
+            <li @click="closeLeftTags" v-show="tabIndex > 1">关闭左侧所有</li>
+            <li @click="closeAllTags">关闭所有</li>
+        </ul>
+    </div>
+</template>
+<script>
+export default {
+    data () {
+        return {
+            tabName: '', // 当前右键选择的标签名
+            editableTabsValue: '',
+            visible: false, // 右键菜单显示
+            left: 0, // 右键菜单定位
+            top: 0, // 右键菜单定位
+            tabIndex: 0, // 右键定位的菜单索引
+            tablength: 1 // 当前菜单页面数量
+        }
+    },
+    computed: {
+        // 当前tab的name
+        activeName () {
+            return this.$store.state.activeTab
+        }
+    },
+    watch: {
+        // 当前选择标签name
+        activeName (val) {
+            this.editableTabsValue = val
+            this.lineAnimate()
+        },
+        // 菜单关闭控制
+        visible (value) {
+            if (value) {
+                document.body.addEventListener('click', this.closeMenu)
+            } else {
+                document.body.removeEventListener('click', this.closeMenu)
+            }
+        },
+        '$store.state.tabsList' (list) {
+            this.tablength = list.length
+        },
+        // 如果跳转至首页则隐藏标签页组件
+        '$route' (to, form) {
+            // if (form.meta.isDetail && form.meta.tag && form.meta.tag === to.meta.tag) {
+            //     this.removeTab(form.name)
+            // }
+            // if (to.meta.isDetail && form.meta.tag && form.meta.tag === to.meta.tag) {
+            //     this.removeTab(form.name)
+            // }
+            // if (to.path === '/home2') {
+            //     this.$store.commit('setTabShow', false)
+            // } else {
+            //     this.$store.commit('setTabShow', true)
+            // }
+        }
+    },
+    created () {
+        this.editableTabsValue = this.$store.state.activeTab
+        let temp = this.$store.state.themeBgColor
+        this.$store.commit('setThemeBgColor', '')
+        this.$store.commit('setThemeBgColor', temp)
+    },
+    mounted () {
+        this.lineAnimate()
+    },
+    methods: {
+        // 线条动画
+        lineAnimate () {
+            setTimeout(() => {
+                const tabItem = document.querySelector('.el-tabs__item.is-active')
+                if (tabItem) {
+                    this.$refs.line.style.width = tabItem.offsetWidth + 'px'
+                    this.$refs.line.style.left = tabItem.offsetLeft + 'px'
+                }
+            })
+        },
+        // 显示菜单
+        showMenu (e) {
+            if (/el-tabs__item/.test(e.target.className)) {
+                this.tabName = e.target.id.replace('tab-', '')
+                this.tabIndex = this.$store.state.tabsList.findIndex(item => {
+                    return item.name === this.tabName
+                })
+                this.top = e.clientY - 50
+                this.left = e.clientX - 230 + document.documentElement.scrollLeft
+                this.visible = true
+            }
+        },
+        // 刷新选中标签页
+        refreshSelectedTag () {
+            console.log(this.tabName)
+            this.$store.dispatch('routerTo', { excludeName: this.tabName, nextPath: this.$route.fullPath })
+        },
+        // 关闭选择的标签
+        closeSelectedTag () {
+            this.removeTab(this.tabName)
+        },
+        // 关闭右侧所有标签
+        closeRightTags () {
+            const tabsList = [...this.$store.state.tabsList]
+            const newTabs = tabsList.slice(0, this.tabIndex + 1)
+            const removeTabs = tabsList.slice(this.tabIndex + 1, this.tablength).map(item => { return item.name })
+            if (removeTabs.findIndex(item => { return item === this.editableTabsValue }) !== -1) {
+                this.$store.dispatch('routerTo', {
+                    excludeName: this.editableTabsValue,
+                    nextPath: tabsList[this.tabIndex].path
+                })
+            }
+            this.$store.commit('setTabsList', newTabs)
+            this.$store.dispatch('delCache', removeTabs)
+        },
+        // 关闭左侧所有标签
+        closeLeftTags () {
+            const tabsList = [...this.$store.state.tabsList]
+            const newTabs = [...tabsList.slice(0, 1), ...tabsList.slice(this.tabIndex, this.tablength)]
+            const removeTabs = tabsList.slice(1, this.tabIndex).map(item => { return item.name })
+            if (removeTabs.findIndex(item => { return item === this.editableTabsValue }) !== -1) {
+                this.$store.dispatch('routerTo', {
+                    excludeName: this.editableTabsValue,
+                    nextPath: tabsList[this.tabIndex].path
+                })
+            }
+            this.$store.commit('setTabsList', newTabs)
+            this.$store.dispatch('delCache', removeTabs)
+        },
+        // 关闭所有标签
+        closeAllTags () {
+            this.$store.dispatch('delAllCache', '/home')
+        },
+        // 关闭菜单
+        closeMenu () {
+            this.tabName = ''
+            this.visible = false
+        },
+        // tab点击事件
+        tabClick (tab) {
+            let tabs = this.$store.state.tabsList
+            tabs.forEach((item, index) => {
+                if (item.name === tab.name) {
+                    this.$store.commit('setActiveTab', item.name)
+                    this.$router.push(tabs[index].path)
+                }
+            })
+        },
+        // 删除tab
+        removeTab (targetName) {
+            let tabs = this.$store.state.tabsList
+            let activeName = this.editableTabsValue
+            if (activeName === targetName) {
+                const targetIndex = tabs.findIndex(tab => tab.name === targetName)
+                const nextTab = tabs[targetIndex + 1] || tabs[targetIndex - 1]
+                this.editableTabsValue = nextTab.name
+                this.$store.dispatch('closePage', {
+                    nextPath: nextTab.path,
+                    refresh: targetName
+                })
+            } else {
+                this.$store.dispatch('delCache', [targetName])
+                // 改变路由，如果没有则跳回首页
+                let newTabs = tabs.filter(tab => tab.name !== targetName)
+                if (!newTabs.length) {
+                    this.$store.commit('setActiveTab', 'home')
+                    this.$router.push('/home')
+                }
+                this.editableTabsValue = activeName
+                this.$store.commit('setTabsList', newTabs)
+            }
+        }
+    }
+}
+</script>
+
+<style lang="less" scoped>
+.tabs-components {
+    position: relative;
+    // .line {
+    //     position: absolute;
+    //     bottom: 0;
+    //     height: 2px;
+    //     transition: all .2s;
+    //     background-color: #4D7CFE;
+    // }
+    .contextmenu {
+        margin: 0;
+        background: #fff;
+        z-index: 100;
+        position: absolute;
+        list-style-type: none;
+        padding: 5px 0;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 400;
+        color: #333;
+        box-shadow: 2px 2px 3px 0 rgba(0, 0, 0, 0.3);
+        li {
+            margin: 0;
+            padding: 7px 16px;
+            cursor: pointer;
+            &:hover {
+                background: #eee;
+            }
+        }
+    }
+}
+</style>
+
+<style lang="less">
+.tabs-components {
+    .el-tabs__nav-next, .el-tabs__nav-prev {
+        background: rgba(0, 0, 0, 0.3);
+        line-height: 49px;
+    }
+    .el-tabs__nav {
+        padding-right: 50px;
+    }
+    .el-tabs__nav-scroll {
+        padding-left: 30px;
+        padding-top: 10px;
+    }
+    .el-tabs--card>.el-tabs__header .el-tabs__item {
+        padding-left: 16px;
+        padding-right: 12px;
+        min-width: 76px;
+        text-align: center;
+        border: none;
+        color: rgba(255, 255, 255, 0.8);
+        // color: var(--tabColor);
+    }
+    .el-tabs--card>.el-tabs__header .el-tabs__nav {
+        border: none;
+    }
+    .el-tabs--card>.el-tabs__header .el-tabs__item:hover {
+        padding-left: 16px;
+        padding-right: 12px;
+    }
+    .el-tabs--card>.el-tabs__header .el-tabs__item.is-active {
+        background: #F0F2F5;
+        border-radius: 4px 4px 0 0;
+        padding-left: 16px;
+        padding-right: 12px;
+        color: #585858;
+    }
+    .el-tabs--card>.el-tabs__header .el-tabs__item.is-active:hover {
+        padding-left: 16px;
+        padding-right: 12px;
+    }
+    .el-tabs--card>.el-tabs__header .el-tabs__item.is-active.is-closable {
+        padding-left: 16px;
+        padding-right: 12px;
+    }
+    .el-tabs--card>.el-tabs__header .el-tabs__item.is-active.is-closable:hover {
+        padding-left: 16px;
+        padding-right: 12px;
+    }
+    .el-tabs--card>.el-tabs__header .el-tabs__item .el-icon-close {
+        width: 14px;
+    }
+    .el-tabs__nav-wrap {
+        // padding-top: 20px;
+        height: 50px;
+        background: rgba(0, 0, 0, 0.1);
+    }
+    .el-tabs--card>.el-tabs__header {
+        border: none;
+        margin: 0;
+    }
+    .tabs-components .el-tabs--card > .el-tabs__header .el-tabs__item {
+        height: 50px;
+        line-height: 50px;
+    }
+    .el-tabs__item {
+        height: 40px;
+        line-height: 40px;
+    }
+// .el-tabs__content {
+//     display: none;
+// }
+}
+</style>

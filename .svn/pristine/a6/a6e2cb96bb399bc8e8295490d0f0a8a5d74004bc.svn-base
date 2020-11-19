@@ -1,0 +1,154 @@
+import vm from '../main.js'
+import axios from 'axios'
+import { getCookie, clearCookie } from './cookie'
+import { setErrorLog } from './errorLog.js'
+// promise.polyfill()
+
+let baseUrl = ''
+// 处理IE兼容
+if (window['context'] === undefined) {
+    if (!window.location.origin) {
+        window.location.origin = window.location.protocol + '//' + window.location.hostname + (window.location.port ? ':' + window.location.port : '')
+    }
+    window['context'] = location.origin + '/V6.0'
+}
+baseUrl = window.location.protocol + '//' + window.location.hostname + (window.location.port ? ':' + window.location.port : '') + '/api'
+const dev = process.env.NODE_ENV === 'development'
+
+// 默认请求地址
+const _path = dev ? '/api/' : '/'
+baseUrl = dev ? window.location.origin : baseUrl
+// const _path = '/api/'
+axios.defaults.baseURL = baseUrl + _path
+window.uploadURL = baseUrl + _path
+window.exportUrl = baseUrl + _path
+// 登录回跳地址
+window.loginURL = baseUrl + '/#/login'
+
+// 响应时间
+axios.defaults.timeout = 60000
+axios.defaults.withCredentials = true
+
+// 传参序列化
+axios.interceptors.request.use(function (config) {
+    config.headers['Content-Type'] = config.headers['Content-Type'] || 'application/json;charset=UTF-8'
+    // 判断如果是到处接口，设置请求头
+    if (config.url.indexOf('export') !== -1) {
+        config.headers['Content-Type'] = 'application/json; application/octet-stream'
+        config.responseType = 'blob'
+    }
+    config.headers['Cache-Control'] = 'no-cache'
+    getCookie('token') && (config.headers.token = getCookie('token'))
+    return config
+}, function (error) {
+    return Promise.reject(error)
+})
+
+// 登录拦截器
+axios.interceptors.response.use(function (response) {
+    if (/^1003$/.test(response.data.code) && process.env.VUE_APP_MODE !== 'show') {
+        clearCookie('token')
+        clearCookie('user')
+        vm.$router.push('/login')
+        return response
+    } else {
+        return response
+    }
+}, function (error) {
+    return Promise.reject(error)
+})
+
+function showAlert (response) {
+    let err
+    if (/Error/.test(Object.prototype.toString.call(response))) {
+        err = response.request.responseURL + '  ' + response.message
+    } else if (typeof response === 'string') {
+        err = response
+    } else {
+        err = '服务器错误，请重试！'
+    }
+    let msg = (response && response.data && response.data.msg) ? response.data.msg : '服务器错误，请重试！'
+    setErrorLog(2, err, vm.$route.fullPath, vm.$route.meta.title, new Date() - 0)
+    const messageBox = document.querySelector('body > .el-message-box__wrapper')
+    if (!messageBox || messageBox.style.display === 'none') {
+        vm.$alert(msg, '提示')
+    }
+}
+
+// 返回一个Promise(发送post请求)
+function post (url, params, config) {
+    if (process.env.VUE_APP_MODE === 'show') {
+        return new Promise((resolve, reject) => { resolve({ code: 0, data: [{}] }) })
+    }
+    config = config || {}
+    return new Promise((resolve, reject) => {
+        axios.post(url, params, config)
+            .then(response => {
+                if (response.status === 200) {
+                    if (response.data.code === 205) {
+                        vm.$msg({
+                            type: 'error',
+                            message: '你没有该权限'
+                        })
+                        resolve(response.data)
+                    } else if (response.data.code !== 0) {
+                        setTimeout(() => {
+                            showAlert(response)
+                            resolve(response.data)
+                        }, 500)
+                    } else {
+                        resolve(response.data)
+                    }
+                } else {
+                    showAlert(response)
+                }
+            }).catch((error) => {
+                setTimeout(() => {
+                    showAlert(error)
+                    reject(error)
+                }, 500)
+            })
+    })
+}
+
+// 返回一个Promise(发送get请求)
+function get (url, params, config) {
+    if (process.env.VUE_APP_MODE === 'show') {
+        return new Promise((resolve, reject) => { resolve({ code: 0, data: [{}] }) })
+    }
+    config = config || {}
+    return new Promise((resolve, reject) => {
+        axios.get(url, { params: params }, config)
+            .then(response => {
+                if (response.status === 200) {
+                    if (response.data.code === 205) {
+                        vm.$msg({
+                            type: 'error',
+                            message: '你没有该权限'
+                        })
+                        resolve(response.data)
+                    } else if (url.indexOf('export') !== -1) {
+                        resolve(response.data)
+                    } else if (response.data.code !== 0) {
+                        setTimeout(() => {
+                            showAlert(response)
+                            resolve(response.data)
+                        }, 500)
+                    } else {
+                        resolve(response.data)
+                    }
+                } else {
+                    showAlert(response)
+                }
+            }).catch((error) => {
+                setTimeout(() => {
+                    showAlert(error)
+                    reject(error)
+                }, 500)
+            })
+    })
+}
+export {
+    post,
+    get
+}

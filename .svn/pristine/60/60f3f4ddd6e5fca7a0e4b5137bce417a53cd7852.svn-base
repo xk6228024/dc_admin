@@ -1,0 +1,2249 @@
+<!-- 运营通告详情 -->
+<template>
+    <div class="cjlEnterpriseArchivesDetail detailPage" id="cjlEnterpriseArchivesDetail">
+        <div class="detail_header">
+            <el-button type="primary" @click="saveData" class="goBack btn" :disabled="!$checkAuth('operation:ent:edit')">保 存</el-button>
+            <el-button class="btn" @click="close">关 闭</el-button>
+        </div>
+        <div class="detail_content edit_content">
+            <el-form :model="form" ref="form" class="form">
+                <el-tabs v-model="activeName">
+                    <el-tab-pane label="配置信息" name="tab1">
+                        <div class="detail_model">
+                            <!-- <h4 class="detail_tittle">企业账号</h4>
+                            <div class="clearfix">
+                                <div class="detail_item">
+                                    <label>管理员账号<span class="required">(必填)</span></label>
+                                    <el-form-item prop="configDto.enterpriseConfigUser" :rules="$validate({required:true,max:15,type:'EN'})">
+                                        <el-input
+                                            class="edit_input"
+                                            v-model="form.configDto.enterpriseConfigUser"
+                                            placeholder="">
+                                        </el-input>
+                                    </el-form-item>
+                                </div>
+                                <div class="detail_item">
+                                    <label>管理员密码<span class="required">(必填)</span></label>
+                                    <el-form-item prop="configDto.enterpriseConfigPass" :rules="$validate({required:true,max:15,type:'EN'})" >
+                                        <el-input
+                                            class="edit_input"
+                                            v-model="form.configDto.enterpriseConfigPass"
+                                            placeholder="">
+                                        </el-input>
+                                    </el-form-item>
+                                </div>
+                            </div>
+                            <div class="line"></div> -->
+                            <h4 class="detail_tittle">业务配置</h4>
+                            <div class="clearfix">
+                                <div class="detail_item">
+                                    <label>可进行营运车辆二级维护作业<span class="required">(必填)</span></label>
+                                    <el-form-item prop="configDto.enterpriseConfigFix2Is"  :rules="$validate({required:true})">
+                                        <el-select class="edit_input" clearable v-model="form.configDto.enterpriseConfigFix2Is" placeholder="请选择" >
+                                            <el-option
+                                            v-for="item in [{value:'yes',label:'是'},{value:'no',label:'否'}]"
+                                            :key="item.value"
+                                            :label="item.label"
+                                            clearable
+                                            :value="item.value">
+                                            </el-option>
+                                        </el-select>
+                                        <el-tooltip class="icon_item" effect="dark" content="为维修企业配置是否可进行二级维护作业功能" placement="top">
+                                            <img src="../../../assets/img/tips.png">
+                                        </el-tooltip>
+                                    </el-form-item>
+                                </div>
+                                <div class="detail_item" v-if="form.configDto.enterpriseConfigFix2Is==='yes'">
+                                    <label>可进行竣工检验作业<span class="required">(必填)</span></label>
+                                    <el-form-item prop="configDto.enterpriseConfigJcIs"  :rules="$validate({required:true})">
+                                        <el-select class="edit_input" clearable v-model="form.configDto.enterpriseConfigJcIs" placeholder="请选择" >
+                                            <el-option
+                                            v-for="item in [{value:'yes',label:'是'},{value:'no',label:'否'}]"
+                                            :key="item.value"
+                                            :label="item.label"
+                                            clearable
+                                            :value="item.value">
+                                            </el-option>
+                                        </el-select>
+                                        <el-tooltip class="icon_item" effect="dark" content="为维修企业配置是否可进行二级维护竣工质量检测功能" placement="top">
+                                            <img src="../../../assets/img/tips.png">
+                                        </el-tooltip>
+                                    </el-form-item>
+                                </div>
+                                <div class="detail_item"  v-if="form.configDto.enterpriseConfigFix2Is==='yes'">
+                                    <label>二级维护竣工<span class="required">(必填)</span></label>
+                                    <el-form-item prop="configDto.enterpriseConfigFix2Becompleted"  :rules="$validate({required:true})">
+                                        <el-select class="edit_input" clearable v-model="form.configDto.enterpriseConfigFix2Becompleted" placeholder="请选择" >
+                                            <el-option
+                                            v-for="item in [{value:'inspect',label:'已检测'},{value:'finish',label:'已完工'}]"
+                                            :key="item.value"
+                                            :label="item.label"
+                                            clearable
+                                            :value="item.value">
+                                            </el-option>
+                                        </el-select>
+                                        <el-tooltip class="icon_item" effect="dark" placement="top">
+                                            <div slot="content">为维修企业配置维护完工可进行竣工操作，或需要完成检测后进行竣工操作。
+                                                <br/>
+                                                1、已检测可竣工：检测企业已检测可进行竣工。
+                                                <br/>
+                                                2、已完工可竣工：维修企业已完工可进行竣工。
+                                            </div>
+                                            <img src="../../../assets/img/tips.png">
+                                        </el-tooltip>
+                                    </el-form-item>
+                                </div>
+                            </div>
+                            <div class="line"></div>
+                            <h4 class="detail_tittle">二级维护配置</h4>
+                            <div class="clearfix">
+                                <div class="detail_item">
+                                    <label>合格证每月使用上限<span class="required">(必填)</span></label>
+                                    <el-form-item prop="configDto.enterpriseConfigFix2CertificateMaxMonth"  :rules="$validate({required:true})">
+                                        <el-input
+                                            class="edit_input"
+                                            type="number"
+                                            v-model="form.configDto.enterpriseConfigFix2CertificateMaxMonth"
+                                            placeholder="">
+                                        </el-input>
+                                    </el-form-item>
+                                </div>
+                                <div class="detail_item">
+                                    <label>每月最大维修量<span class="required">(必填)</span></label>
+                                    <el-form-item prop="configDto.enterpriseConfigFix2MaximumMonth"  :rules="$validate({required:true})">
+                                        <el-input
+                                            class="edit_input"
+                                            type="number"
+                                            v-model="form.configDto.enterpriseConfigFix2MaximumMonth"
+                                            placeholder="">
+                                        </el-input>
+                                    </el-form-item>
+                                </div>
+                                <div class="detail_item">
+                                    <label>是否限定监测站<span class="required">(必填)</span></label>
+                                    <el-form-item prop="configDto.enterpriseConfigFix2LinkJcIs"  :rules="$validate({required:true})">
+                                        <el-select class="edit_input" clearable v-model="form.configDto.enterpriseConfigFix2LinkJcIs" placeholder="请选择" >
+                                            <el-option
+                                            v-for="item in [{value:'yes',label:'是'},{value:'no',label:'否'}]"
+                                            :key="item.value"
+                                            :label="item.label"
+                                            clearable
+                                            :value="item.value">
+                                            </el-option>
+                                        </el-select>
+                                    </el-form-item>
+                                </div>
+                                <div class="detail_item">
+                                    <label>维护拍照模式<span class="required">(必填)</span></label>
+                                    <el-form-item prop="configDto.enterpriseConfigFix2PhotoMode" :rules="$validate({required:true})">
+                                        <el-select class="edit_input" clearable v-model="form.configDto.enterpriseConfigFix2PhotoMode" placeholder="请选择" >
+                                            <el-option
+                                            v-for="item in [{value:'manual',label:'手动'},{value:'automatic',label:'自动'},{value:'automanual',label:'自动&手动'},{value:'notRequired',label:'不需要'}]"
+                                            :key="item.value"
+                                            :label="item.label"
+                                            clearable
+                                            :value="item.value">
+                                            </el-option>
+                                        </el-select>
+                                    </el-form-item>
+                                </div>
+                                <div class="detail_item">
+                                    <label>检测拍照模式<span class="required">(必填)</span></label>
+                                    <el-form-item prop="configDto.enterpriseConfigJcPhotoMode" :rules="$validate({required:true})">
+                                        <el-select class="edit_input" clearable v-model="form.configDto.enterpriseConfigJcPhotoMode" placeholder="请选择" >
+                                            <el-option
+                                            v-for="item in [{value:'manual',label:'手动'},{value:'automatic',label:'自动'},{value:'automanual',label:'自动&手动'},{value:'notRequired',label:'不需要'}]"
+                                            :key="item.value"
+                                            :label="item.label"
+                                            clearable
+                                            :value="item.value">
+                                            </el-option>
+                                        </el-select>
+                                    </el-form-item>
+                                </div>
+                                <div class="detail_item">
+                                    <label>RFID获取方式<span class="required">(必填)</span></label>
+                                    <el-form-item prop="configDto.enterpriseConfigRfidMode" :rules="$validate({required:true})">
+                                        <el-select class="edit_input" clearable v-model="form.configDto.enterpriseConfigRfidMode" placeholder="请选择">
+                                            <el-option
+                                            v-for="item in [{value:'manual',label:'手动'},{value:'automatic',label:'自动'},{value:'automanual',label:'自动&手动'},{value:'notRequired',label:'不需要'}]"
+                                            :key="item.value"
+                                            :label="item.label"
+                                            clearable
+                                            :value="item.value">
+                                            </el-option>
+                                        </el-select>
+                                    </el-form-item>
+                                </div>
+                            </div>
+                            <div class="line"></div>
+                            <h4 class="detail_tittle">二级维护车辆类型
+                                <el-checkbox :indeterminate="isIndeterminate" v-model="checkAll" @change="handleCheckAllChange" class="allCheck">全选</el-checkbox>
+                            </h4>
+                            <div class="clearfix">
+                                <el-checkbox-group v-model="checkList" class="check_box" @change="handleCheckedCitiesChange">
+                                    <div class="check_item" :key='item.vehicle_type_id' v-for="item in vehicleType">
+                                        <el-checkbox :label="item.vehicle_type_id" >{{item.vehicle_type_name}}</el-checkbox>
+                                    </div>
+                                </el-checkbox-group>
+                            </div>
+                        </div>
+                    </el-tab-pane>
+                    <el-tab-pane label="基础信息" name="tab2">
+                        <div class="edit_content">
+                            <!-- <el-form :model="detailData" ref="form" class="form"> -->
+                                <div class="detail_model">
+                                    <h4>基本信息</h4>
+                                    <div class="clearfix">
+                                        <div class="detail_item">
+                                            <label>机构唯一编码<span class="required">(必填)</span></label>
+                                            <el-form-item prop="entBaseDto.enterpriseJcCoding" :rules="$validate({type:'EN'})">
+                                                <el-input
+                                                    :disabled="!!enterpriseId"
+                                                    class="edit_input"
+                                                    maxlength="30"
+                                                    v-model.trim="form.entBaseDto.enterpriseJcCoding"
+                                                    placeholder="请输入">
+                                                </el-input>
+                                            </el-form-item>
+                                        </div>
+                                        <div class="detail_item">
+                                            <label>企业名称<span class="required">(必填)</span></label>
+                                            <el-form-item prop="entBaseDto.enterpriseName" :rules="$validate({required:true})">
+                                                <el-input
+                                                    :disabled="!!enterpriseId"
+                                                    class="edit_input"
+                                                    maxlength="30"
+                                                    v-model.trim="form.entBaseDto.enterpriseName"
+                                                    placeholder="请输入">
+                                                </el-input>
+                                            </el-form-item>
+                                        </div>
+                                        <div class="detail_item">
+                                            <label>企业简称<span class="required">(必填)</span></label>
+                                            <el-form-item prop="entBaseDto.enterpriseJcShortName" :rules="$validate({required:true})">
+                                                <el-input
+                                                    class="edit_input"
+                                                    maxlength="30"
+                                                    v-model="form.entBaseDto.enterpriseJcShortName"
+                                                    placeholder="请输入">
+                                                </el-input>
+                                            </el-form-item>
+                                        </div>
+                                        <div class="detail_item">
+                                            <label>所属类型<span class="required">(必填)</span></label>
+                                            <el-form-item prop="entBaseDto.enterpriseBusinessCategory" :rules="$validate({required:true})">
+                                                <el-select v-model="form.entBaseDto.enterpriseBusinessCategory"
+                                                placeholder="请选择">
+                                                    <el-option
+                                                        v-for="item in [{value:'01',label:'一类'},{value:'02',label:'二类'},{value:'03',label:'三类'}]"
+                                                        :key="item.value"
+                                                        :label="item.label"
+                                                        :value="item.value">
+                                                    </el-option>
+                                                </el-select>
+                                            </el-form-item>
+                                        </div>
+                                        <div class="detail_item">
+                                            <label>经营许可证号<span class="required">(必填)</span></label>
+                                            <el-form-item prop="entBaseDto.enterpriseBusinessCertificate"
+                                            :rules="$validate({required:true, type: 'enterpriseBusinessCertificate'})">
+                                                <el-input
+                                                    class="edit_input"
+                                                    maxlength="12"
+                                                    v-model.trim="form.entBaseDto.enterpriseBusinessCertificate"
+                                                    placeholder="请输入">
+                                                </el-input>
+                                            </el-form-item>
+                                        </div>
+                                        <div class="detail_item">
+                                            <label>经济性质<span class="required">(必填)</span></label>
+                                            <el-form-item prop="entBaseDto.enterpriseEconomicCategory" :rules="$validate({required:true})">
+                                                <el-select v-model="form.entBaseDto.enterpriseEconomicCategory"
+                                                placeholder="请选择">
+                                                    <el-option
+                                                        v-for="item in economicsList"
+                                                        :key="item.value"
+                                                        :label="item.label"
+                                                        :value="item.value">
+                                                    </el-option>
+                                                </el-select>
+                                            </el-form-item>
+                                        </div>
+                                        <div class="detail_item">
+                                            <label>营业状态<span class="required">(必填)</span></label>
+                                            <el-form-item prop="entBaseDto.enterpriseOperatingState" :rules="$validate({required:true})">
+                                                <el-select v-model="form.entBaseDto.enterpriseOperatingState"
+                                                placeholder="请选择">
+                                                    <el-option
+                                                        v-for="item in operateState"
+                                                        :key="item.value"
+                                                        :label="item.label"
+                                                        :value="item.value">
+                                                    </el-option>
+                                                </el-select>
+                                            </el-form-item>
+                                        </div>
+                                        <div class="detail_item">
+                                            <label>营业开始时间</label>
+                                            <el-form-item prop="entBaseDto.enterpriseJcBusinessS">
+                                                <el-time-picker
+                                                    v-model="form.entBaseDto.enterpriseJcBusinessS"
+                                                    format="HH:mm"
+                                                    value-format="HH:mm"
+                                                    :picker-options="{
+                                                    selectableRange: '00:00:00 - 23:59:59'
+                                                    }"
+                                                    placeholder="请选择">
+                                                </el-time-picker>
+                                            </el-form-item>
+                                        </div>
+                                        <div class="detail_item">
+                                            <label>营业结束时间</label>
+                                            <el-form-item prop="enterpriseJcBusiness">
+                                                <el-time-picker
+                                                    v-model="form.entBaseDto.enterpriseJcBusinessE"
+                                                    format="HH:mm"
+                                                    value-format="HH:mm"
+                                                    :picker-options="{
+                                                    selectableRange: '00:00:00 - 23:59:59'
+                                                    }"
+                                                    placeholder="请选择">
+                                                </el-time-picker>
+                                            </el-form-item>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="detail_model">
+                                    <h4>联系人信息</h4>
+                                    <div class="clearfix">
+                                        <div class="detail_item">
+                                            <label>负责人<span class="required">(必填)</span></label>
+                                            <el-form-item prop="entBaseDto.enterpriseOwner" :rules="$validate({required:true})">
+                                                <el-input
+                                                    class="edit_input"
+                                                    maxlength="25"
+                                                    v-model.trim="form.entBaseDto.enterpriseOwner"
+                                                    placeholder="请输入">
+                                                </el-input>
+                                            </el-form-item>
+                                        </div>
+                                        <div class="detail_item">
+                                            <label>负责人电话<span class="required">(必填)</span></label>
+                                            <el-form-item prop="entBaseDto.enterpriseOwnerPhone" :rules="$validate({required:true, type: 'phone'})">
+                                                <el-input
+                                                    class="edit_input"
+                                                    onkeypress='return( /[\d]/.test(String.fromCharCode(event.keyCode)))'
+                                                    maxlength="11"
+                                                    v-model="form.entBaseDto.enterpriseOwnerPhone"
+                                                    placeholder="请输入">
+                                                </el-input>
+                                            </el-form-item>
+                                        </div>
+                                        <!-- <div class="detail_item">
+                                            <label>负责人传真号码</label>
+                                            <el-form-item prop="headPhone" :rules="$validate({required:true, type: 'phone'})">
+                                                <el-input
+                                                    class="edit_input"
+                                                    onkeypress='return( /[\d]/.test(String.fromCharCode(event.keyCode)))'
+                                                    maxlength="11"
+                                                    v-model="detailData.headPhone"
+                                                    placeholder="请输入">
+                                                </el-input>
+                                            </el-form-item>
+                                        </div> -->
+                                        <div class="detail_item">
+                                            <label>负责人身份证</label>
+                                            <el-form-item prop="entBaseDto.enterpriseOwnerIdcardnumber" :rules="$validate({type: 'idcard'})">
+                                                <el-input
+                                                    class="edit_input"
+                                                    maxlength="18"
+                                                    v-model="form.entBaseDto.enterpriseOwnerIdcardnumber"
+                                                    placeholder="请输入">
+                                                </el-input>
+                                            </el-form-item>
+                                        </div>
+                                        <div class="detail_item">
+                                            <label>联系人<span class="required">(必填)</span></label>
+                                            <el-form-item prop="entBaseDto.enterpriseLinkName" :rules="$validate({required:true})">
+                                                <el-input
+                                                    class="edit_input"
+                                                    maxlength="25"
+                                                    v-model.trim="form.entBaseDto.enterpriseLinkName"
+                                                    placeholder="请输入">
+                                                </el-input>
+                                            </el-form-item>
+                                        </div>
+                                        <div class="detail_item">
+                                            <label>联系人电话<span class="required">(必填)</span></label>
+                                            <el-form-item prop="entBaseDto.enterpriseLinkMobile" :rules="$validate({required:true, type: 'phone'})">
+                                                <el-input
+                                                    class="edit_input"
+                                                    maxlength="11"
+                                                    onkeypress='return( /[\d]/.test(String.fromCharCode(event.keyCode)))'
+                                                    v-model="form.entBaseDto.enterpriseLinkMobile"
+                                                    placeholder="请输入">
+                                                </el-input>
+                                            </el-form-item>
+                                        </div>
+                                        <!-- <div class="detail_item">
+                                            <label>联系人传真号码</label>
+                                            <el-form-item prop="headPhone" :rules="$validate({required:true, type: 'phone'})">
+                                                <el-input
+                                                    class="edit_input"
+                                                    onkeypress='return( /[\d]/.test(String.fromCharCode(event.keyCode)))'
+                                                    maxlength="11"
+                                                    v-model="detailData.headPhone"
+                                                    placeholder="请输入">
+                                                </el-input>
+                                            </el-form-item>
+                                        </div> -->
+                                        <div class="detail_item">
+                                            <label>联系人身份证</label>
+                                            <el-form-item prop="entBaseDto.enterpriseLinkIdcardnumber" :rules="$validate({type: 'idcard'})">
+                                                <el-input
+                                                    class="edit_input"
+                                                    maxlength="18"
+                                                    v-model="form.entBaseDto.enterpriseLinkIdcardnumber"
+                                                    placeholder="请输入">
+                                                </el-input>
+                                            </el-form-item>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="detail_model">
+                                    <h4>拓展信息</h4>
+                                    <div class="clearfix">
+                                        <div class="detail_item">
+                                            <label>企业LOGO图片<span class="required">(可上传1张)</span></label>
+                                            <el-form-item prop="entExtendDto.enterprisePicUrl">
+                                                <el-upload
+                                                    v-if="!form.entExtendDto.enterprisePicUrl"
+                                                    class="image-upload"
+                                                    :accept="'image/png,image/jpeg'"
+                                                    :show-file-list="false"
+                                                    :action="uploadURL + 'attachment/file/upload'"
+                                                    :on-success="handleSuccess1"
+                                                    :before-upload="beforeUpload">
+                                                    <i class="el-icon-plus"></i>
+                                                    <p>支持jpg/png格式<br/>小于2M</p>
+                                                </el-upload>
+                                                <div v-else class="image-pic">
+                                                    <img :src="form.entExtendDto.enterprisePicUrl" @click="$lookImg(form.entExtendDto.enterprisePicUrl)" class="pic">
+                                                    <i class="el-icon-error" @click="clearImage('enterprisePicUrl')"></i>
+                                                </div>
+                                            </el-form-item>
+                                        </div>
+                                        <div class="detail_item" style="width:67%;">
+                                            <label>门店照片<span class="required">(可上传5张)</span></label>
+                                            <el-form-item prop="entExtendDto.enterpriseStoresImages">
+                                                <div class="image-pic"
+                                                    v-for="(item, index) in form.entExtendDto.enterpriseStoresImages" :key="index">
+                                                    <img :src="item" @click="$lookImg(item)" class="pic">
+                                                    <i class="el-icon-error" @click="clearImage('enterpriseStoresImages', index)" ></i>
+                                                </div>
+                                                <el-upload
+                                                    :show-file-list="false"
+                                                    v-if="detailData.imageUrls.length < 5"
+                                                    class="image-upload"
+                                                    :accept="'image/png,image/jpeg'"
+                                                    :action="uploadURL + 'attachment/file/upload'"
+                                                    :on-success="handleSuccess2"
+                                                    :before-upload="beforeUpload">
+                                                    <i class="el-icon-plus"></i>
+                                                    <p>支持jpg/png格式<br/>小于2M</p>
+                                                </el-upload>
+                                            </el-form-item>
+                                        </div>
+                                        <div class="detail_item">
+                                            <label>许可证照片<span class="required">(可上传1张)</span></label>
+                                            <el-form-item prop="entExtendDto.enterpriseBusinessPermit">
+                                                <el-upload
+                                                    v-if="!form.entExtendDto.enterpriseBusinessPermit"
+                                                    class="image-upload"
+                                                    :accept="'image/png,image/jpeg'"
+                                                    :show-file-list="false"
+                                                    :action="uploadURL + 'attachment/file/upload'"
+                                                    :on-success="handleSuccess3"
+                                                    :before-upload="beforeUpload">
+                                                    <i class="el-icon-plus"></i>
+                                                    <p>支持jpg/png格式<br/>小于2M</p>
+                                                </el-upload>
+                                                <div v-else class="image-pic">
+                                                    <img :src="form.entExtendDto.enterpriseBusinessPermit"
+                                                    @click="$lookImg(form.entExtendDto.enterpriseBusinessPermit)" class="pic">
+                                                    <i class="el-icon-error"
+                                                    @click="clearImage('enterpriseBusinessPermit')" ></i>
+                                                </div>
+                                            </el-form-item>
+                                        </div>
+                                        <div class="detail_item">
+                                            <label>营业执照照片<span class="required">(可上传1张)</span></label>
+                                            <el-form-item prop="entExtendDto.enterpriseBusinessLicense">
+                                                <el-upload
+                                                    v-if="!form.entExtendDto.enterpriseBusinessLicense"
+                                                    class="image-upload"
+                                                    :accept="'image/png,image/jpeg'"
+                                                    :show-file-list="false"
+                                                    :action="uploadURL + 'attachment/file/upload'"
+                                                    :on-success="handleSuccess4"
+                                                    :before-upload="beforeUpload">
+                                                    <i class="el-icon-plus"></i>
+                                                    <p>支持jpg/png格式<br/>小于2M</p>
+                                                </el-upload>
+                                                <div v-else class="image-pic">
+                                                    <img :src="form.entExtendDto.enterpriseBusinessLicense"
+                                                    @click="$lookImg(form.entExtendDto.enterpriseBusinessLicense)" class="pic">
+                                                    <i class="el-icon-error"
+                                                    @click="clearImage('enterpriseBusinessLicense')" ></i>
+                                                </div>
+                                            </el-form-item>
+                                        </div>
+                                    </div>
+                                    <div class="clearfix">
+                                        <div class="detail_item">
+                                            <label>所在地区<span class="required">(必填)</span></label>
+                                            <el-form-item prop="entExtendDto.city" :rules="$validate({required:true, type: 'array'})">
+                                                <el-cascader :props="props" :options="options"
+                                                    ref="region"
+                                                    v-model="form.entExtendDto.city"
+                                                    class="edit_input">
+                                                </el-cascader>
+                                                <!-- <el-cascader :props="props"></el-cascader> -->
+                                            </el-form-item>
+                                        </div>
+                                        <div class="detail_item">
+                                            <label>经营地址</label>
+                                            <el-form-item prop="entExtendDto.enterpriseAddr">
+                                                <el-input
+                                                    class="edit_input"
+                                                    maxlength="50"
+                                                    v-model.trim="form.entExtendDto.enterpriseAddr"
+                                                    placeholder="请输入">
+                                                </el-input>
+                                            </el-form-item>
+                                        </div>
+                                        <div class="detail_item" style="height:76px;">
+                                            <label>地图经纬度</label>
+                                            <el-form-item prop="longitude">
+                                                <div class="map-location" @click="showMap" style="overflow:hidden;">
+                                                    {{form.entExtendDto.enterpriseAddrX}},{{form.entExtendDto.enterpriseAddrY}}
+                                                    <i class="el-icon-location-outline"></i>
+                                                </div>
+                                            </el-form-item>
+                                        </div>
+                                        <div class="detail_item">
+                                            <label>邮政编码</label>
+                                            <el-form-item prop="entExtendDto.enterprisePostalcode" :rules="$validate({type: 'num'})">
+                                                <el-input
+                                                    class="edit_input"
+                                                    onkeypress='return( /[\d]/.test(String.fromCharCode(event.keyCode)))'
+                                                    v-model="form.entExtendDto.enterprisePostalcode"
+                                                    maxlength="6"
+                                                    placeholder="请输入">
+                                                </el-input>
+                                            </el-form-item>
+                                        </div>
+                                        <div class="detail_item">
+                                            <label>只维修本区车辆<span class="required">(必填)</span></label>
+                                            <el-form-item prop="entBaseDto.enterpriseFixAreaIs" :rules="$validate({required:true})">
+                                                <el-select v-model="form.entBaseDto.enterpriseFixAreaIs"
+                                                placeholder="请选择">
+                                                    <el-option
+                                                        v-for="item in [{value:0,label:'否'},{value:1,label:'是'}]"
+                                                        :key="item.value"
+                                                        :label="item.label"
+                                                        :value="item.value">
+                                                    </el-option>
+                                                </el-select>
+                                            </el-form-item>
+                                        </div>
+                                        <div class="detail_item">
+                                            <label>法人代表</label>
+                                            <el-form-item prop="entBaseDto.enterpriseLegalPerson" :rules="$validate({type: 'floatNumber'})">
+                                                <el-input
+                                                    class="edit_input"
+                                                    maxlength="20"
+                                                    v-model="form.entBaseDto.enterpriseLegalPerson"
+                                                    placeholder="请输入">
+                                                </el-input>
+                                            </el-form-item>
+                                        </div>
+                                        <div class="detail_item">
+                                            <label>企业注册资本(万元)</label>
+                                            <el-form-item prop="entBaseDto.enterpriseRegisteredCapital" :rules="$validate({type: 'floatNumber'})">
+                                                <el-input
+                                                    class="edit_input"
+                                                    maxlength="20"
+                                                    v-model="form.entBaseDto.enterpriseRegisteredCapital"
+                                                    placeholder="请输入">
+                                                </el-input>
+                                            </el-form-item>
+                                        </div>
+                                        <!-- <div class="detail_item">
+                                            <label>缴费提醒开关</label>
+                                            <el-form-item prop="isRepairStation">
+                                                <el-select class="edit_input" v-model="detailData.isRepairStation" placeholder="请选择">
+                                                    <el-option
+                                                    v-for="item in [{value:0,label:'关'},{value:1,label:'开'}]"
+                                                    :key="item.value"
+                                                    :label="item.label"
+                                                    :value="item.value">
+                                                    </el-option>
+                                                </el-select>
+                                            </el-form-item>
+                                        </div> -->
+                                        <div class="detail_item">
+                                            <label>颁发证书数量</label>
+                                            <el-form-item prop="entBaseDto.allCertificateNum" :rules="$validate({type: 'floatNumber'})">
+                                                <el-input
+                                                    disabled
+                                                    class="edit_input"
+                                                    type="number"
+                                                    maxlength="20"
+                                                    v-model="form.entBaseDto.allCertificateNum"
+                                                    placeholder="请输入">
+                                                </el-input>
+                                            </el-form-item>
+                                        </div>
+                                        <div class="detail_item">
+                                            <label>已用证书数量</label>
+                                            <el-form-item prop="entBaseDto.useCertificateNum" :rules="$validate({type: 'floatNumber'})">
+                                                <el-input
+                                                    disabled
+                                                    class="edit_input"
+                                                    type="number"
+                                                    maxlength="20"
+                                                    v-model="form.entBaseDto.useCertificateNum"
+                                                    placeholder="请输入">
+                                                </el-input>
+                                            </el-form-item>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- <div class="detail_model">
+                                    <h4>主修品牌</h4>
+                                    <div class="clearfix">
+                                        <div class="detail_item" style="width:100%;">
+                                            <label>主修品牌</label>
+                                            <el-form-item prop="serBrandIds">
+                                                <el-select
+                                                class="multiple"
+                                                style="width:100%;"
+                                                v-model="detailData.serBrandIds"
+                                                multiple
+                                                filterable
+                                                placeholder="请选择">
+                                                    <el-option-group
+                                                    v-for="(val, key) in brandList"
+                                                    :key="key"
+                                                    :label="key">
+                                                        <el-option
+                                                            v-for="item in brandList[key]"
+                                                            :key="item.carBrandId"
+                                                            :label="item.carBrandName"
+                                                            :value="item.carBrandId">
+                                                        </el-option>
+                                                    </el-option-group>
+                                                </el-select>
+                                            </el-form-item>
+                                        </div>
+                                    </div>
+                                </div> -->
+                            <!-- </el-form> -->
+                        </div>
+                    </el-tab-pane>
+                    <el-tab-pane label="工位信息" name="tab3">
+                        <div class="edit_content station_wrap">
+                            <div class="detail_model">
+                                <h4>维修工位信息</h4>
+                                <div style="margin-bottom:10px;">
+                                    <el-radio v-model="currentStation.workstationProperty" label="inspect">检测工位</el-radio>
+                                    <el-radio v-model="currentStation.workstationProperty" label="fix">维修工位</el-radio>
+                                </div>
+                                <div class="station_group">
+                                    <el-button v-for="(station,index) in form.entWorkStationDtos" @click="selectStation(index)" :type="selectStationIndex===index?'primary':''" :key="index">{{station.workstationName}}</el-button>
+                                    <el-button class="right_btn" type="primary" plain icon="el-icon-plus" @click="addStation">新增工位</el-button>
+                                </div>
+                                <div class="station_detail" v-if="currentStation">
+                                    <div class="station_header">
+                                        <label style="margin-left:20px">工位名称：</label>
+                                        <el-input
+                                            size="small"
+                                            v-model="currentStation.workstationName"
+                                            style="width:100px;margin-right:20px">
+                                        </el-input>
+                                        <label>状态：</label>
+                                        <el-select v-model="currentStation.workstationStatus"
+                                        style="width:160px;"
+                                        placeholder="请选择">
+                                            <el-option
+                                                v-for="item in [
+                                                    {value: 'enable', label: '启用'},
+                                                    {value: 'disable', label: '禁用'}
+                                                ]"
+                                                :key="item.value"
+                                                :label="item.label"
+                                                :value="item.value">
+                                            </el-option>
+                                        </el-select>
+                                        <el-button class="right_btn" type="danger" plain @click="deleteStation">删除</el-button>
+                                        <el-button class="right_btn" type="primary" plain @click="saveStation">保存</el-button>
+                                    </div>
+                                    <div class="station_content">
+                                        <h5>摄像头信息：
+                                            <!-- <el-button size="small">工位1</el-button>
+                                            <el-button size="small">工位2</el-button> -->
+                                            <el-tag
+                                                v-for="(camera,index) in currentStation.videoDtos"
+                                                style="cursor:pointer;"
+                                                :key="index"
+                                                closable
+                                                @close="deleteCamera(index)"
+                                                @click="selectCamera(index)"
+                                                :type="selectCameraIndex===index?'':'info'">
+                                                {{'摄像头'+(index+1)}}
+                                            </el-tag>
+                                            <el-button style="" size="small" class="right_btn" @click="addCamera" type="primary" plain icon="el-icon-plus">新增摄像头</el-button>
+                                        </h5>
+                                        <div class="clearfix stationBox" v-if="currentCamera">
+                                            <el-form ref='cameraForm' :model="currentCamera">
+                                                <el-row :gutter="20">
+                                                    <!-- <el-col :span="6" class="cameraItem">
+                                                        <label>网络类型<span class="required">(必填)</span></label>
+                                                         <el-form-item prop="value" :rules="$validate({required:true})">
+                                                             <el-input
+                                                                class="edit_input"
+                                                                v-model="cameraForm.value"
+                                                                placeholder="请输入">
+                                                            </el-input>
+                                                         </el-form-item>
+                                                    </el-col> -->
+                                                    <el-col :span="6" class="cameraItem">
+                                                        <label>插件版本<span class="required">(必填)</span></label>
+                                                         <el-form-item prop="videoPlugin" :rules="$validate({required:true})">
+                                                             <!-- <el-input
+                                                                class="edit_input"
+                                                                v-model="currentCamera.videoPlugin"
+                                                                placeholder="请输入">
+                                                            </el-input> -->
+                                                            <el-select class="edit_input" clearable v-model="currentCamera.videoPlugin" placeholder="请选择" >
+                                                                <el-option
+                                                                v-for="item in [{value:'java',label:'java插件'},{value:'c#',label:'C#插件'}]"
+                                                                :key="item.value"
+                                                                :label="item.label"
+                                                                clearable
+                                                                :value="item.value">
+                                                                </el-option>
+                                                            </el-select>
+                                                         </el-form-item>
+                                                    </el-col>
+                                                    <el-col :span="6" class="cameraItem">
+                                                        <label>账号<span class="required">(必填)</span></label>
+                                                         <el-form-item prop="videoUser" :rules="$validate({required:true,type:'EN'})">
+                                                             <el-input
+                                                                class="edit_input"
+                                                                v-model="currentCamera.videoUser"
+                                                                placeholder="请输入">
+                                                            </el-input>
+                                                         </el-form-item>
+                                                    </el-col>
+                                                    <el-col :span="6" class="cameraItem">
+                                                        <label>密码<span class="required">(必填)</span></label>
+                                                         <el-form-item prop="videoPass" :rules="$validate({required:true,type:'EN'})">
+                                                             <el-input
+                                                                class="edit_input"
+                                                                v-model="currentCamera.videoPass"
+                                                                placeholder="请输入">
+                                                            </el-input>
+                                                         </el-form-item>
+                                                    </el-col>
+                                                    <el-col :span="6" class="cameraItem">
+                                                        <label>内网IP<span class="required">(必填)</span></label>
+                                                         <el-form-item prop="videoIp" :rules="$validate({required:true,type:'ip'})">
+                                                             <el-input
+                                                                class="edit_input"
+                                                                v-model="currentCamera.videoIp"
+                                                                placeholder="请输入">
+                                                            </el-input>
+                                                         </el-form-item>
+                                                    </el-col>
+                                                    <!-- <el-col :span="6" class="cameraItem">
+                                                        <label>外网IP<span class="required">(必填)</span></label>
+                                                         <el-form-item prop="value" :rules="$validate({required:true})">
+                                                             <el-input
+                                                                class="edit_input"
+                                                                v-model="cameraForm.value"
+                                                                placeholder="请输入">
+                                                            </el-input>
+                                                         </el-form-item>
+                                                    </el-col> -->
+                                                    <el-col :span="6" class="cameraItem">
+                                                        <label>通道数<span class="required">(必填)</span></label>
+                                                         <el-form-item prop="videoChannel" :rules="$validate({required:true})">
+                                                             <el-input
+                                                                type="number"
+                                                                class="edit_input"
+                                                                v-model="currentCamera.videoChannel"
+                                                                placeholder="请输入">
+                                                            </el-input>
+                                                         </el-form-item>
+                                                    </el-col>
+                                                    <el-col :span="6" class="cameraItem">
+                                                        <label>端口号<span class="required">(必填)</span></label>
+                                                        <el-form-item prop="videoPort" :rules="$validate({required:true})">
+                                                            <el-input
+                                                                type="number"
+                                                                class="edit_input"
+                                                                v-model="currentCamera.videoPort"
+                                                                placeholder="请输入">
+                                                            </el-input>
+                                                        </el-form-item>
+                                                    </el-col>
+                                                </el-row>
+                                            </el-form>
+                                            <el-button class="right_btn" type="primary" size="small" @click="saveCamera" style="margin-top:10px;">保存</el-button>
+                                        </div>
+                                        <h5>RFID信息</h5>
+                                        <div class="clearfix stationBox">
+                                            <el-form ref='rfidForm' :model="currentStation">
+                                                <el-row :gutter="20">
+                                                    <el-col :span="6" class="cameraItem">
+                                                        <label>厂商<span class="required">(必填)</span></label>
+                                                         <el-form-item prop="rfidFactory" :rules="$validate({required:true})">
+                                                             <!-- <el-input
+                                                                class="edit_input"
+                                                                v-model="currentStation.rfidFactory"
+                                                                placeholder="请输入">
+                                                            </el-input> -->
+                                                            <el-select class="edit_input" clearable v-model="currentStation.rfidFactory" placeholder="请选择" >
+                                                                <el-option
+                                                                v-for="item in [{value:'JT',label:'捷通'},{value:'ZK',label:'中科'}]"
+                                                                :key="item.value"
+                                                                :label="item.label"
+                                                                clearable
+                                                                :value="item.value">
+                                                                </el-option>
+                                                            </el-select>
+                                                         </el-form-item>
+                                                    </el-col>
+                                                    <el-col :span="6" class="cameraItem">
+                                                        <label>标识号<span class="required">(必填)</span></label>
+                                                         <el-form-item prop="rfidMark" :rules="$validate({required:true,type:'EN'})">
+                                                             <el-input
+                                                                class="edit_input"
+                                                                v-model="currentStation.rfidMark"
+                                                                placeholder="请输入">
+                                                            </el-input>
+                                                         </el-form-item>
+                                                    </el-col>
+                                                    <el-col :span="6" class="cameraItem">
+                                                        <label>串口号<span class="required">(必填)</span></label>
+                                                         <el-form-item prop="rfidSerialPort" :rules="$validate({required:true})">
+                                                            <!-- <el-input
+                                                                class="edit_input"
+                                                                v-model="currentStation.rfidSerialPort"
+                                                                placeholder="请输入">
+                                                            </el-input> -->
+                                                            <el-select class="edit_input" clearable v-model="currentStation.rfidSerialPort" placeholder="请选择" >
+                                                                <el-option
+                                                                v-for="item in [{value:1,label:'1'},{value:2,label:'2'},{value:3,label:'3'},{value:4,label:'4'},{value:5,label:'5'},{value:6,label:'6'},{value:7,label:'7'}]"
+                                                                :key="item.value"
+                                                                :label="item.label"
+                                                                clearable
+                                                                :value="item.value">
+                                                                </el-option>
+                                                            </el-select>
+                                                         </el-form-item>
+                                                    </el-col>
+                                                </el-row>
+                                            </el-form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </el-tab-pane>
+                    <el-tab-pane label="关联检测站" name="tab4">
+                        <div class="table">
+                            <el-button type="primary" icon="el-icon-plus" size="medium" style="margin-bottom:20px;float:right;" @click="showAlert=true">关联监测站</el-button>
+                            <el-table
+                                border
+                                :data="form.entFixJcDtos"
+                                class=""
+                                style="width: 100%;">
+                                <!-- <el-table-column
+                                prop="num"
+                                align="left"
+                                label="序号"
+                                min-width="5%">
+                                </el-table-column> -->
+                                <el-table-column
+                                prop="jcEntName"
+                                align="left"
+                                min-width="20%"
+                                label="检测企业名称">
+                                </el-table-column>
+                                <el-table-column
+                                prop="jcEntAdress"
+                                align="left"
+                                min-width="20%"
+                                label="经营地址">
+                                </el-table-column>
+                                <el-table-column
+                                prop="jcGrade"
+                                align="left"
+                                min-width="10%"
+                                label="等级">
+                                </el-table-column>
+                                <el-table-column
+                                prop="provinceName"
+                                align="left"
+                                min-width="10%"
+                                label="省份">
+                                </el-table-column>
+                                <el-table-column
+                                prop="cityName"
+                                align="left"
+                                min-width="10%"
+                                label="城市">
+                                </el-table-column>
+                                <el-table-column
+                                prop="districtName"
+                                align="left"
+                                min-width="10%"
+                                label="区域">
+                                </el-table-column>
+                                <el-table-column
+                                prop="chargeTime"
+                                align="left"
+                                min-width="8%"
+                                label="操作">
+                                    <template slot-scope="scope">
+                                        <el-button @click="deleteLink(scope.$index)" type="text" size="small"
+                                        :disabled="!$checkAuth('sys:user:delete')">删除</el-button>
+                                    </template>
+                                </el-table-column>
+                            </el-table>
+                        </div>
+                    </el-tab-pane>
+                    <el-tab-pane label="开通业务" name="tab5">
+                        <div>
+                            <div class="config_item" :class="{'active':config1}" @click="config1=!config1">
+                                <div class="box">
+                                    <img src="../../../assets/imgV3/cjl_config1.png" width="44">
+                                    <div>M站</div>
+                                </div>
+                                <div class="config_text">
+                                    {{config1?'开通':'关闭'}}
+                                    <i class="el-icon-warning-outline"></i>
+                                </div>
+                            </div>
+                            <div class="config_item" :class="{'active':config2}" @click="config2=!config2">
+                                <div class="box">
+                                    <img src="../../../assets/imgV3/cjl_config2.png" width="44">
+                                    <div>车险</div>
+                                </div>
+                                <div class="config_text">
+                                    {{config2?'开通':'关闭'}}
+                                    <i class="el-icon-warning-outline"></i>
+                                </div>
+                            </div>
+                            <div class="config_item" :class="{'active':config3}" @click="config3=!config3">
+                                <div class="box">
+                                    <img src="../../../assets/imgV3/cjl_config3.png" width="44">
+                                    <div>视频</div>
+                                </div>
+                                <div class="config_text">
+                                    {{config3?'开通':'关闭'}}
+                                    <i class="el-icon-warning-outline"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </el-tab-pane>
+                </el-tabs>
+            </el-form>
+        </div>
+        <modal :alert="alert" :width="650" :height="576" :title="'地图定位'" @alertConfirm="alertConfirm" @alertCancel="alertCancel">
+            <div class="map-content">
+                <el-row :gutter="16">
+                    <el-col :span="4" class="map-input" style="padding-right: 0;text-align:right;"><label>定位地址：</label></el-col>
+                    <el-col :span="16">
+                        <el-input class="map-input" v-model="positionAddr" placeholder="请输入"></el-input>
+                    </el-col>
+                    <el-col :span="4"><el-button type="primary" class="map-input" @click="mapSearch">获取定位</el-button></el-col>
+                </el-row>
+                <el-row :gutter="16" style="margin-top:14px;">
+                    <el-col :span="4" class="map-input" style="padding-right: 0;text-align:right;">
+                        <label>经度：</label>
+                    </el-col>
+                    <el-col :span="8" class="map-input">
+                        <span>{{center.lng || '无'}}</span>
+                    </el-col>
+                    <el-col :span="4" class="map-input" style="text-align:right;">
+                        <label>纬度：</label>
+                    </el-col>
+                    <el-col :span="8" class="map-input">
+                        <span>{{center.lat || '无'}}</span>
+                    </el-col>
+                </el-row>
+                <baidu-map class="map_box" @click="mapClick" :center="center"
+                    :scroll-wheel-zoom="true" :double-click-zoom="true" :zoom="15">
+                    <bm-view class="map_view"></bm-view>
+                    <bm-marker class="" :position="center" :dragging="true" animation="BMAP_ANIMATION_BOUNCE">
+                    </bm-marker>
+                    <bm-local-search :keyword="BMkeyword" :panel="false" :selectFirstResult="true"
+                    :auto-viewport="true"  @searchcomplete="searchcomplete"></bm-local-search>
+                </baidu-map>
+            </div>
+        </modal>
+        <modal
+            :alert="showAlert"
+            :width="760"
+            :title="'关联监测站'"
+            @alertConfirm="alertConfirm2"
+            @alertCancel="alertCancel2">
+            <div style="padding:0 20px;">
+                <el-input
+                    placeholder="请输入监测站名称"
+                    style="width:400px;margin-bottom:15px;"
+                    v-model="searchName">
+                    <i slot="suffix" class="el-input__icon el-icon-search" @click="iptSearch" style="cursor:pointer;"></i>
+                </el-input>
+                <el-table
+                    border
+                    :data="tableData"
+                    class=""
+                    @selection-change="handleSelectionChange"
+                    style="width: 100%;">
+                    <el-table-column
+                    type="selection"
+                    align="left">
+                    </el-table-column>
+                    <el-table-column
+                    prop="jcEntName"
+                    align="left"
+                    min-width="20%"
+                    label="检测企业名称">
+                    </el-table-column>
+                    <el-table-column
+                    prop="jcEntAdress"
+                    align="left"
+                    min-width="20%"
+                    label="经营地址">
+                    </el-table-column>
+                </el-table>
+            </div>
+        </modal>
+    </div>
+</template>
+
+<script>
+import axios from 'axios'
+import modal from '@/components/Modal.vue'
+import { mainCampType, economicsList, operateState } from '@/utils/type.js'
+import { filterStrTime } from '@/utils/filterTime.js'
+// 初次进入或者修改地区保存省市区数据
+let cityList = []
+let regionList = []
+let provinceList = []
+export default {
+    name: 'cjlEnterpriseArchivesDetail',
+    data () {
+        return {
+            config3: true,
+            config2: true,
+            config1: false,
+            checkAll: false,
+            isIndeterminate: false,
+            vehicleType: [],
+            // cameraIndex: '',
+            showAdrText: '', // 所在城市
+            selectCameraIndex: '', // 当前编辑的摄像头index
+            currentCamera: '', // 当前选中的摄像头信息
+            selectStationIndex: '', // 当前编辑的工位index
+            stationType: 'inspect', // 工位类型
+            currentStation: {
+                workstationProperty: ''
+            }, // 当前选中的工位
+            operateState,
+            economicsList,
+            searchName: '',
+            showAlert: false,
+            tableData: [],
+            selectData: [], // 选中的监测站
+            cameraForm: {
+                value: ''
+            },
+            stationObj1: {},
+            checkList: [],
+            activeName: 'tab1',
+            form: {
+                configDto: {
+                    enterpriseConfigJcIs: 'no',
+                    enterpriseConfigFix2Becompleted: 'inspect'
+                },
+                entBaseDto: {},
+                entExtendDto: {
+                    enterpriseStoresImages: []
+                },
+                entWorkStationDtos: [],
+                entFixJcDtos: []
+            },
+            zoom: 15,
+            enterpriseId: '', // 企业ID
+            enterprise: {},
+            detailData: {
+                businessCertUrl: '',
+                businessLicenseUrl: '',
+                logo: '',
+                imageUrls: []
+            }, // 全部数据
+            alert: false,
+            loading: false, // 加载中
+            loaded: false, // 已加载
+            isEdit: false, // 已修改过内容
+            brandList: {}, // 主修品牌
+            center: { // 坐标经纬度
+                lng: 116.409,
+                lat: 39.915526
+            },
+            positionAddr: '',
+            positionAddrX: '',
+            positionAddrY: '',
+            BMkeyword: '', // 百度搜索关键词
+            serviceTypeList: [
+                {
+                    value: 1,
+                    label: '一类维修经营业务'
+                },
+                {
+                    value: 2,
+                    label: '二类维修经营业务'
+                },
+                {
+                    value: 3,
+                    label: '三类维修经营业务'
+                }
+            ],
+            entTypeList: [
+                {
+                    value: '1',
+                    label: '维修企业'
+                },
+                {
+                    value: '2',
+                    label: '美容企业'
+                },
+                {
+                    value: '3',
+                    label: '维修美容企业'
+                }
+            ],
+            mainCampType,
+            options: [],
+            // props: {
+            // lazy: true,
+            // lazyLoad (node, resolve) {
+            //     const { level } = node;
+            //     console.log(level)
+            //     let id = node
+            //     setTimeout(() => {
+            //     const nodes = Array.from({ length: level + 1 })
+            //         .map(item => ({
+            //         value: ++id,
+            //         label: `选项${id}`,
+            //         leaf: level >= 2
+            //         }));
+            //     // 通过调用resolve将子节点数据返回，通知组件数据加载完成
+            //     resolve(nodes);
+            //     }, 1000);
+            // }
+            // },
+            props: {
+                lazy: true,
+                value: 'regionId',
+                label: 'regionName',
+                lazyLoad (node, resolve) {
+                    // resolve([{regionId:1,regionName:2}])
+                    const { level, value } = node
+                    if (level === 1) {
+                        axios.get('list/regioncityList?provinceRegionId=' + value).then(res => {
+                            res.data.data.forEach(item => {
+                                item.leaf = false
+                            })
+                            cityList = res.data.data
+                            resolve(res.data.data)
+                        })
+                        return
+                    }
+                    if (level === 2) {
+                        axios.get('list/regionList?cityId=' + value).then(res => {
+                            res.data.data.forEach(item => {
+                                item.leaf = true
+                            })
+                            regionList = res.data.data
+                            resolve(res.data.data)
+                        })
+                        return
+                    }
+                    axios.get('list/regionProvinceList?type=1').then(res => {
+                        res.data.data.forEach(item => {
+                            item.leaf = false
+                        })
+                        resolve(res.data.data)
+                    })
+                }
+            },
+            uploadURL: window.uploadURL,
+            radioSelect: [
+                {
+                    value: 0,
+                    label: '否'
+                },
+                {
+                    value: 1,
+                    label: '是'
+                }
+            ],
+            edit: false,
+            url: 'https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1556718509&di=ad0de25c93a172532d171aec8c976704&imgtype=jpg&er=1&src=http%3A%2F%2Fwww.pcauto.com.cn%2Fprice%2Fcsrm%2F10211%2Fpic%2F20021124_03_honda_element_500.jpg'
+        }
+    },
+    components: {
+        modal
+    },
+    watch: {
+        detailData: {
+            handler () {
+                if (this.loaded) {
+                    this.isEdit = true
+                }
+            },
+            deep: true
+        }
+    },
+    created () {
+        this.enterpriseId = this.$route.query.id
+        if (this.enterpriseId) this.getData()
+        this.$get('comm/vehicle/types/1').then(res => {
+            if (res.code === 0) {
+                this.vehicleType = res.data
+            }
+        })
+        // this.findBrandList()
+        // setTimeout(() => {
+        //     console.dir(this.$refs.region._data.inputValue = '1111')
+        // }, 10000)
+    },
+    methods: {
+        handleCheckAllChange (val) {
+            this.checkList = val ? this.vehicleType.map(e => { return e.vehicle_type_id }) : []
+            this.isIndeterminate = false
+        },
+        handleCheckedCitiesChange (value) {
+            let checkedCount = value.length
+            this.checkAll = checkedCount === this.vehicleType.length
+            this.isIndeterminate = checkedCount > 0 && checkedCount < this.vehicleType.length
+        },
+        deleteLink (index) {
+            // console.log(index)
+            this.form.entFixJcDtos.splice(index, 1)
+        },
+        // 搜索关联监测站
+        iptSearch () {
+            this.$get('operation/ent/jcEnts?page=1&size=10', {
+                entId: this.enterpriseId,
+                entName: this.searchName
+            }).then(res => {
+                if (res.code === 0) {
+                    this.tableData = this.$setNum(res.data || [], 1, 999)
+                    if (!this.tableData.length) {
+                        this.$alert('查找不到企业信息', '提示')
+                    }
+                }
+            })
+        },
+        // 新增摄像头
+        addCamera () {
+            this.currentCamera = {
+                videoPlugin: '',
+                videoUser: '',
+                videoPass: '',
+                videoIp: '',
+                videoChannel: '',
+                videoPort: ''
+            }
+            this.selectCameraIndex = ''
+            this.$refs.cameraForm.clearValidate()
+        },
+        // 删除工位
+        deleteStation () {
+            if (this.selectStationIndex === '') {
+                this.currentStation = ''
+            } else {
+                this.currentStation.videoDtos.splice(this.selectStationIndex, 1)
+                this.selectStationIndex = ''
+                this.currentStation = ''
+            }
+        },
+        deleteCamera (index) {
+            this.currentStation.videoDtos.splice(this.selectCameraIndex, 1)
+            if (index === this.selectCameraIndex) {
+                this.selectCameraIndex = ''
+                this.currentCamera = ''
+            }
+        },
+        // 选中工位信息 编辑
+        selectStation (index) {
+            this.selectStationIndex = index
+            // this.selectCamera(0)
+            this.currentStation = this.form.entWorkStationDtos[index]
+            this.$nextTick(() => {
+                this.$refs.rfidForm.clearValidate()
+                this.selectCamera(0)
+            })
+        },
+        selectCamera (index) {
+            this.selectCameraIndex = index
+            this.currentCamera = this.currentStation.videoDtos[index]
+            this.$nextTick(() => {
+                this.$refs.cameraForm.clearValidate()
+            })
+        },
+        // 新增工位
+        addStation () {
+            this.currentStation = {
+                workstationProperty: this.stationType,
+                workstationNo: '',
+                workstationName: '工位名称' + (this.form.entWorkStationDtos.length + 1),
+                workstationStatus: 'enable',
+                rfidFactory: '',
+                rfidMark: '',
+                rfidSerialPort: '',
+                videoDtos: []
+            }
+            this.selectStationIndex = ''
+            this.addCamera()
+            this.$refs.rfidForm.clearValidate()
+        },
+        // 保持摄像头信息
+        saveCamera () {
+            this.$refs.cameraForm.validate((valid) => {
+                if (valid) {
+                    if (this.selectCameraIndex === '') {
+                        console.log(this.currentStation)
+                        this.currentStation.videoDtos.push(JSON.parse(JSON.stringify(this.currentCamera)))
+                    } else {
+                        this.currentStation.videoDtos[this.selectCameraIndex] = JSON.parse(JSON.stringify(this.currentCamera))
+                        this.selectCameraIndex = ''
+                    }
+                    this.currentCamera = ''
+                }
+            })
+        },
+        // 保存工位信息
+        saveStation () {
+            if (!this.currentStation.workstationName) {
+                this.$alert('工位名称不能为空', '提示')
+                return
+            }
+            if (this.form.entWorkStationDtos.find(e => {
+                return e.workstationName === this.currentStation.workstationName
+            }) && this.selectStationIndex === '') {
+                this.$alert('工位名称不能重复', '提示')
+                return
+            }
+            this.$refs.rfidForm.validate((valid) => {
+                if (valid) {
+                    if (this.selectStationIndex === '') {
+                        this.form.entWorkStationDtos.push(JSON.parse(JSON.stringify(this.currentStation)))
+                    } else {
+                        this.form.entWorkStationDtos[this.selectStationIndex] = JSON.parse(JSON.stringify(this.currentStation))
+                        this.selectStationIndex = ''
+                    }
+                    this.currentStation = ''
+                }
+            })
+        },
+        handleSelectionChange (val) {
+            console.log(val)
+            this.selectData = val
+        },
+        handleClose (tag) {
+        },
+        splitTime (time) {
+            if (!time) return ''
+            if (time.split(' ').length === 1) {
+                return time.split(':')[0] + ':' + time.split(':')[1]
+            } else if (time.split(' ').length === 2) {
+                let times = time.split(' ')[1]
+                return times.split(':')[0] + ':' + times.split(':')[1]
+            }
+        },
+        imageOnload (e) {
+            const radio = e.target.width / e.target.height
+            if (radio >= 1) {
+                e.target.style.width = '100%'
+                e.target.style.height = 'auto'
+            } else {
+                e.target.style.width = 'auto'
+                e.target.style.height = '100%'
+            }
+        },
+        mapClick ({ point }) {
+            this.center.lng = point.lng
+            this.center.lat = point.lat
+        },
+        testPass () {
+            if (!this.detailData.enterpriseProvinceUser) {
+                this.$alert('请输入电子健康档案省网账号', '提示')
+                return
+            }
+            if (!this.detailData.enterpriseProvincePass) {
+                this.$alert('电子健康档案省网密码', '提示')
+                return
+            }
+            this.$post('/enterprise/loginprovincesite', {
+                username: this.detailData.enterpriseProvinceUser,
+                password: this.detailData.enterpriseProvincePass
+            }).then(res => {
+                if (res.data.access_token) {
+                    this.$alert('账号密码测试正确', '提示')
+                } else {
+                    this.$alert('账号密码错误', '提示')
+                }
+            })
+        },
+        // 进入编辑
+        toEdit () {
+            // 权限校验**********************************************************
+            if (!this.$checkAuth('entUserManager:enterprise:edit')) {
+                this.$msg({
+                    type: 'error',
+                    message: '你没有该项权限'
+                })
+                return
+            }
+            this.edit = true
+            this.$refs.form.clearValidate()
+        },
+        // 将图片字符串转换成对象数组
+        strTofileList (str, type) {
+            if (str) {
+                if (!type) {
+                    return str.split(',')
+                } else {
+                    return str.split(',').map(item => {
+                        return {
+                            url: item
+                        }
+                    })
+                }
+            } else {
+                return []
+            }
+        },
+        // 保存数据
+        saveData () {
+            if (!this.$checkAuth('entUserManager:enterprise:edit')) {
+                this.$alert('您没有该权限')
+                return
+            }
+            this.$refs.form.validate((valid) => {
+                if (valid) {
+                    // console.log(this.form)
+                    // let data = JSON.parse(JSON.stringify(this.detailData))
+                    // data.province = data.addr[0]
+                    // data.city = data.addr[1]
+                    // data.district = data.addr[2]
+                    // data.longitude = data.longitude + ''
+                    // data.latitude = data.latitude + ''
+                    // data.entNoStartDate = data.enterpriseCertificate[0]
+                    // data.entNoEndDate = data.enterpriseCertificate[1]
+                    // data.startTime = data.enterpriseJcBusiness[0]
+                    // data.endTime = data.enterpriseJcBusiness[1]
+                    // if (/1/.test(data.entCat)) {
+                    //     data.entCatName = '一类维修经营业务'
+                    // }
+                    // if (/2/.test(data.entCat)) {
+                    //     data.entCatName = '二类维修经营业务'
+                    // }
+                    // if (/3/.test(data.entCat)) {
+                    //     data.entCatName = '三类维修经营业务'
+                    // }
+                    // data.serBrandIds = data.serBrandIds + ''
+                    // data.majorBusinessKeys = data.majorBusinessKeys + ''
+                    // console.log(this.form.entExtendDto.city)
+                    this.form.entExtendDto.enterpriseProvince = this.form.entExtendDto.city[0]
+                    this.form.entExtendDto.enterpriseCity = this.form.entExtendDto.city[1]
+                    this.form.entExtendDto.enterpriseRegion = this.form.entExtendDto.city[2]
+                    this.form.configDto.enterpriseConfigFix2VehicleType = this.checkList.join(',')
+                    let url = ''
+                    if (this.enterpriseId) url = '/operation/ent/edit'
+                    if (!this.enterpriseId) url = '/operation/ent/add'
+                    this.$post(url, this.form)
+                        .then(res => {
+                            if (res.code === 0) {
+                                this.edit = false
+                                this.$message({
+                                    type: 'success',
+                                    message: '保存成功'
+                                })
+                                // this.getData()
+                                this.$store.dispatch('closePage', {
+                                    nextPath: '/cjlEnterpriseArchives',
+                                    refresh: 'cjlEnterpriseArchives'
+                                })
+                            }
+                        })
+                } else {
+                    this.$alert('保存失败，请输入必填字段', '提示')
+                }
+            })
+        },
+        // 获取所有数据
+        getData () {
+            if (!this.$checkAuth('entUserManager:detail')) {
+                this.$alert('您没有该权限')
+                return
+            }
+            this.loading = true
+            this.$get(`/operation/ent/${this.$route.query.id}`)
+                .then(res => {
+                    if (res && res.code === 0) {
+                        res.data.entExtendDto.city = []
+                        if (!res.data.entExtendDto.enterpriseStoresImages) res.data.entExtendDto.enterpriseStoresImages = []
+                        this.form = res.data
+                        this.showAdrText = ''
+                        this.checkList = this.form.configDto.enterpriseConfigFix2VehicleType.split(',')
+                        if (this.form.entExtendDto.enterpriseProvince) {
+                            this.form.entExtendDto.city.push(this.form.entExtendDto.enterpriseProvince)
+                            this.$get('list/regionProvinceList?type=1').then(res => {
+                                if (res.code === 0) {
+                                    res.data.forEach(a => {
+                                        if (a.regionId === this.form.entExtendDto.enterpriseProvince) {
+                                            this.showAdrText += a.regionName
+                                            this.$refs.region._data.inputValue = this.showAdrText
+                                            if (this.form.entExtendDto.enterpriseCity) {
+                                                this.form.entExtendDto.city.push(this.form.entExtendDto.enterpriseCity)
+                                                this.$get('list/regioncityList?provinceRegionId=' + this.form.entExtendDto.enterpriseProvince).then(res2 => {
+                                                    if (res2.code === 0) {
+                                                        res2.data.forEach(b => {
+                                                            if (b.regionId === this.form.entExtendDto.enterpriseCity) {
+                                                                this.showAdrText += '/' + b.regionName
+                                                                this.$refs.region._data.inputValue = this.showAdrText
+                                                                if (this.form.entExtendDto.enterpriseRegion) {
+                                                                    this.form.entExtendDto.city.push(this.form.entExtendDto.enterpriseRegion)
+                                                                    this.$get('list/regionList?cityId=' + this.form.entExtendDto.enterpriseCity).then(res3 => {
+                                                                        if (res3.code === 0) {
+                                                                            res3.data.forEach(c => {
+                                                                                if (c.regionId === this.form.entExtendDto.enterpriseRegion) {
+                                                                                    this.showAdrText += '/' + c.regionName
+                                                                                    this.$refs.region._data.inputValue = this.showAdrText
+                                                                                    console.log(this.form)
+                                                                                }
+                                                                            })
+                                                                        }
+                                                                    })
+                                                                }
+                                                            }
+                                                        })
+                                                    }
+                                                })
+                                            }
+                                        }
+                                    })
+                                }
+                            })
+                        }
+                        // 图片格式转换
+                        // if (res.data.logo && res.data.logo !== '0' && res.data.logo.indexOf('http') === -1) {
+                        //     res.data.logo = 'http://' + res.data.logo
+                        // }
+                        // // 营业执照
+                        // if (res.data.businessLicenseUrl && res.data.businessLicenseUrl !== '0' && res.data.businessLicenseUrl.indexOf('http') === -1) {
+                        //     res.data.businessLicenseUrl = 'http://' + res.data.businessLicenseUrl
+                        // } else if (!res.data.businessLicenseUrl) {
+                        //     res.data.businessLicenseUrl = ''
+                        // }
+                        // // 许可证照片
+                        // if (res.data.businessCertUrl && res.data.businessCertUrl !== '0' && res.data.businessCertUrl.indexOf('http') === -1) {
+                        //     res.data.businessCertUrl = 'http://' + res.data.businessCertUrl
+                        // }
+                        // // 门店照片
+                        // if (res.data.imageUrls && res.data.imageUrls.length > 0) {
+                        //     let arr = []
+                        //     res.data.imageUrls.forEach(e => {
+                        //         if (e && typeof e === 'string') {
+                        //             if (e.indexOf('http') === -1) {
+                        //                 e = 'http://' + e
+                        //                 arr.push(e)
+                        //             } else {
+                        //                 arr.push(e)
+                        //             }
+                        //         }
+                        //     })
+                        //     res.data.imageUrls = arr
+                        // } else {
+                        //     res.data.imageUrls = []
+                        // }
+                        // if (res.data.majorBusinessKeys === '0') res.data.majorBusinessKeys = ''
+                        // if (res.data.headCardNo === '0') res.data.headCardNo = ''
+                        // if (res.data.contactCardNo === '0') res.data.contactCardNo = ''
+                        // // 主营项目转换
+                        // if (res.data.majorBusinessKeys) {
+                        //     res.data.majorBusinessKeys = res.data.majorBusinessKeys.split(',')
+                        // }
+                        // // 省市区格式转换
+                        // const { province, city, district } = res.data
+                        // if (province && city && district) {
+                        //     res.data.addr = [province, city, district]
+                        // } else {
+                        //     res.data.addr = []
+                        // }
+                        // // 经纬度转换
+                        // if (res.data.longitude) {
+                        //     res.data.longitude = res.data.longitude - 0
+                        // } else {
+                        //     res.data.longitude = 0
+                        // }
+                        // if (res.data.latitude) {
+                        //     res.data.latitude = res.data.latitude - 0
+                        // } else {
+                        //     res.data.latitude = 0
+                        // }
+                        // // 日期转换
+                        // res.data.enterpriseCertificate = [res.data.entNoStartDate || '', res.data.entNoEndDate || '']
+                        // res.data.enterpriseJcBusiness = [res.data.startTime || '', res.data.endTime || '']
+                        // // 品牌转换
+                        // if (res.data.serBrandIds) {
+                        //     if (res.data.serBrandIds === 'null') {
+                        //         res.data.serBrandIds = []
+                        //     } else {
+                        //         res.data.serBrandIds = res.data.serBrandIds.split(',').map(item => {
+                        //             return item - 0
+                        //         })
+                        //     }
+                        // } else {
+                        //     res.data.serBrandIds = []
+                        // }
+                        // this.detailData = res.data
+                        // this.showAddr(res.data)
+                        // this.findBrandList()
+                        // setTimeout(() => {
+                        //     this.$refs.form.clearValidate()
+                        // })
+                    } else {
+                        this.loading = false
+                    }
+                })
+                .catch(e => {
+                    this.loading = false
+                })
+        },
+        // 所在地市回显
+        showAddr (res) {
+            this.$get('list/regionProvinceList?type=1')
+                .then(regionProvinceList => {
+                    let provinceIndex = 0
+                    regionProvinceList.data.forEach((item, index) => {
+                        item.leaf = false
+                        item.children = []
+                        if (item.regionId === res.province) {
+                            provinceIndex = index
+                        }
+                    })
+                    let options = regionProvinceList.data
+                    provinceList = regionProvinceList.data
+                    // 如果返回信息没有省市区信息则退出
+                    if (!res.province || !res.city || !res.district) {
+                        this.loading = false
+                        this.options = options
+                        return
+                    }
+                    this.$get('list/regioncityList?provinceRegionId=' + res.province)
+                        .then(regioncityList => {
+                            let cityIndex = 0
+                            regioncityList.data.forEach((item, index) => {
+                                item.leaf = false
+                                item.children = []
+                                if (item.regionId === res.city) {
+                                    cityIndex = index
+                                }
+                            })
+                            options[provinceIndex].children = regioncityList.data
+                            cityList = regioncityList.data
+                            this.$get('list/regionList?cityId=' + res.city)
+                                .then(regionListData => {
+                                    let regionIndex = 0
+                                    regionListData.data.forEach((item, index) => {
+                                        item.leaf = true
+                                        if (item.regionId === res.district) {
+                                            regionIndex = index
+                                        }
+                                    })
+                                    options[provinceIndex].children[cityIndex].children = regionListData.data
+                                    regionList = regionListData.data
+                                    this.options = options
+                                    this.loading = false
+                                    this.$set(this.detailData, 'provinceName', options[provinceIndex].regionName)
+                                    this.$set(this.detailData, 'cityName', options[provinceIndex].children[cityIndex].regionName)
+                                    this.$set(this.detailData, 'districtName', options[provinceIndex].children[cityIndex].children[regionIndex].regionName)
+                                    this.loaded = true
+                                    this.loading = false
+                                })
+                        })
+                })
+                .catch(e => {
+                    this.loading = false
+                })
+        },
+        // 选取地市列表
+        regionChange (list) {
+            this.detailData.province = list[0]
+            this.detailData.city = list[1]
+            this.detailData.district = list[2]
+            this.detailData.provinceName = provinceList.filter(item => { return item.regionId === list[0] })[0].regionName
+            this.detailData.cityName = cityList.filter(item => { return item.regionId === list[1] })[0].regionName
+            this.detailData.districtName = regionList.filter(item => { return item.regionId === list[2] })[0].regionName
+        },
+        // 获取品牌列表
+        findBrandList () {
+            this.$post('advertisement/brandlist ', {})
+                .then(res => {
+                    let brandName = []
+                    this.initBrandList = [...res.data]
+                    res.data.forEach(item => {
+                        item.initial = window.pinyinUtil.getFirstLetter(item.carBrandName).substr(0, 1)
+                        this.detailData.serBrandIds.forEach(brandId => {
+                            if (item.carBrandId === brandId) {
+                                brandName.push(item.carBrandName)
+                            }
+                        })
+                    })
+                    this.$set(this.detailData, 'enterpriseMajorBrandName', brandName + '')
+                    // 按首字母排序
+                    let brandList = res.data.sort(function (objA, objB) {
+                        if (objA.initial > objB.initial) {
+                            return 1
+                        } else if (objA.initial < objB.initial) {
+                            return -1
+                        } else {
+                            return 0
+                        }
+                    })
+                    // 将同字母类型进行分类
+                    let obj = {}
+                    brandList.forEach(item => {
+                        if (!obj[item.initial]) {
+                            obj[item.initial] = [item]
+                        } else {
+                            obj[item.initial].push(item)
+                        }
+                    })
+                    this.brandList = obj
+                })
+        },
+        // 地图弹窗确认
+        alertConfirm () {
+            this.alert = false
+            this.$set(this.form.entExtendDto, 'enterpriseAddrX', this.center.lng)
+            this.$set(this.form.entExtendDto, 'enterpriseAddrY', this.center.lat)
+        },
+        // 打开地图弹窗
+        showMap () {
+            this.alert = true
+            setTimeout(() => {
+                this.center = {
+                    lng: this.detailData.longitude - 0,
+                    lat: this.detailData.latitude - 0
+                }
+            })
+        },
+        // 关闭地图弹窗
+        alertCancel () {
+            this.alert = false
+        },
+        alertConfirm2 () {
+            this.alertCancel2()
+            this.form.entFixJcDtos = this.form.entFixJcDtos.concat(this.selectData)
+        },
+        alertCancel2 () {
+            this.showAlert = false
+            this.tableData = []
+        },
+        // 搜索百度地图
+        mapSearch () {
+            // 遍历地址信息,匹配省市区
+            this.BMkeyword = this.positionAddr
+        },
+        // 搜索回调函数
+        searchcomplete (res) {
+            if (!res) {
+                return
+            }
+            if (!res.Ar.length) {
+                this.$message.error('未找到您输入的位置信息!')
+            }
+            if (res && res.Ar.length > 0) {
+                this.center.lng = res.Ar[0].point.lng
+                this.center.lat = res.Ar[0].point.lat
+            }
+        },
+        // 清除图片
+        clearImage (pic, index) {
+            if (typeof index === 'number') {
+                this.form.entExtendDto[pic].splice(index, 1)
+            } else {
+                this.$set(this.form.entExtendDto, pic, '')
+            }
+        },
+        beforeUpload (file) {
+            const isJPG = /jpeg|png/.test(file.type)
+            const isLt2M = file.size / 1024 / 1024 < 2
+
+            if (!isJPG) {
+                this.$message.error('上传图片只能是 JPG/JPEG/PNG 格式!')
+            }
+            if (!isLt2M) {
+                this.$message.error('上传图片大小不能超过 2MB!')
+            }
+            return isJPG && isLt2M
+        },
+        handleSuccess1 (res, file, fileList) {
+            if (res.data) {
+                this.$set(this.form.entExtendDto, 'enterprisePicUrl', res.data)
+            } else {
+                this.$alert('服务器错误，上传失败')
+            }
+        },
+        handleSuccess2 (res, file, fileList) {
+            if (res.data) {
+                this.form.entExtendDto.enterpriseStoresImages.push(res.data)
+            } else {
+                this.$alert('服务器错误，上传失败')
+            }
+        },
+        handleSuccess3 (res, file, fileList) {
+            if (res.data) {
+                this.$set(this.form.entExtendDto, 'enterpriseBusinessPermit', res.data)
+            } else {
+                this.$alert('服务器错误，上传失败')
+            }
+        },
+        handleSuccess4 (res, file, fileList) {
+            if (res.data) {
+                this.$set(this.form.entExtendDto, 'enterpriseBusinessLicense', res.data)
+            } else {
+                this.$alert('服务器错误，上传失败')
+            }
+        },
+        setImageData (attr, fileList) {
+            console.log(fileList)
+            this.$message({
+                type: 'success',
+                message: '操作成功'
+            })
+            this.detailData[attr] = fileList.map(item => {
+                if (item.response) {
+                    return item.response.data
+                } else if (item.url) {
+                    return item.url
+                }
+            })
+        },
+        // 关闭页面
+        close () {
+            this.$store.dispatch('closePage', {
+                nextPath: '/cjlEnterpriseArchives',
+                refresh: 'cjlEnterpriseArchives'
+            })
+            // if (this.isEdit && this.edit) {
+            //     this.$confirm('当前页面未保存，是否继续？', '提示', {
+            //         confirmButtonText: '确定',
+            //         cancelButtonText: '取消',
+            //         type: 'warning'
+            //     }).then(() => {
+            //         this.edit = false
+            //         this.$store.dispatch('closePage', {
+            //             nextPath: '/entUserManagedetail?id=' + this.$route.query.id
+            //         })
+            //     }).catch(() => {
+            //     })
+            // } else {
+            //     this.edit = false
+            //     this.$store.dispatch('closePage', {
+            //         nextPath: '/entUserManagedetail?id=' + this.$route.query.id
+            //     })
+            // }
+        }
+    },
+    filters: {
+        serviceTypeFilter (val) {
+            if (/1/.test(val)) {
+                return '一类维修经营业务'
+            }
+            if (/2/.test(val)) {
+                return '二类维修经营业务'
+            }
+            if (/3/.test(val)) {
+                return '三类维修经营业务'
+            }
+        },
+        mainCampTypeFilter (list) {
+            if (list) {
+                let newlist = []
+                for (let i = 0; i < mainCampType.length; i++) {
+                    for (let j = 0; j < list.length; j++) {
+                        if (mainCampType[i].value === list[j]) {
+                            newlist.push(mainCampType[i].label)
+                        }
+                    }
+                }
+                return newlist + ''
+            }
+        },
+        filterStrTime
+    }
+}
+</script>
+<style lang="less" scoped>
+.cjlEnterpriseArchivesDetail {
+    .config_item {
+        float: left;
+        margin-right: 28px;
+        margin-top: 25px;
+        .box {
+            height: 104px;
+            width: 104px;
+            padding-top: 15px;
+            box-sizing: border-box;
+            border: 1px solid rgba(217,217,217,1);
+            text-align: center;
+            cursor: pointer;
+        }
+        .config_text {
+            line-height: 26px;
+            text-align: center;
+        }
+        &.active {
+            .box {
+                border: 1px dashed rgba(217,217,217,1);
+                opacity: .4;
+                background: #eeeeee;
+            }
+            .config_text {
+                color: #FF4D4F;
+            }
+        }
+    }
+    .table {
+        padding-top: 20px;
+    }
+    .station_wrap {
+        .station_detail {
+            margin-top: 20px;
+            border: 1px solid #E8E8E8;
+            .station_header {
+                background: #FAFAFA;
+                height: 50px;
+                line-height: 50px;
+                .station_name {
+                    margin: 0 24px;
+                }
+                .right_btn {
+                    float: right;
+                    margin-right: 25px;
+                    padding: 0 12px;
+                    height: 32px;
+                    margin-top: 9px;
+                }
+            }
+            .station_content {
+                // padding: 0 24px;
+                h5 {
+                    line-height: 60px;
+                    padding: 0 24px;
+                }
+                .stationBox {
+                    // padding-bottom: 20px;
+                    padding: 0 24px 30px;
+                    border-bottom: 1px solid #E8E8E8;
+                }
+                .cameraItem {
+                    line-height: 30px;
+                    color: #262626;
+                    margin-bottom: 10px;
+                    .required {
+                        color: #8C8C8C;
+                    }
+                }
+            }
+        }
+    }
+    .detail_item {
+        box-sizing: border-box;
+        padding-right: 60px;
+        .edit_input {
+            // width: calc(100% - 30px);
+            margin-right: 0!important;
+        }
+        .icon_item {
+            margin-left: 5px;
+            vertical-align: middle;
+        }
+    }
+    .detail_item2 {
+        margin-top: 10px;
+        label {
+            color: #262626;
+            font-size: 14px;
+        }
+    }
+    .line {
+        clear: both;
+        height: 1px;
+        width: 100%;
+        background: #E8E8E8;
+        margin: 20px 0;
+    }
+    .check_box {
+        .check_item {
+            float: left;
+            width: 200px;
+            margin-bottom: 10px;
+        }
+    }
+    .allCheck {
+        margin-left: 20px;
+    }
+    .detail_item_empty {
+        height: 76px;
+    }
+    .test {
+        position: absolute;
+        right: 0;
+        top: 2px;
+        height: 32px;
+        width: 78px;
+        padding: 0;
+    }
+    .image-upload {
+        width: 120px;
+        height: 120px;
+        border: 1px dashed #c0ccda;
+        border-radius: 4px;
+        line-height: 20px;
+        background: #fbfdff;
+        transition: all .2s;
+        text-align: center;
+        display: inline-block;
+        margin-bottom: 10px;
+        cursor: pointer;
+        &:hover {
+            border: 1px dashed #4D7CFE;
+        }
+        .el-icon-plus {
+            font-size: 26px;
+            color: #8c939d;
+        }
+        p {
+            font-size: 12px;
+            color:#8c8c8c;
+        }
+    }
+    .image-pic {
+        padding: 8px;
+        width: 104px;
+        height: 104px;
+        position: relative;
+        border: 1px solid #d9d9d9;
+        border-radius: 4px;
+        margin-bottom: 10px;
+        display: inline-block;
+        margin-right: 20px;
+        .pic {
+            width: 100%;
+            height: 100%;
+        }
+        .el-icon-error {
+            position: absolute;
+            top: 2px;
+            left: 95px;
+            font-size: 18px;
+            cursor: pointer;
+            display: none;
+            background: #ececec;
+            border-radius: 50%;
+        }
+        &:hover {
+            .el-icon-error {
+                display: block;
+            }
+        }
+    }
+    .image-upload, .image-pic {
+        vertical-align: middle;
+    }
+    .show-image {
+        background-size: cover;
+        width: 600px;
+        height: 480px;
+    }
+    .nophoto {
+        text-align: center;
+        color: #BFBFBF;
+        font-size: 14px;
+        line-height: 22px;
+        padding-top: 24px;
+    }
+    .item-image-wrap {
+        padding: 8px;
+        border: 1px solid #d9d9d9;
+        border-radius: 2px;
+        display: inline-block;
+        margin-right: 20px;
+        width: 100px;
+        height: 100px;
+        .item-image {
+            width: 100px;
+            height: 100px;
+            cursor: pointer;
+        }
+    }
+    .map-location {
+        border: 1px solid #DCDFE6;
+        border-radius: 4px;
+        height: 30px;
+        line-height: 30px;
+        width: 80%;
+        padding: 0 15px;
+        box-sizing: border-box;
+        cursor: pointer;
+        i {
+            float: right;
+            margin-top: 7px;
+        }
+    }
+    .map_box {
+        margin-top: 4px;
+        border: 1px solid #eeeeee;
+        border-radius: 4px;
+        padding: 10px;
+        .map_view {
+            width:530px;
+            height:280px;
+        }
+    }
+    .map-content {
+        padding: 10px 50px 24px 50px;
+        border-bottom: 1px solid #D9D9D9;
+        .map-input {
+            height: 32px;
+            line-height: 32px;
+            padding: 0;
+        }
+    }
+}
+</style>
+<style lang="less">
+.cjlEnterpriseArchivesDetail {
+     .el-tag {
+        margin-right: 10px;
+    }
+    .avatar-uploader .el-upload {
+        border: 1px dashed #d9d9d9;
+        border-radius: 6px;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+    }
+    .avatar-uploader .el-upload:hover {
+        border-color: #409EFF;
+    }
+    .avatar-uploader-icon {
+        font-size: 28px;
+        color: #8c939d;
+        width: 104px;
+        height: 104px;
+        line-height: 104px;
+        text-align: center;
+    }
+    .avatar {
+        width: 104px;
+        height: 104px;
+        display: block;
+    }
+    .upload_tips {
+        // position: absolute;
+        width: 104px;
+        text-align: center;
+        line-height: 20px;
+        color: #98A9BC;
+        font-size: 14px;
+        top: 3px;
+        left: 120px;
+    }
+    .el-tabs__header {
+        line-height: 68px;
+        margin: 0;
+    }
+    .BMap_mask {
+        cursor: auto;
+    }
+    .el-upload {
+        width: 120px;
+        height: 95px;
+        padding-top: 25px;
+    }
+    .el-upload--picture-card {
+        width: 120px;
+        height: 120px;
+        line-height: 120px;
+    }
+    .el-upload-list--picture-card {
+        display: inline-block;
+        min-height: 131px;
+        .el-upload-list__item {
+            width: 118px;
+            height: 118px;
+            margin: 0 8px 0 0;
+        }
+    }
+    .el-upload-list__item.is-success .el-upload-list__item-status-label {
+        display: none;
+    }
+    .el-select {
+        width: 80%;
+        height: 32px;
+        .el-input__inner {
+            height: 32px;
+        }
+        &.multiple {
+            height: auto;
+        }
+    }
+    .el-date-editor {
+        width: 80%;
+        .el-range__close-icon {
+            line-height: 26px;
+        }
+    }
+    .el-dialog {
+        min-height: 60%;
+        text-align: center;
+    }
+    .el-cascader {
+        line-height: 32px;
+    }
+}
+#cjlEnterpriseArchivesDetail {
+    .el-table--enable-row-transition .el-table__body .el-table__row td:nth-child(1) {
+        padding-left: 0!important;
+    }
+    .el-table__header .has-gutter th:nth-child(1) {
+        padding-left: 0!important;
+    }
+}
+</style>

@@ -1,0 +1,118 @@
+.alertForm(@leftW, @rightW, @textareaH: 200px, @itemMargin: 20px) {
+    .form {
+        padding: 30px 0;
+        .red {
+            color: #ff0000;
+        }
+        .form-item {
+            margin-bottom: @itemMargin;
+            &.nomargin {
+                margin-bottom: 0px;
+            }
+            .title {
+                line-height: 34px;
+                width: @leftW;
+                text-align: right;
+                float: left;
+                font-size: 14px;
+                color: #252631;
+            }
+            .msg {
+                line-height: 34px;
+                width: @rightW;
+                margin-left: @leftW + 8px;
+                text-align: left;
+                font-size: 14px;
+                color: #252631;
+                .el-textarea {
+                    height: @textareaH;
+                }
+                &.btn {
+                    padding-top: 10px;
+                }
+            }
+            &:last-child {
+                margin-bottom: 0;
+            }
+        }
+    }
+}
+// 文字前面的点
+.yellowDot {
+    position: relative;
+    &:before {
+        position: absolute;
+        content: '';
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        left: -10px;
+        top: 8px;
+        background: #FACC14;
+    }
+}
+.greenDot {
+    position: relative;
+    &:before {
+        position: absolute;
+        content: '';
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        left: -10px;
+        top: 8px;
+        background: #36CBCB;
+    }
+}
+.redDot {
+    position: relative;
+    &:before {
+        position: absolute;
+        content: '';
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        left: -10px;
+        top: 8px;
+        background: #F2637B;
+    }
+}
+.violetDot {
+    position: relative;
+    &:before {
+        position: absolute;
+        content: '';
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        left: -10px;
+        top: 8px;
+        background: #975FE4;
+    }
+}
+.grayDot {
+    position: relative;
+    &:before {
+        position: absolute;
+        content: '';
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        left: -10px;
+        top: 8px;
+        background: #D9D9D9;
+    }
+}
+.blueDot {
+    position: relative;
+    &:before {
+        position: absolute;
+        content: '';
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        left: -10px;
+        top: 8px;
+        background: #1890FF;
+    }
+}

@@ -1,0 +1,347 @@
+<!-- 权限管理 -->
+<template>
+    <div class="maintenanceData">
+        <breadcrumb>
+            <label for="">车辆信息:</label>
+            <el-input style="width:160px;" class="search-text" v-model="searchKeyword" placeholder="车牌号码/VIN码"></el-input>
+            <div class="dlb">
+                <label for="">上传企业:</label>
+                <el-input style="width:160px;" class="search-text" v-model="searchKeyword2" placeholder="企业名称"></el-input>
+            </div>
+            <div class="dlb">
+                <label for="">数据来源:</label>
+                <el-select
+                    style="width:120px;"
+                    clearable
+                    v-model="searchKeyword3">
+                    <el-option
+                    v-for="item in dataSource"
+                    :key="item.dataSourceName"
+                    :label="item.dataSourceName"
+                    :value="item.dataSourceCode">
+                    </el-option>
+                </el-select>
+            </div>
+            <div class="dlb">
+                <label>运营人员：</label>
+                <el-select class="searchIpt" collapse-tags multiple clearable v-model="searchKeyword4" filterable placeholder="请选择" style="width:150px;">
+                    <el-option
+                    v-for="item in personList"
+                    :key="item.areaUserId"
+                    :label="item.areaUserName"
+                    clearable
+                    :value="item.areaUserId">
+                    </el-option>
+                </el-select>
+            </div>
+            <div class="dlb">
+                <label>选择城市：</label>
+                <el-cascader
+                placeholder="请选择"
+                v-model="searchKeyword5"
+                clearable
+                :options="allCityList"
+                change-on-select
+                filterable></el-cascader>
+            </div>
+            <div class="dlb">
+                <label>出厂时间：</label>
+                <el-date-picker
+                    clearable
+                    v-model="searchKeyword6"
+                    type="daterange"
+                    unlink-panels
+                    range-separator="~"
+                    start-placeholder="开始"
+                    class="searchIpt dateSearch"
+                    value-format="yyyy-MM-dd"
+                    style="line-height:1"
+                    end-placeholder="结束">
+                </el-date-picker>
+                <el-button class="fr mt17 hhide">导出报表</el-button>
+                <el-button type="primary" class="search mt17" @click="search">查 询</el-button>
+            </div>
+            <!-- <el-button class="fr mt17 hhide">导出报表</el-button> -->
+        </breadcrumb>
+        <div class="table">
+            <el-table
+                border
+                :data="tableData"
+                class="tableBorder"
+                v-loading="loading"
+                style="width: 100%;min-height:550px;;">
+                <el-table-column
+                prop="num"
+                align="left"
+                label="序号"
+                min-width="4%">
+                </el-table-column>
+                <el-table-column
+                prop="vehicleFixCategory"
+                align="left"
+                min-width="5%"
+                label="维修类别">
+                    <template slot-scope="scope">
+                        <span>{{scope.row.vehicleFixCategory | filterCommon(repairType)}}</span>
+                    </template>
+                </el-table-column>
+                <el-table-column
+                prop="vehicleLicensePlate"
+                align="left"
+                min-width="5%"
+                label="车牌号码">
+                </el-table-column>
+                <el-table-column
+                prop="vehicleVin"
+                align="left"
+                min-width="8%"
+                label="VIN码">
+                </el-table-column>
+                <el-table-column
+                prop="companyName"
+                align="left"
+                min-width="13%"
+                label="上传企业">
+                </el-table-column>
+                <el-table-column
+                prop="createTime"
+                align="left"
+                min-width="5%"
+                label="送修日期">
+                    <template slot-scope="scope">
+                        <span>{{scope.row.vehicleFixDate | filterTime('yyyy-mm-dd')}}</span>
+                    </template>
+                </el-table-column>
+                <el-table-column
+                prop="createTime"
+                align="left"
+                min-width="5%"
+                label="出厂日期">
+                    <template slot-scope="scope">
+                        <span>{{scope.row.vehicleFixFactoryDate}}</span>
+                    </template>
+                </el-table-column>
+                <el-table-column
+                prop="vehicleFixSourceName"
+                align="left"
+                min-width="5%"
+                label="数据来源">
+                </el-table-column>
+                <el-table-column
+                prop="servicerName"
+                align="left"
+                min-width="5%"
+                label="运营服务人员">
+                </el-table-column>
+                <el-table-column
+                prop="ownerId"
+                align="left"
+                min-width="5%"
+                label="操作">
+                <template slot-scope="scope">
+                    <el-button @click="goDetail(scope.row)" type="text" size="small">详情</el-button>
+                </template>
+                </el-table-column>
+            </el-table>
+            <el-pagination
+                @size-change="handleSizeChange"
+                @current-change="handleCurrentChange"
+                :current-page="pageNum"
+                :page-sizes="[10, 20, 30, 40, 50, 100]"
+                :page-size="pageSize"
+                layout="total, sizes, prev, pager, next, jumper, slot"
+                :total="total">
+            </el-pagination>
+        </div>
+    </div>
+</template>
+
+<script>
+import Breadcrumb from '@/components/Breadcrumb'
+// import Modal from '@/components/Modal'
+import { repairType } from '@/utils/type.js'
+export default {
+    name: 'maintenanceData',
+    data () {
+        return {
+            allCityList: [],
+            personList: [],
+            dataSource: [],
+            loading: false,
+            searchKeyword: '',
+            searchKeyword2: '',
+            searchKeyword3: '',
+            searchKeyword4: [],
+            searchKeyword5: [],
+            searchKeyword6: [],
+            total: 0,
+            pageNum: 1,
+            pageSize: 10,
+            repairType,
+            tableData: [
+            ]
+        }
+    },
+    components: {
+        Breadcrumb
+    },
+    created () {
+        this.getDataList()
+        // 获取数据来源
+        this.$post('/workUser/name', {
+            areaUserId: ''
+        }).then(res => {
+            this.personList = res.data
+        })
+        this.$get('datasource/view')
+            .then(res => {
+                this.dataSource = res.data.filter(m => {
+                    return m.dataSourceName
+                })
+            })
+        this.$get('list/regionProvinceList').then(res => {
+            if (res.code === 0) {
+                let arr = []
+                res.data.forEach(e => {
+                    if (e.regionType === 1) {
+                        e.children = []
+                        e.label = e.regionName
+                        e.value = e.regionId
+                        arr.push(e)
+                        res.data.forEach(m => {
+                            if (m.parentId === e.regionId) {
+                                m.label = m.regionName
+                                m.value = m.regionId
+                                e.children.push(m)
+                            }
+                        })
+                    }
+                })
+                this.allCityList = arr
+            }
+        })
+    },
+    watch: {
+    },
+    methods: {
+        // 获取所有数据
+        getDataList () {
+            if (!this.$checkAuth('repair:find')) {
+                this.$alert('您没有该权限')
+                return
+            }
+            this.loading = true
+            let obj = {
+                vehicleSearchKey: this.searchKeyword,
+                enterpriseSearchKey: this.searchKeyword2,
+                dataSource: this.searchKeyword3,
+                servicerIds: this.searchKeyword4,
+                province: this.searchKeyword5[0],
+                city: this.searchKeyword5[1]
+            }
+            if (this.searchKeyword6) {
+                obj.startFactoryDate = this.searchKeyword6[0]
+                obj.endFactoryDate = this.searchKeyword6[1]
+            }
+            this.$post('repair/find?page=' + this.pageNum + '&size=' + this.pageSize, obj)
+                .then(res => {
+                    if (res && res.code === 0) {
+                        this.tableData = this.$setNum(res.data, this.pageNum, this.pageSize)
+                        this.total = res.total
+                    }
+                    this.loading = false
+                }).catch(() => {
+                    this.loading = false
+                })
+        },
+        goDetail ({ vehicleFixId, vehicleFixSource }) {
+            // 权限校验**********************************************************
+            if (!this.$checkAuth('datamanage:vehiclefix:view')) {
+                this.$msg({
+                    type: 'error',
+                    message: '你没有该项权限'
+                })
+                return
+            }
+            this.$router.push(`/maintenanceDataDetail?id=${vehicleFixId}&vehicleFixSource=${vehicleFixSource}`)
+        },
+        search () {
+            this.pageNum = 1
+            this.pageSize = 10
+            this.getDataList()
+        },
+        handleSizeChange (val) {
+            this.pageSize = val
+            this.pageNum = 1
+            this.getDataList()
+        },
+        handleCurrentChange (val) {
+            this.pageNum = val
+            this.getDataList()
+        }
+    }
+}
+</script>
+
+<style lang='less' scoped>
+.maintenanceData {
+    .table {
+        margin: 20px;
+        margin-top: 0;
+    }
+    .tips {
+        position: absolute;
+        top: 0;
+        line-height: 40px;
+        color: #98A9BC;
+        font-size: 14px;
+        font-weight: normal;
+    }
+    .alertInner {
+        padding: 0 40px;
+        table {
+            width: 100%;
+            border: none;
+            line-height: 44px;
+            td {
+                padding: 0 10px;
+                box-sizing: border-box;
+            }
+            .blueTilte {
+                background: rgb(242, 244, 246);
+            }
+            .resonInput {
+                line-height: 36px;
+                width: 600px;
+                border: none;
+                outline: none;
+            }
+            .importantIcon {
+                color: red;
+                margin-right: 4px;
+            }
+        }
+    }
+}
+</style>
+<style lang='less'>
+.maintenanceData {
+    .small_input {
+        .el-input__inner {
+            width: 140px;
+        }
+    }
+    .w200_input {
+        width: 220px;
+    }
+    .w120_input {
+        width: 100px;
+    }
+    .el-pagination {
+        position: relative;
+    }
+    .el-select__tags {
+        margin-top: 8px;
+    }
+}
+</style>

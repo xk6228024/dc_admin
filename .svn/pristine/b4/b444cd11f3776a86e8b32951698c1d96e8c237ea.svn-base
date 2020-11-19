@@ -1,0 +1,150 @@
+<template>
+    <transition name="fade">
+        <div class="modal" v-show="alert">
+            <div class="wrap fade-up" ref="model" :style="{width:width + 'px',height:height + 'px','margin-left': -width/2 + 'px'}">
+                <div class="title">
+                    {{title}}
+                    <span class="subTitle">{{subTitle}}</span>
+                    <span class="close_btn" @click="cancel"></span>
+                    <!-- <img src="../assets/img/close-.svg" class="icon" @click="cancel"> -->
+                </div>
+                <div class="alert-content">
+                    <slot></slot>
+                </div>
+                <div class="btn" v-if="showBtns">
+                    <el-button @click="cancel">取消</el-button>
+                    <el-button @click="sure" type="primary">{{confirmText || '确定'}}</el-button>
+                </div>
+                <div class="block" v-else></div>
+            </div>
+        </div>
+    </transition>
+</template>
+
+<script>
+export default {
+    data () {
+        return {
+            showBtns: true
+        }
+    },
+    props: ['title', 'alert', 'width', 'height', 'subTitle', 'showBtn', 'confirmText'],
+    components: {},
+    methods: {
+        sure () {
+            this.$emit('alertConfirm')
+        },
+        cancel () {
+            this.$emit('alertCancel')
+        }
+    },
+    updated () {
+        if (this.showBtn === false) this.showBtns = false
+        if (alert && this.$refs.model) {
+            this.$refs.model.style.marginTop = -this.$refs.model.clientHeight / 2 + 'px'
+        }
+    }
+}
+</script>
+
+<style lang="less" scoped>
+.modal {
+    position: fixed;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 5;
+    background: rgba(0, 0, 0, 0.5);
+    .wrap {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        background: #FEFEFE;
+        border-radius: 6px;
+        .title {
+            height: 64px;
+            line-height: 64px;
+            text-align: left;
+            font-size: 14px;
+            background-color: #fff;
+            color: #252631;
+            font-size: 16px;
+            // font-weight: bold;
+            padding: 0 40px;
+            border-radius:6px;
+            position: relative;
+            border-bottom: 1px solid rgba(232,236,239,1);
+            .icon {
+                position: absolute;
+                top: 24px;
+                right: 20px;
+                cursor: pointer;
+            }
+            .close_btn {
+                position: absolute;
+                top: 24px;
+                right: 20px;
+                height: 24px;
+                width: 24px;
+                cursor: pointer;
+                background-image: url('../assets/img/close-.svg');
+                &:hover {
+                    background-image: url('../assets/img/close.svg');
+                }
+            }
+            .subTitle {
+                font-size: 14px;
+                color: #98A9BC;
+                padding-left: 3px;
+                font-weight: normal;
+            }
+        }
+        .alert-content {
+            background: #ffffff;
+            // padding: 20px 0;
+            padding-top: 20px;
+            max-height: 550px;
+            overflow-y: auto;
+        }
+        .btn {
+            height: 32px;
+            text-align: right;
+            padding: 20px 40px;
+            button {
+                // width: 65px;
+                height: 32px;
+                margin-left: 16px;
+                // padding: 0;
+            }
+        }
+        .block {
+            height: 40px;
+        }
+    }
+}
+.fade-enter-active, .fade-leave-active {
+    background-color: rgba(0, 0, 0, 0.5);
+    transition: all .3s;
+    .fade-up {
+        transform: translateY(0%);
+        opacity: 1;
+        transition: all .3s;
+    }
+}
+.fade-enter, .fade-leave-to{
+    background-color: rgba(0, 0, 0, 0);
+    .fade-up {
+        opacity: 0;
+        transform: translateY(50%);
+    }
+}
+</style>
+<style lang="less">
+.modal {
+    .el-button {
+        min-width: 65px;
+        padding: 9px 15px;
+    }
+}
+</style>

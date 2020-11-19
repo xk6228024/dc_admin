@@ -1,0 +1,466 @@
+<!-- 用户管理 -->
+<template>
+    <div class="userManagement">
+        <breadcrumb :breadList="['系统设置', '用户管理']">
+            <el-input class="search-text" v-model="searchUser" placeholder="请输入用户名" size="mini"></el-input>
+            <el-button class="search" @click="search" size="mini">查 询</el-button>
+            <el-button class="fr mt17" type="primary" icon="el-icon-plus" @click="addUser" size="mini">新增用户</el-button>
+            <el-button class="fr mt17" :disabled="!multipleSelection.length" @click="batchDelete" size="mini">批量删除</el-button>
+        </breadcrumb>
+        <div class="table">
+            <el-table
+                :data="tableData"
+                class="tableBorder"
+                @selection-change="handleSelectionChange"
+                v-loading="showLoading"
+                style="width: 100%;min-height:550px;">
+                <el-table-column
+                type="selection"
+                align="left"
+                width="55">
+                </el-table-column>
+                <el-table-column
+                prop="num"
+                align="left"
+                label="序号"
+                width="100">
+                </el-table-column>
+                <el-table-column
+                prop="username"
+                align="left"
+                label="用户名">
+                </el-table-column>
+                <el-table-column
+                prop="nickname"
+                align="left"
+                label="昵称">
+                </el-table-column>
+                <el-table-column
+                prop="roleName"
+                align="left"
+                label="角色">
+                </el-table-column>
+                <el-table-column
+                prop="queryTypeName"
+                align="left"
+                label="查询方式">
+                </el-table-column>
+                <el-table-column
+                align="left"
+                width="100"
+                label="状态">
+                    <template slot-scope="scope">
+                        <span v-if="!scope.row.status">启用</span>
+                        <span v-else>禁用</span>
+                        <!-- <el-switch
+                        @change="changeStatus(scope.row.status, scope.row.sysUserId)"
+                        v-model="scope.row.status"
+                        :active-value="0"
+                        :inactive-value="1"
+                        active-color=""
+                        inactive-color="">
+                        </el-switch> -->
+                    </template>
+                </el-table-column>
+                <el-table-column
+                prop="createTime"
+                align="left"
+                width="200"
+                label="创建时间">
+                    <template slot-scope="scope">
+                        {{scope.row.createTime|filterTime('yyyy-mm-dd hh:ff:ss')}}
+                    </template>
+                </el-table-column>
+                <el-table-column
+                align="left"
+                width="150"
+                label="操作">
+                    <template slot-scope="scope" >
+                        <el-button @click="userEdit(scope.row.sysUserId)" type="text" size="small">编辑</el-button>
+                        <el-button v-if='scope.row.status' @click="changeStatus(0, scope.row.sysUserId)" type="text" size="small">启用</el-button>
+                        <el-button v-else @click="changeStatus(1, scope.row.sysUserId)" type="text" size="small">禁用</el-button>
+                        <!-- <el-button @click="deleteUser([scope.row.sysUserId])" type="text" size="small" :disabled="!$checkAuth('sys:user:delete')">删除</el-button> -->
+                    </template>
+                </el-table-column>
+            </el-table>
+            <el-pagination
+                @size-change="handleSizeChange"
+                @current-change="handleCurrentChange"
+                :current-page="pageNum"
+                :page-sizes="[10, 20, 30, 40, 50, 100]"
+                :page-size="pageSize"
+                layout="total, sizes, prev, pager, next, jumper"
+                :total="total">
+            </el-pagination>
+        </div>
+        <modal
+            :title="userId ? '编辑用户' : '新增用户'"
+            :width="650"
+            :showBtn='false'
+            :alert="addUserAlert"
+            @alertConfirm="alertConfirm"
+            @alertCancel="alertCancel">
+            <el-form :model="ruleForm" status-icon ref="marketAreaForm" label-width="132px" class="form">
+                <el-form-item label="用户名：" prop="alertUser" :rules="$validate({required:true,max:14,type:'EN'})">
+                    <el-input v-model="ruleForm.alertUser" placeholder="请输入用户名"></el-input>
+                </el-form-item>
+                <el-form-item label="昵称：" prop="nickName" :rules="$validate({required:true,max:28})">
+                    <el-input v-model="ruleForm.nickName" placeholder="请输入昵称"></el-input>
+                </el-form-item>
+                <el-form-item label="手机号：" prop="mobile" :rules="$validate({required:true,max:11})">
+                    <el-input v-model="ruleForm.mobile" placeholder="手机号"></el-input>
+                </el-form-item>
+                <!-- <el-form-item label="密码：" prop="alertPassword" :rules="$validate({required:true,max:8,min:6,type:'EN'})">
+                    <el-input type="password" v-model="ruleForm.alertPassword" placeholder="请输入密码"></el-input>
+                </el-form-item>
+                <el-form-item label="确认密码：" prop="alertConfirmPsw" :rules="[
+                    { required: true, message: '请输入确认密码', trigger: 'change' },
+                    { validator: validatePass, trigger: 'change' }
+                ]">
+                    <el-input type="password" v-model="ruleForm.alertConfirmPsw" placeholder="请输入确认密码"></el-input>
+                </el-form-item> -->
+                <el-form-item label="角色：" prop="checkedRoleList" :rules="$validate({required:true,type:'array'})">
+                    <!-- <el-checkbox-group v-model="ruleForm.checkedRoleList">
+                        <el-checkbox v-for="item in roleLIst" :label="item.sysRoleId" :key="item.roleId">{{item.roleName}}</el-checkbox>
+                    </el-checkbox-group> -->
+                    <el-select
+                    style="width:100%;dsplay:inline-block;"
+                    v-model="ruleForm.checkedRoleList"
+                    multiple
+                    filterable
+                    placeholder="请选择">
+                        <el-option
+                        v-for="item in roleLIst"
+                        :key="item.sysRoleId"
+                        :label="item.roleName"
+                        :value="item.sysRoleId">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="查询方式：" prop="queryType" :rules="$validate({required:true})">
+                    <el-select
+                    style="width:100%;dsplay:inline-block;"
+                    v-model="ruleForm.queryType"
+                    filterable
+                    placeholder="请选择">
+                        <el-option
+                        v-for="item in [{value:1,label:'模糊查询'},{value:0,label:'前缀查询'}]"
+                        :key="item.value"
+                        :label="item.label"
+                        :value="item.value">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <!-- <el-form-item label="状态：" prop="alertRadio" :rules="$validate({required:true})">
+                    <el-radio-group v-model="ruleForm.alertRadio">
+                        <el-radio :label="0">正常</el-radio>
+                        <el-radio :label="1">禁用</el-radio>
+                    </el-radio-group>
+                </el-form-item> -->
+            </el-form>
+            <div class="btn_grounp clearfix" style="border-top:1px solid #fff;padding-top:20px;">
+                <el-button v-if="userId" class="btn fl" style="margin-left:22px" @click="resetPassword" :disabled="!userId">重置密码</el-button>
+                <span v-if="userId" class="fl" style="line-height:36px;margin-left:12px" >
+                    <img src="../../assets/img/tips.png" alt="" style="position:relative;top:2px;">
+                    密码重置后将恢复为'用户名+888'
+                </span>
+                <span v-else class="fl" style="line-height:36px;margin-left:12px" >
+                    <img src="../../assets/img/tips.png" alt="" style="position:relative;top:2px;margin-left:20px;">
+                    默认密码为"用户名+888",如用户名为user,密码为user888
+                </span>
+                <el-button class="btn fr" type="primary" style="margin-right:52px" @click="alertConfirm">确定</el-button>
+                <el-button class="btn fr" style="margin-right:20px" @click="alertCancel">取消</el-button>
+            </div>
+        </modal>
+    </div>
+</template>
+
+<script>
+import Breadcrumb from '@/components/Breadcrumb'
+import Modal from '@/components/Modal'
+import { setNum } from '@/utils/utils.js'
+export default {
+    name: 'userManagement',
+    data () {
+        return {
+            showLoading: false,
+            total: 0,
+            searchUser: '',
+            pageNum: 1,
+            pageSize: 10,
+            value2: true,
+            addUserAlert: false,
+            multipleSelection: [],
+            roleLIst: [],
+            userId: '',
+            ruleForm: {
+                queryType: 1,
+                alertRadio: 1, // 角色状态
+                alertConfirmPsw: '', // 确认密码
+                alertPassword: '', // 密码
+                alertUser: '', // 用户名
+                nickName: '', // 用户姓名
+                checkedRoleList: [] // 角色列表
+            },
+            tableData: [
+            ]
+        }
+    },
+    components: {
+        Modal,
+        Breadcrumb
+    },
+    computed: {
+    },
+    created () {
+        this.findUserList()
+        this.findRoleList()
+    },
+    methods: {
+        addUser () {
+            // console(111)
+            // 权限校验**********************************************************
+            if (!this.$checkAuth('user:addUser')) {
+                this.$msg({
+                    type: 'error',
+                    message: '你没有该项权限'
+                })
+                return
+            }
+            this.ruleForm.queryType = 1
+            this.addUserAlert = true
+            // console.log(111)
+            // this.$refs['ruleForm'].resetFields()
+            // this.addUserAlert = true
+        },
+        resetPassword () {
+            // 权限校验**********************************************************
+            if (!this.$checkAuth('user:resetpass')) {
+                this.$msg({
+                    type: 'error',
+                    message: '你没有该项权限'
+                })
+                return
+            }
+            console.log(this.userId)
+            this.$post('user/resetpass', {
+                sysUserId: this.userId
+            }).then(res => {
+                if (res.code === 0) {
+                    this.$message({
+                        type: 'success',
+                        message: '密码重置成功！'
+                    })
+                }
+            })
+        },
+        search () {
+            this.pageNum = 1
+            this.pageSize = 10
+            this.findUserList()
+        },
+        // 重复密码校验
+        validatePass (rule, value, callback) {
+            if (value === '') {
+                callback(new Error('请再次输入密码'))
+            } else if (value !== this.ruleForm.alertPassword) {
+                callback(new Error('两次输入密码不一致!'))
+            } else {
+                callback()
+            }
+        },
+        // 获取角色列表
+        findRoleList () {
+            this.$get('list/roleList', {})
+                .then(res => {
+                    this.roleLIst = res.data
+                    // console.log(this.roleLIst)
+                })
+        },
+        // 获取用户列表
+        findUserList () {
+            this.showLoading = true
+            this.$post('user/list?page=' + this.pageNum + '&size=' + this.pageSize, {
+                username: this.searchUser
+            })
+                .then(res => {
+                    this.showLoading = false
+                    if (res.code === 0) {
+                        this.total = res.total
+                        this.tableData = setNum(res.data, this.pageNum, this.pageSize)
+                    }
+                })
+        },
+        handleSizeChange (val) {
+            this.pageSize = val
+            this.pageNum = 1
+            this.findUserList()
+        },
+        handleCurrentChange (val) {
+            this.pageNum = val
+            this.findUserList()
+        },
+        // 表格多选事件
+        handleSelectionChange (val) {
+            this.multipleSelection = val
+        },
+        // 批量删除
+        batchDelete () {
+            if (!this.$checkAuth('user:deleteUser')) {
+                this.$msg({
+                    type: 'error',
+                    message: '你没有该项权限'
+                })
+                return
+            }
+            this.deleteUser(this.multipleSelection.map(item => {
+                return item.sysUserId
+            }))
+        },
+        // 删除用户
+        deleteUser (userIds) {
+            this.$myAlert({
+                title: '删除',
+                msg: '确定删除吗？',
+                type: 'waring'
+            }).then(() => {
+                this.$post('user/deleteUser', {
+                    sysUserIds: userIds
+                })
+                    .then(res => {
+                        if (res.code === 0) {
+                            this.findUserList()
+                            this.$message({
+                                type: 'success',
+                                message: '删除成功！'
+                            })
+                        }
+                    })
+            }).catch(() => {})
+        },
+        // 更改状态
+        changeStatus (status, userId) {
+            if (!this.$checkAuth('user:changeUserStatus')) {
+                this.$msg({
+                    type: 'error',
+                    message: '你没有该项权限'
+                })
+                return
+            }
+            this.$post('user/changeUserStatus', {
+                status: status,
+                sysUserId: userId
+            }).then(res => {
+                if (res.code === 0) {
+                    this.$message({
+                        type: 'success',
+                        message: '状态修改成功！'
+                    })
+                }
+                this.findUserList()
+            })
+        },
+        // 新增用户弹窗确认
+        alertConfirm () {
+            this.$refs['marketAreaForm'].validate((valid) => {
+                if (valid) {
+                    let msg, url
+                    let userData = {
+                        nickname: this.ruleForm.nickName,
+                        username: this.ruleForm.alertUser,
+                        queryType: this.ruleForm.queryType,
+                        mobile: this.ruleForm.mobile,
+                        // password: this.ruleForm.alertPassword !== '******' ? this.ruleForm.alertPassword : '',
+                        status: this.ruleForm.alertRadio,
+                        // data: {
+                        //     username: this.ruleForm.alertUser,
+                        //     password: this.ruleForm.alertPassword,
+                        //     status: this.ruleForm.alertRadio
+                        // },
+                        // confirmPass: this.ruleForm.alertConfirmPsw,
+                        roleId: this.ruleForm.checkedRoleList
+                    }
+                    if (this.userId) {
+                        msg = '编辑成功'
+                        url = 'user/editUser'
+                        userData.sysUserId = this.userId
+                        if (this.ruleForm.alertPassword !== '000000') userData.password = this.ruleForm.alertPassword
+                    } else {
+                        msg = '添加成功'
+                        url = 'user/addUser'
+                        userData.password = this.ruleForm.alertPassword
+                    }
+                    this.$post(url, userData)
+                        .then(res => {
+                            if (res.code === 0) {
+                                this.findUserList()
+                                this.$message({
+                                    type: 'success',
+                                    message: msg
+                                })
+                                this.alertCancel()
+                            }
+                        })
+                } else {
+                    this.$alert('请填写正确的用户信息！')
+                    return false
+                }
+            })
+        },
+        // 新增用户弹窗关闭
+        alertCancel () {
+            this.ruleForm = {
+                queryType: 1,
+                alertRadio: 1,
+                alertConfirmPsw: '',
+                alertPassword: '',
+                alertUser: '',
+                checkedRoleList: []
+            }
+            this.$refs['marketAreaForm'].resetFields()
+            this.userId = ''
+            this.addUserAlert = false
+        },
+        // 用户编辑
+        userEdit (userId) {
+            if (!this.$checkAuth('user:editUser')) {
+                this.$msg({
+                    type: 'error',
+                    message: '你没有该项权限'
+                })
+                return
+            }
+            this.$get('user/userInfo', {
+                sysUserId: userId
+            })
+                .then(res => {
+                    if (res.code === 0) {
+                        this.addUserAlert = true
+                        this.userId = res.data.sysUserId
+                        this.ruleForm = {
+                            queryType: res.data.queryType,
+                            alertRadio: res.data.status, // 角色状态
+                            alertConfirmPsw: '000000', // 确认密码
+                            alertPassword: '000000', // 密码
+                            alertUser: res.data.username, // 用户名
+                            nickName: res.data.nickname,
+                            checkedRoleList: res.data.roles.map(item => { return item.sysRoleId }) // 角色列表
+                        }
+                    }
+                })
+        }
+    }
+}
+</script>
+
+<style lang='less' scoped>
+.userManagement {
+    .table {
+        margin: 20px;
+        margin-top: 0;
+    }
+    .form {
+        padding-right: 52px;
+    }
+}
+</style>

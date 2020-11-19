@@ -1,0 +1,308 @@
+<!-- 权限管理 -->
+<template>
+    <div class="maintenanceDataDetail detailPage">
+        <div class="detail_header">
+            <el-button class="goBack btn" @click="close">关闭</el-button>
+            <!-- <h1>维修数据详情</h1> -->
+        </div>
+        <div class="detail_content" v-loading="loading">
+            <div class="detail_model">
+                <h4>车辆信息</h4>
+                <div class="clearfix">
+                    <div class="detail_item">
+                        <label>车牌号码：</label>
+                        <span>{{vehicleInfo.vehicleLicensePlate}}</span>
+                    </div>
+                    <div class="detail_item">
+                        <label>车牌颜色：</label>
+                        <span>{{vehicleInfo.vehicleLicensePlateColorName}}</span>
+                    </div>
+                    <div class="detail_item">
+                        <label>车身颜色：</label>
+                        <span>{{vehicleInfo.vehicleBodyColor|filterCommonA(carBodyColor)}}</span>
+                    </div>
+                    <div class="detail_item">
+                        <label>VIN码：</label>
+                        <span>{{vehicleInfo.vehicleVin}}</span>
+                    </div>
+                    <div class="detail_item">
+                        <label>品牌车系：</label>
+                        <span>{{vehicleInfo.brandSeriesModel}}</span>
+                    </div>
+                    <div class="detail_item">
+                        <label>车主：</label>
+                        <span>{{vehicleInfo.vehicleOwnerName}}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="detail_model">
+                <h4>
+                    维修信息
+                    <div v-if="vehicleFixInfo.vehicleFixCategory=== '99'" class="test-report"
+                    @click="$router.push('/testReport?vehicleFixId=' + vehicleFixId)">环保检测报告单</div>
+                </h4>
+                <div class="clearfix">
+                    <div class="detail_item">
+                        <label>上传企业：</label>
+                        <span>{{vehicleFixInfo.vehicleFixUnit}}</span>
+                    </div>
+                    <div class="detail_item">
+                        <label>维修类型：</label>
+                        <span>{{vehicleFixInfo.vehicleFixCategory | filterCommon(repairType)}}</span>
+                    </div>
+                    <div class="detail_item">
+                        <label>结算金额：</label>
+                        <span>{{vehicleFixInfo.vehicleFixTotalFee}}</span>
+                    </div>
+                    <div class="detail_item">
+                        <label>送修日期：</label>
+                        <span>{{vehicleFixInfo.vehicleFixDate|filterTime('yyyy-mm-dd')}}</span>
+                    </div>
+                    <div class="detail_item">
+                        <label>送修里程：</label>
+                        <span>{{vehicleFixInfo.vehicleFixMileage}}</span>
+                    </div>
+                    <div class="detail_item">
+                        <label>故障描述：</label>
+                        <span>{{vehicleFixInfo.vehicleFixDescription}}</span>
+                    </div>
+                    <div class="detail_item">
+                        <label>送修人：</label>
+                        <span>{{vehicleFixInfo.vehicleFixRepairName}}</span>
+                    </div>
+                    <div class="detail_item">
+                        <label>送修人电话：</label>
+                        <span>{{vehicleFixInfo.vehicleFixRepairTel}}</span>
+                    </div>
+                    <div class="detail_item">
+                        <label>出厂时间：</label>
+                        <span>{{vehicleFixInfo.vehicleFixFactoryDate|filterTime('yyyy-mm-dd')}}</span>
+                    </div>
+                    <div class="detail_item">
+                        <label>上传日期：</label>
+                        <span>{{vehicleFixInfo.createTime|filterTime('yyyy-mm-dd')}}</span>
+                    </div>
+                    <div class="detail_item">
+                        <label>数据来源：</label>
+                        <span>{{vehicleFixInfo.sourceName}}</span>
+                    </div>
+                    <div class="detail_item">
+                        <label>运营服务人员：</label>
+                        <span>{{vehicleFixInfo.servicerName}}</span>
+                    </div>
+                    <div class="detail_item" v-if="vehicleFixInfo.hasElectronicCertificate && vehicleFixInfo.vehicleFixCertificateNumber">
+                        <label>合格证编号：</label>
+                        <span class="blue" @click="openCertificate">{{vehicleFixInfo.vehicleFixCertificateNumber}}</span>
+                    </div>
+                    <!-- <div class="detail_item" v-if="vehicleFixInfo.enterpriseCity === '440300' && vehicleFixSource !== 'cjl'  && vehicleFixInfo.vehicleFixCertificateNumber">
+                        <label>合格证编号：</label>
+                        <span>{{vehicleFixInfo.vehicleFixCertificateNumber}}</span>
+                    </div> -->
+                </div>
+            </div>
+            <div class="detail_model noBorder">
+                <h4>维修项目</h4>
+                <el-table
+                    border
+                    :data="vehicleFixProject"
+                    class="tableBorder"
+                    style="width: 100%;">
+                    <el-table-column
+                    prop="vehicleFixProjectCode"
+                    align="left"
+                    label="项目编码"
+                    min-width="5%">
+                    </el-table-column>
+                    <el-table-column
+                    prop="vehicleFixProjectName"
+                    align="left"
+                    min-width="8%"
+                    label="项目名称">
+                    </el-table-column>
+                    <el-table-column
+                    prop="vehicleFixProjectHours"
+                    align="left"
+                    min-width="8%"
+                    label="维修工时">
+                    </el-table-column>
+                    <el-table-column
+                    prop="vehicleFixProjectPrice"
+                    align="left"
+                    min-width="8%"
+                    label="工时单价">
+                    </el-table-column>
+                    <el-table-column
+                    prop="ownerMobile"
+                    align="left"
+                    min-width="10%"
+                    label="工时费">
+                    <template slot-scope="scope">
+                        {{(scope.row.vehicleFixProjectHours||0)*scope.row.vehicleFixProjectPrice}}
+                    </template>
+                    </el-table-column>
+                </el-table>
+            </div>
+            <div class="detail_model noBorder">
+                <h4>维修用料</h4>
+                <el-table
+                    border
+                    :data="vehicleFixParts"
+                    class="tableBorder"
+                    style="width: 100%;">
+                    <el-table-column
+                    prop="vehicleFixPartsNumber"
+                    align="left"
+                    label="配件编码"
+                    min-width="5%">
+                    </el-table-column>
+                    <el-table-column
+                    prop="vehicleFixPartsName"
+                    align="left"
+                    min-width="8%"
+                    label="配件名称">
+                    </el-table-column>
+                    <el-table-column
+                    prop="vehicleFixPartsNum"
+                    align="left"
+                    min-width="8%"
+                    label="数量">
+                    </el-table-column>
+                    <el-table-column
+                    prop="ownerGender"
+                    align="left"
+                    min-width="8%"
+                    label="单位">
+                    <template slot-scope="scope">
+                        个{{scope.row.asd}}
+                    </template>
+                    </el-table-column>
+                    <el-table-column
+                    prop="vehicleFixPartsPrice"
+                    align="left"
+                    min-width="10%"
+                    label="金额">
+                    </el-table-column>
+                </el-table>
+            </div>
+            <div class="detail_model noBorder">
+                <h4>其他收费</h4>
+                <el-table
+                    border
+                    :data="vehicleFixOtherfee"
+                    class="tableBorder"
+                    style="width: 100%;">
+                    <el-table-column
+                    prop="vehicleFixOtherfeeProjectname"
+                    align="left"
+                    label="收费项目"
+                    min-width="10%">
+                    </el-table-column>
+                    <el-table-column
+                    prop="vehicleFixOtherfee"
+                    align="left"
+                    min-width="5%"
+                    label="金额">
+                    </el-table-column>
+                    <el-table-column
+                    prop="vehicleFixOtherfeeSettlementName"
+                    align="left"
+                    label="支付类型"
+                    min-width="5%">
+                    </el-table-column>
+                    <el-table-column
+                    prop="vehicleFixOtherfeeBak"
+                    align="left"
+                    min-width="8%"
+                    label="备注">
+                    </el-table-column>
+                </el-table>
+            </div>
+        </div>
+        <certificate v-model="certificateShow" :data="certificateData"></certificate>
+    </div>
+</template>
+
+<script>
+import Certificate from '@/components/Certificate'
+// import { setNum } from '@/utils/utils.js'
+import { carBodyColor, repairType } from '@/utils/type.js'
+export default {
+    name: 'maintenanceDataDetail',
+    data () {
+        return {
+            carBodyColor,
+            certificateShow: false,
+            certificateData: [],
+            vehicleFixParts: [],
+            vehicleFixProject: [],
+            vehicleFixOtherfee: [],
+            vehicleFixInfo: {},
+            vehicleInfo: {},
+            vehicleFixId: this.$route.query.id,
+            vehicleFixSource: this.$route.query.vehicleFixSource,
+            repairType,
+            loading: false
+        }
+    },
+    components: {
+        Certificate
+    },
+    created () {
+        this.loading = true
+        this.$post('repair/view', {
+            data: {
+                vehicleFixId: this.vehicleFixId
+            }
+        }).then(res => {
+            if (!res.data) return
+            this.vehicleFixParts = res.data.vehicleFixParts || []
+            this.vehicleFixProject = res.data.vehicleFixProject || []
+            this.vehicleFixInfo = res.data.vehicleFixInfo
+            this.vehicleInfo = res.data.vehicleInfo
+            this.vehicleFixOtherfee = res.data.vehicleFixOtherfee || []
+            this.loading = false
+        }).catch(e => {
+            this.loading = false
+        })
+    },
+    methods: {
+        // 关闭页面
+        close () {
+            if (this.$route.query.sourcePage) {
+                this.$store.dispatch('closePage', {
+                    nextPath: `/vehicleConditionReport?id=${this.$route.query.sourcePage}`
+                })
+            } else {
+                this.$store.dispatch('closePage', {
+                    nextPath: '/maintenanceData'
+                })
+            }
+        },
+        openCertificate () {
+            this.$post(`repair/vehicleFixCertificate/${this.vehicleFixId}`, {})
+                .then(res => {
+                    if (res.code === 0) {
+                        this.certificateData = res.data
+                        this.certificateShow = true
+                    }
+                })
+        }
+    }
+}
+</script>
+<style lang="less">
+.maintenanceDataDetail {
+    .test-report {
+        float: right;
+        color: #0088ee;
+        cursor:pointer;
+        font-size: 14px;
+        font-weight: normal;
+    }
+    .blue {
+        color: #0088ee;
+        font-size: 14px;
+        cursor: pointer;
+    }
+}
+</style>

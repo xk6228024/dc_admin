@@ -1,0 +1,562 @@
+<template>
+    <div id="applicationManage">
+        <div class="header">
+            应用管理
+            <el-button type="primary" class="btn" @click="appVisible = true"
+            icon="el-icon-plus" v-if="winIds.length">创建应用</el-button>
+        </div>
+        <div class="content">
+            <div class="empty" v-if="!winIds.length">
+                <div class="empty-icon">
+                    <i class="el-icon-warning"></i>
+                </div>
+                <div class="empty-title">暂无应用</div>
+                <div class="empty-text">请添加应用后进行下一步操作</div>
+                <div class="emtpy-btn">
+                    <el-button type="primary" class="btn"
+                    icon="el-icon-plus" @click="appVisible = true">创建应用</el-button>
+                </div>
+            </div>
+            <el-tabs v-model="activeName" type="card" v-if="winIds.length">
+                <el-tab-pane :label="item.winName" :name="item.winName" v-for="item in winIds" :key="item.winId">
+                    <el-popover
+                    placement="right"
+                    trigger="hover">
+                    <div  class="add-win-block-tips">
+                        <i class="el-icon-warning"></i>
+                        在此处可以创建Win10块
+                    </div>
+                    <div class="add-win-block" slot="reference" @click="winBlockVisible = true">
+                        <i class="el-icon-plus"></i>
+                        <div>创建Win10块</div>
+                    </div>
+                    </el-popover>
+                    <div class="win-block-list">
+                        <div :class="'win-block-item ' + item.winStyleButtonBgcolor" v-for="item in winStyleList"
+                        :key="item.winStyleId">
+                            <div class="win-block-item-wrap" :style="{
+                                width: item.winStyleButtonSiteX === 1 ? '120px' : '250px',
+                                height: item.winStyleButtonSiteY === 1 ? '120px' : '250px'
+                            }">
+                                <img class="icon" :src="item.winStyleBigIcoUrl">
+                                <div><span>{{item.winStyleButtionTitle}}</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </el-tab-pane>
+            </el-tabs>
+        </div>
+        <el-dialog
+            title="创建应用"
+            :visible.sync="appVisible"
+            top="30vh"
+            width="480px"
+            @closed="appClose">
+            <el-form :model="appForm" :rules="appRules" ref="appForm" class="form" label-position="right"
+            label-width="110px">
+                <el-form-item prop="winName" label="产品应用名称">
+                    <el-input
+                        v-model="appForm.winName"
+                        maxlength="20"
+                        placeholder="请输入">
+                    </el-input>
+                </el-form-item>
+                <el-form-item prop="winRemark" label="产品应用描述">
+                    <el-input
+                        type="textarea"
+                        class="textarea"
+                        maxlength="200"
+                        v-model="appForm.winRemark"
+                        placeholder="请输入">
+                    </el-input>
+                </el-form-item>
+            </el-form>
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="appVisible = false">取 消</el-button>
+                <el-button type="primary" @click="appConfirm">确 定</el-button>
+            </span>
+        </el-dialog>
+        <el-dialog
+            title="创建Win10块"
+            :visible.sync="winBlockVisible"
+            top="20vh"
+            width="640px"
+            @closed="winBlockClose">
+            <el-form :model="winBlockForm" :rules="winBlockRules" ref="winBlockForm" class="form" label-position="right"
+            label-width="110px">
+                <el-form-item prop="winStyleButtionTitle" label="Win10块名称">
+                    <el-input
+                        v-model="winBlockForm.winStyleButtionTitle"
+                        maxlength="20"
+                        placeholder="请输入">
+                    </el-input>
+                </el-form-item>
+                <el-form-item prop="winStyleBigIcoUrl" label="图标上传">
+                    <el-upload
+                    class="upload-demo"
+                    ref="upload"
+                    action="https://jsonplaceholder.typicode.com/posts/"
+                    :file-list="fileList"
+                    :show-file-list="false"
+                    :auto-upload="true">
+                        <div class="select-file-input" slot="trigger">
+                            请选择图标文件
+                            <i class="icon el-icon-upload2 fr"></i>
+                        </div>
+                    </el-upload>
+                </el-form-item>
+                <el-form-item prop="winStyleButtonBgcolor" label="背景颜色">
+                    <el-select v-model="winBlockForm.winStyleButtonBgcolor" placeholder="请选择"
+                    class="form-select">
+                        <el-option
+                        v-for="item in bgColorList"
+                        :key="item.value"
+                        :label="item.label"
+                        :value="item.value">
+                        <div class="bg-select">
+                            {{item.label}}
+                            <div class="color-blcok" :style="{background: item.color}"></div>
+                        </div>
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item prop="winStyleButtonSite" label="方块尺寸">
+                    <el-select v-model="winBlockForm.winStyleButtonSite" placeholder="请选择"
+                    class="form-select">
+                        <el-option
+                        v-for="item in winSizeList"
+                        :key="item.label"
+                        :label="item.label"
+                        :value="item.value">
+                        <div class="bg-select">
+                            {{item.label}}
+                            <div class="size-blcok" :style="{
+                                width: 12 * item.size.x + 'px',
+                                height: 12 * item.size.y + 'px'
+                            }">
+                            </div>
+                        </div>
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item prop="winStylePositionRow" label="显示位置">
+                    <el-select v-model="winBlockForm.winStylePositionRow" placeholder="所在行"
+                    style="width: 240px;margin-right:10px;">
+                        <el-option
+                        v-for="item in [1, 2, 3, 4, 5]"
+                        :key="item + 'row'"
+                        :label="'第 ' + item + ' 行'"
+                        :value="item">
+                        </el-option>
+                    </el-select>
+                    <el-select v-model="winBlockForm.winStylePositionCol" placeholder="所在列"
+                    style="width: 240px;">
+                        <el-option
+                        v-for="item in [1, 2, 3, 4, 5]"
+                        :key="item + 'col'"
+                        :label="'第 ' + item + ' 列'"
+                        :value="item">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item prop="winStylePositionRow" label="显示位置">
+                    <el-switch
+                        v-model="winBlockForm.isDesktop"
+                        :active-value="1"
+                        :inactive-value="0">
+                    </el-switch>
+                    <span class="switch-tips">开状态：WIN10桌面  关状态：菜单显示</span>
+                </el-form-item>
+            </el-form>
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="winBlockVisible = false">取 消</el-button>
+                <el-button type="primary" @click="winBlockConfirm">下一步</el-button>
+            </span>
+        </el-dialog>
+        <el-dialog
+            title="绑定菜单"
+            :visible.sync="menuVisible"
+            top="30vh"
+            width="640px"
+            @closed="menuClose">
+            <el-transfer
+                style="text-align: left; display: inline-block"
+                v-model="selectMenu"
+                filterable
+                :left-default-checked="[2, 3]"
+                :right-default-checked="[1]"
+                :props="{
+                    key: 'menuId',
+                    label: 'name'
+                }"
+                :titles="['菜单列表', '已绑定菜单列表']"
+                :format="{
+                    noChecked: '${total}',
+                    hasChecked: '${checked}/${total}'
+                }"
+                :render-content="renderFunc"
+                @change="menuHandleChange"
+                :data="menuData">
+                <span slot-scope="{ option }">{{ option.key }} - {{ option.label }}</span>
+            </el-transfer>
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="menuVisible = false">取 消</el-button>
+                <el-button type="primary" @click="menuConfirm">完 成</el-button>
+            </span>
+        </el-dialog>
+    </div>
+</template>
+
+<script>
+export default {
+    data () {
+        return {
+            activeName: '维修企业智能服务系统',
+            winIds: [
+                {
+                    winId: 1,
+                    winName: '维修企业智能服务系统',
+                    winRemark: '备注'
+                },
+                {
+                    winId: 2,
+                    winName: '检测',
+                    winRemark: '备注'
+                }
+            ],
+            fileList: [],
+            bgColorList: [
+                {
+                    value: 'blue',
+                    label: '蓝色',
+                    color: '#00bdf8'
+                },
+                {
+                    value: 'green',
+                    label: '绿色',
+                    color: '#79c52b'
+                },
+                {
+                    value: 'purple',
+                    label: '紫色',
+                    color: '#7e5ee6'
+                },
+                {
+                    value: 'orange',
+                    label: '橙色',
+                    color: '#ef9056'
+                },
+                {
+                    value: 'yellow',
+                    label: '黄色',
+                    color: '#fbd249'
+                },
+                {
+                    value: 'cyan',
+                    label: '深绿',
+                    color: '#4AD5B6'
+                },
+                {
+                    value: 'pink',
+                    label: '粉色',
+                    color: '#CE4CD3'
+                },
+                {
+                    value: 'brown',
+                    label: '棕色',
+                    color: '#BF9054'
+                }
+            ],
+            winSizeList: [
+                {
+                    value: 1,
+                    size: {
+                        x: 1,
+                        y: 1
+                    },
+                    label: '尺寸1'
+                },
+                {
+                    value: 2,
+                    size: {
+                        x: 1,
+                        y: 2
+                    },
+                    label: '尺寸2'
+                },
+                {
+                    value: 3,
+                    size: {
+                        x: 2,
+                        y: 1
+                    },
+                    label: '尺寸3'
+                },
+                {
+                    value: 4,
+                    size: {
+                        x: 2,
+                        y: 2
+                    },
+                    label: '尺寸4'
+                }
+            ],
+            appVisible: false,
+            appRules: {
+                winName: { required: true, message: '请输入', trigger: 'blur' }
+            },
+            appForm: {
+                winName: '',
+                winRemark: ''
+            },
+            winBlockVisible: false,
+            winBlockRules: {
+                winStyleButtionTitle: { required: true, message: '请输入', trigger: 'blur' },
+                winStyleButtonBgcolor: { required: true, message: '请选择', trigger: 'blur' },
+                winStyleBigIcoUrl: { required: true, message: '请上传', trigger: 'blur' },
+                winStyleButtonSite: { required: true, message: '请选择', trigger: 'blur' }
+            },
+            winBlockForm: {
+                winStyleButtionTitle: '',
+                winStyleButtonBgcolor: '',
+                winStyleBigIcoUrl: '',
+                isDesktop: 1
+            },
+            menuVisible: false,
+            selectMenu: [],
+            menuData: [
+                {
+                    name: '菜单1',
+                    menuId: 1
+                },
+                {
+                    name: '菜单2',
+                    menuId: 2,
+                    children: []
+                }
+            ],
+            winStyleList: [
+                {
+                    winStyleId: 1,
+                    winStyleButtionTitle: '首页',
+                    winStyleBigIcoUrl: 'aa.png',
+                    winStyleButtonBgcolor: 'purple',
+                    winStyleButtonSiteX: 1,
+                    winStyleButtonSiteY: 2
+                },
+                {
+                    winStyleId: 2,
+                    winStyleButtionTitle: '运输车辆',
+                    winStyleBigIcoUrl: 'aa.png',
+                    winStyleButtonBgcolor: 'brown',
+                    winStyleButtonSiteX: 2,
+                    winStyleButtonSiteY: 2
+                }
+            ]
+        }
+    },
+    components: {
+
+    },
+    methods: {
+        addApplication () {},
+        appClose () {
+            this.appVisible = false
+            this.$nextTick(() => {
+                this.$refs.appForm.resetFields()
+            })
+        },
+        appConfirm () {
+            this.$refs.appForm.validate((valid) => {
+                if (valid) {}
+            })
+        },
+        winBlockClose () {
+            this.winBlockVisible = false
+            this.$nextTick(() => {
+                this.$refs.winBlockForm.resetFields()
+            })
+        },
+        winBlockConfirm () {
+            this.$refs.winBlockForm.validate((valid) => {
+                if (valid) {
+                    this.menuVisible = false
+                }
+            })
+        },
+        menuClose () {
+            this.menuVisible = false
+            this.selectMenu = []
+        },
+        menuConfirm () {
+            console.log(this.selectMenu)
+        },
+        menuHandleChange () {},
+        renderFunc (h, option) {
+            return (
+                <div>
+                    {option.name}
+                </div>
+            )
+        }
+    }
+}
+</script>
+
+<style lang='less'>
+#applicationManage {
+    .header {
+        font-size: 15px;
+        font-weight: bold;
+        padding: 0 24px;
+        line-height: 72px;
+        border-bottom: 1px solid #ddd;
+        .btn {
+            float: right;
+            margin-top: 16px;
+        }
+    }
+    .empty {
+        text-align: center;
+        margin-top: 150px;
+        .empty-icon {
+            margin-bottom: 20px;
+            i {
+                font-size: 70px;
+                color: #ccc;
+            }
+        }
+        .empty-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .empty-text {
+            color: #999;
+            margin-bottom: 24px;
+        }
+    }
+    .content {
+        padding: 24px;
+        .add-win-block {
+            width: 216px;
+            height: 120px;
+            border-radius:2px;
+            border:1px dashed #ddd;
+            background: #f3f3f3;
+            text-align: center;
+            display: table-cell;
+            vertical-align: middle;
+            cursor: pointer;
+            .el-icon-plus {
+                font-size: 20px;
+                color: #999;
+                margin-bottom: 16px;
+            }
+        }
+        .win-block-list {
+            margin-top: 24px;
+            .win-block-item {
+                display: inline-block;
+                margin-right: 10px;
+                font-size: 16px;
+                color: #e8e8e8;
+                text-align: center;
+                cursor: pointer;
+                .win-block-item-wrap {
+                    display: table-cell;
+                    vertical-align: middle;
+                }
+                .icon {
+                    margin-bottom: 14px;
+                }
+            }
+            .blue {
+                background: #00bdf8;
+                background:linear-gradient(135deg,rgba(0,189,248,1) 0%,rgba(0,136,238,1) 100%);
+            }
+            .cyan {
+                background: #4AD5B6;
+                background:linear-gradient(135deg,rgba(74,213,182,1) 0%,rgba(9,149,118,1) 100%);
+            }
+            .purple {
+                background: #7e5ee6;
+                background:linear-gradient(180deg,rgba(126,94,230,1) 0%,rgba(72,48,200,1) 100%);
+            }
+            .orange {
+                background: #ef9056;
+                background:linear-gradient(180deg,rgba(239,144,86,1) 0%,rgba(218,87,43,1) 100%);
+            }
+            .yellow {
+                background: #fbd249;
+                background:linear-gradient(180deg,rgba(251,210,73,1) 0%,rgba(245,166,35,1) 100%);
+            }
+            .green {
+                background: #79c52b;
+                background:linear-gradient(135deg,rgba(121,197,43,1) 0%,rgba(66,108,23,1) 100%);
+            }
+            .pink {
+                background: #CE4CD3;
+                background:linear-gradient(180deg,rgba(206,76,211,1) 0%,rgba(160,37,167,1) 100%);
+            }
+            .brown {
+                background: #BF9054;
+                background:linear-gradient(180deg,rgba(191,144,84,1) 0%,rgba(139,87,42,1) 100%);
+            }
+        }
+    }
+    .form {
+        .textarea {
+            .el-textarea__inner {
+                resize: none;
+                height: 100px;
+            }
+        }
+        .el-upload {
+            width: 100%;
+        }
+        .form-select {
+            width: 100%;
+        }
+        .select-file-input {
+            border-radius:2px;
+            border: 1px solid #DCDFE6;
+            height: 32px;
+            line-height: 32px;
+            padding: 0 15px;
+            text-align: left;
+            .icon {
+                margin-top: 7px;
+                font-size: 18px;
+            }
+        }
+        .switch-tips {
+            color: #999;
+            font-size: 12px;
+            margin-left: 16px;
+        }
+    }
+}
+.add-win-block-tips {
+    .el-icon-warning {
+        color: #FAAD14;
+        margin-right: 4px;
+    }
+}
+.bg-select {
+    .color-blcok {
+        display: inline-block;
+        width: 24px;
+        height: 24px;
+        vertical-align: middle;
+        margin-left: 30px;
+    }
+    .size-blcok {
+        display: inline-block;
+        margin-left: 30px;
+        border: 1px solid #333;
+        vertical-align: middle;
+    }
+}
+</style>

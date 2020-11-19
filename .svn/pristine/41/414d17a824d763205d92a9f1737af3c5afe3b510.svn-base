@@ -1,0 +1,900 @@
+<!-- 广告发布 -->
+<template>
+    <div class="advertReleaseDetail" id="advertReleaseDetail" v-loading="showLoading">
+        <h3 class="detail-title">{{$route.query.id?'编辑广告':'新增广告'}}
+            <el-button class="fr back" @click="goBack" style="margin-right:0;">返回</el-button>
+        </h3>
+        <el-form :model="ruleForm" ref="advertForm" label-width="132px" class="form" style="width:600px;margin-top:20px;">
+            <el-form-item label="广告位置：" prop="adType">
+                <el-radio-group v-model="ruleForm.adType" @change="adTypeChange">
+                    <el-radio :label="1">跑马灯文字广告</el-radio>
+                    <el-radio :label="2">弹出窗口广告</el-radio>
+                </el-radio-group>
+            </el-form-item>
+            <el-form-item style="position:relative;" v-if="ruleForm.adType === 1" label="广告标题：" prop="adTitleLong" :rules="$validate({required:true})">
+                <el-input
+                    type="textarea"
+                    maxlength="80"
+                    :resize="'none'"
+                    :rows="3"
+                    placeholder="字数控制在80字内哈~"
+                    v-model="ruleForm.adTitleLong">
+                </el-input>
+                <span class="tipsText">{{ruleForm.adTitleLong.length}}/80</span>
+            </el-form-item>
+            <el-form-item v-if="ruleForm.adType === 2" label="广告标题：" prop="adTitle" :rules="$validate({required:true})">
+                <el-input
+                    v-model="ruleForm.adTitle"
+                    maxlength="18"
+                    placeholder="字数控制在18字内哈~">
+                </el-input>
+            </el-form-item>
+            <el-form-item style="position:relative;" v-if="ruleForm.adType === 2" label="正文内容：" prop="adContent" :rules="$validate({required:true})">
+                <el-input type="textarea" :resize="'none'" maxlength="60" v-model="ruleForm.adContent"
+                placeholder="字数控制在60字内哈~"></el-input>
+                <span class="tipsText">{{ruleForm.adContent.length}}/60</span>
+            </el-form-item>
+            <el-form-item v-if="ruleForm.adType === 2" label="图片：" prop="adPic" :rules="$validate({required:true})">
+                <el-upload
+                    class="avatar-uploader"
+                    v-model="ruleForm.adPic"
+                    :action="uploadUrl + 'attachment/file/upload'"
+                    :show-file-list="false"
+                    :on-remove="removeUploadImg"
+                    :on-success="uploadSuccess"
+                    :before-upload="beforeAvatarUpload">
+                    <img v-if="ruleForm.adPic" :src="ruleForm.adPic" class="avatar">
+                    <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+                </el-upload>
+                <div class="avatar-uploader-tips">
+                    <h6>点击<span v-html="ruleForm.adPic ? '图片重新' : '”+”号'"></span>上传图片</h6>
+                    <p>建议尺寸：320x180px <br />支持JPG、JPEG、GIF、PNG格式，小于2M</p>
+                </div>
+            </el-form-item>
+            <el-form-item label="广告时间段：" prop="dateRegion" :rules="$validate({required:true})">
+                <el-date-picker
+                    v-model="ruleForm.dateRegion"
+                    type="daterange"
+                    :picker-options="pickerOptions"
+                    range-separator="至"
+                    start-placeholder="开始日期"
+                    class="search-text vam"
+                    value-format="timestamp"
+                    end-placeholder="结束日期">
+                </el-date-picker>
+            </el-form-item>
+            <el-form-item label="跳转链接：" prop="adHref">
+                <el-input  maxlength="180" v-model="ruleForm.adHref"></el-input>
+            </el-form-item>
+            <el-form-item label="备注：" prop="remark" :rules="$validate({max:60})">
+                <el-input type="textarea" :resize="'none'" maxlength="60" v-model="ruleForm.remark"
+                placeholder="字数控制在60字内哈~"></el-input>
+            </el-form-item>
+            <el-form-item label="发布对象：">
+                <el-radio-group v-model="ruleForm.isShareAll">
+                    <el-radio :label="1">所有用户</el-radio>
+                    <el-radio :label="0">指定用户</el-radio>
+                </el-radio-group>
+                <el-button class="fr back" @click="checkEnv">查看覆盖企业</el-button>
+            </el-form-item>
+            <el-form-item v-show="ruleForm.isShareAll === 0" label="指定城市：" prop="city" style="position:relative;">
+                <!-- <el-popover
+                    placement="bottom"
+                    width="450"
+                    v-model="showPopover"
+                    trigger="click">
+                    <el-tree
+                    show-checkbox
+                    :data="selectMenu"
+                    :props="defaultProps"
+                    ref="cityTree"
+                    @check-change="handleNodeClick"
+                    node-key="regionId"
+                    ></el-tree>
+                    <div slot="reference" style="position:absolute;top:0;left:0;width:470px;height:100%;z-index:2;"></div>
+                </el-popover> -->
+                <el-select
+                v-model="ruleForm.city"
+                multiple
+                filterable
+                placeholder="请选择城市">
+                    <el-option
+                    v-for="item in cityList"
+                    :key="item.cityId"
+                    :label="item.cityName"
+                    :value="item.cityId">
+                    </el-option>
+                </el-select>
+            </el-form-item>
+            <el-form-item v-show="ruleForm.isShareAll === 0" label="指定品牌：" prop="vehicleBrand">
+                <el-select
+                v-model="ruleForm.vehicleBrand"
+                multiple
+                filterable
+                placeholder="请选择品牌">
+                    <el-option-group
+                    v-for="(val, key) in brandList"
+                    :key="key"
+                    :label="key">
+                        <el-option
+                            v-for="item in brandList[key]"
+                            :key="item.carBrandId"
+                            :label="item.carBrandName"
+                            :value="item.carBrandId">
+                        </el-option>
+                    </el-option-group>
+                </el-select>
+            </el-form-item>
+            <el-form-item v-show="ruleForm.isShareAll === 0" label="企业类型：" prop="businessCategory">
+                <el-select v-model="ruleForm.businessCategory" multiple filterable placeholder="请选择企业类型">
+                    <el-option
+                    v-for="item in enterpriseTypeList"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value">
+                    </el-option>
+                </el-select>
+            </el-form-item>
+        </el-form>
+         <div class="btn" style="padding-left:132px;">
+            <el-button @click="save" type="primary">保存</el-button>
+            <!-- <el-button @click="returnStep">上一步</el-button> -->
+        </div>
+        <modal
+            :title="'查看覆盖企业'"
+            :width="1000"
+            :alert="showAlert"
+            @alertConfirm="alertConfirm"
+            @alertCancel="alertCancel">
+            <div class="alertInner">
+                <breadcrumb>
+                    <!-- <label for="">所属区域:</label>
+                    <el-select class="w100" clearable v-model="areaId"  placeholder="请选择">
+                        <el-option
+                        v-for="item in areaList"
+                        :key="item.sysAreaId"
+                        :label="item.areaName"
+                        clearable
+                        :value="item.sysAreaId">
+                        </el-option>
+                    </el-select>
+                    <label for="">城市:</label>
+                    <el-select class="w100" clearable v-model="regionId" placeholder="请选择">
+                        <el-option
+                        v-for="item in cityList2"
+                        :key="item.regionId"
+                        :label="item.regionName"
+                        clearable
+                        :value="item.regionId">
+                        </el-option>
+                    </el-select>
+                    <label for="">企业类型:</label>
+                    <el-select class="w100" clearable v-model="envType" placeholder="请选择">
+                        <el-option
+                        v-for="item in enterpriseTypeList"
+                        :key="item.value"
+                        :label="item.label"
+                        clearable
+                        :value="item.value">
+                        </el-option>
+                    </el-select> -->
+                    <label for="">企业名称:</label>
+                    <el-input style="width:200px;" clearable class="search-text" v-model="entName" placeholder="企业名称"></el-input>
+                    <el-button class="search" @click="search">查询</el-button>
+                </breadcrumb>
+                <div style="padding:0 40px;">
+                    <el-table
+                        border
+                        :data="envList"
+                        ref="multipleTable"
+                        class="tableBorder"
+                        height="300"
+                        >
+                        <el-table-column
+                        prop="num"
+                        align="left"
+                        label="序号"
+                        width="80">
+                        </el-table-column>
+                        <el-table-column
+                        prop="province"
+                        align="left"
+                        width="80"
+                        label="省份">
+                        </el-table-column>
+                        <el-table-column
+                        prop="city"
+                        align="left"
+                        width="80"
+                        label="城市">
+                        </el-table-column>
+                        <el-table-column
+                        prop="district"
+                        align="left"
+                        width="80"
+                        label="区域">
+                        </el-table-column>
+                        <el-table-column
+                        prop="entCat"
+                        align="left"
+                        width="100"
+                        label="企业类型">
+                        </el-table-column>
+                        <el-table-column
+                        prop="entFullName"
+                        align="left"
+                        label="企业名称">
+                        </el-table-column>
+                        <el-table-column
+                        prop="brandName"
+                        align="left"
+                        label="主修品牌">
+                        </el-table-column>
+                    </el-table>
+                    <div class="pagination clearfix">
+                        <el-pagination
+                            class="fr"
+                            @size-change="handleSizeChange"
+                            @current-change="handleCurrentChange"
+                            :current-page="pageNum"
+                            :page-sizes="[10, 20, 30, 40, 50, 100]"
+                            :page-size="pageSize"
+                            layout="total, sizes, prev, pager, next, jumper, slot"
+                            :total="total">
+                        </el-pagination>
+                        <p class="bottom-data fl" style="">覆盖企业总数：{{allTotal}}</p>
+                    </div>
+                </div>
+            </div>
+        </modal>
+    </div>
+</template>
+
+<script>
+import Modal from '@/components/Modal'
+import Breadcrumb from '@/components/Breadcrumb'
+export default {
+    name: 'advertReleaseDetail',
+    data () {
+        return {
+            showLoading: false,
+            showPopover: false,
+            selectMenu: [],
+            defaultProps: {
+                children: 'children',
+                id: 'regionId',
+                label: 'regionName'
+            },
+            uploadUrl: window.uploadURL,
+            allTotal: '', // 覆盖总数
+            entName: '', // 企业名称
+            envType: '', // 企业类型
+            envList: [], // 企业列表
+            regionId: '',
+            areaId: '', // 大区Id
+            cityList2: [],
+            areaList: [],
+            showAlert: false,
+            total: 0,
+            searchKey: '',
+            pageNum: 1,
+            pageSize: 10,
+            advertAlert: false,
+            sendData: false, // 防重复提交
+            advertDetailView: false, // 查看广告详情
+            cityList: [ // 城市列表
+            ],
+            loading: false,
+            advertType: '',
+            advertTypeList: [ // 广告位置
+                {
+                    label: '跑马灯文字广告',
+                    value: 1
+                },
+                {
+                    label: '弹出窗口广告',
+                    value: 2
+                }
+            ],
+            advertStatus: '',
+            advertStatusList: [ // 广告状态
+                {
+                    label: '未开始',
+                    value: 0
+                },
+                {
+                    label: '进行中',
+                    value: 1
+                },
+                {
+                    label: '结束',
+                    value: 2
+                },
+                {
+                    label: '暂停',
+                    value: 3
+                }
+            ],
+            enterpriseTypeList: [ // 企业类型
+                {
+                    label: '一类企业',
+                    value: '1'
+                },
+                {
+                    label: '二类企业',
+                    value: '2'
+                },
+                {
+                    label: '三类企业',
+                    value: '3'
+                }
+            ],
+            adId: '', // 当前广告ID
+            brandList: {}, // 品牌列表
+            initBrandList: [], // 初始品牌数据
+            ruleForm: {
+                remark: '',
+                adTitle: '', // 广告标题
+                adTitleLong: '', // 长广告标题
+                adType: 1, // 广告位置
+                adContent: '', // 广告正文
+                adPic: '', // 企业类型
+                adHref: '', // 链接
+                isShareAll: 1,
+                city: '', // 城市
+                dateRegion: [], // 时间段
+                vehicleBrand: '', // 品牌
+                businessCategory: '' // 企业类型
+            },
+            advertDetailData: {
+                remark: '',
+                adTitle: '', // 广告标题
+                adType: 1, // 广告位置
+                adContent: '', // 广告正文
+                adPic: '', // 企业类型
+                adHref: '', // 链接
+                isShareAll: 1,
+                city: '', // 城市
+                dateRegion: [], // 时间段
+                vehicleBrand: '', // 品牌
+                businessCategory: '' // 企业类型
+            },
+            pickerOptions: { // 日期范围时间限制
+                disabledDate (time) {
+                    return time.getTime() < Date.now() - 8.64e7
+                }
+            },
+            tableData: [
+            ]
+        }
+    },
+    components: {
+        Breadcrumb,
+        Modal
+    },
+    watch: {
+        areaId (val) {
+            if (!val) return
+            this.regionId = ''
+            this.$get('ent_recharge/areaCity?areaId=' + val).then(res => {
+                if (res.code === 0) {
+                    this.cityList2 = res.data
+                }
+            })
+        }
+    },
+    filters: {
+        advertTypeFilter (value) {
+            const advertTypeList = [
+                {
+                    label: '跑马灯文字广告',
+                    value: 1
+                },
+                {
+                    label: '弹出窗口广告',
+                    value: 2
+                }
+            ]
+            for (let i = 0; i < advertTypeList.length; i++) {
+                if (advertTypeList[i].value === value) {
+                    return advertTypeList[i].label
+                }
+            }
+        },
+        enterpriseTypeFilter (value) {
+            const enterpriseTypeList = [
+                {
+                    label: '一类企业',
+                    value: '1'
+                },
+                {
+                    label: '二类企业',
+                    value: '2'
+                },
+                {
+                    label: '三类企业',
+                    value: '3'
+                }
+            ]
+            for (let i = 0; i < enterpriseTypeList.length; i++) {
+                if (enterpriseTypeList[i].value === value) {
+                    return enterpriseTypeList[i].label
+                }
+            }
+        }
+    },
+    computed: {
+    },
+    created () {
+        // this.promises()
+        this.getAreaList()
+        this.findCityList()
+        this.findBrandList()
+        if (this.$route.query.id) {
+            this.adId = this.$route.query.id
+            this.advertDetail(this.$route.query.id)
+        }
+        // this.getProvinceList()
+    },
+    methods: {
+        // 获取省列表
+        getProvinceList () {
+            this.$get('list/regionProvinceList').then(res => {
+                if (res.code === 0) {
+                    // this.cityList = res.data
+                    // console.log(this.cityList)
+                    // this.allCityList = res.data
+                    let arr = []
+                    res.data.forEach(e => {
+                        if (e.regionType === 1) {
+                            arr.push(e)
+                        }
+                    })
+                    arr.forEach(i => {
+                        i.children = []
+                        res.data.forEach(e => {
+                            if (i.regionId === e.parentId) {
+                                i.children.push(e)
+                            }
+                        })
+                    })
+                    this.selectMenu = arr
+                }
+            })
+        },
+        handleNodeClick (val) {
+            // console.log(this.$refs.cityTree.getCheckedNodes().map(i => {
+            //     return i.regionId
+            // }))
+            let list = this.$refs.cityTree.getCheckedNodes().filter(e => {
+                return e.regionType === 2
+            })
+            list = list.map(i => {
+                return i.regionId
+            })
+            console.log(list)
+            this.ruleForm.city = list
+            // this.selectCity = this.$refs.cityTree.getCheckedNodes()
+        },
+        handleSizeChange (val) {
+            this.pageNum = 1
+            this.pageSize = val
+            this.getEnvList()
+        },
+        handleCurrentChange (val) {
+            this.pageNum = val
+            this.getEnvList()
+        },
+        getEnvList () {
+            this.$post('advertisement/findadvertents?page=' + this.pageNum + '&size=' + this.pageSize, {
+                cityList: this.ruleForm.city,
+                vehicleBrandList: this.ruleForm.vehicleBrand,
+                entName: this.entName,
+                isShareAll: this.ruleForm.isShareAll,
+                businessCategory: this.ruleForm.businessCategory
+            }).then(res => {
+                // console.log(this.pageNum, this.pageSize)
+                this.envList = this.$setNum(res.data, this.pageNum, this.pageSize)
+                this.total = res.total
+                this.allTotal = res.allTotal
+            })
+        },
+        getAreaList () {
+            this.$get('list/areaList').then(res => {
+                if (res.code === 0) {
+                    this.areaList = res.data
+                }
+            })
+        },
+        alertConfirm () {
+            this.pageNum = 1
+            this.pageSize = 10
+            this.alertCancel()
+        },
+        alertCancel () {
+            this.showAlert = false
+            this.envList = []
+        },
+        checkEnv () {
+            this.pageNum = 1
+            this.pageSize = 10
+            this.showAlert = true
+            this.getEnvList()
+        },
+        goBack () {
+            this.$router.push('advertRelease')
+        },
+        search () {
+            this.pageNum = 1
+            this.pageSize = 10
+            this.getEnvList()
+        },
+        // 获取城市列表
+        findCityList () {
+            this.$get('comm/citys/cjl/ent', {})
+                .then(res => {
+                    this.cityList = res.data
+                })
+        },
+        // 获取品牌列表
+        findBrandList () {
+            this.$post('advertisement/brandlist ', {})
+                .then(res => {
+                    this.initBrandList = [...res.data]
+                    // res.data.forEach(item => {
+                    //     item.initial = window.pinyinUtil.getFirstLetter(item.carBrandName).substr(0, 1)
+                    // })
+                    // 按首字母排序
+                    let brandList = res.data.sort(function (objA, objB) {
+                        if (objA.initial > objB.initial) {
+                            return 1
+                        } else if (objA.initial < objB.initial) {
+                            return -1
+                        } else {
+                            return 0
+                        }
+                    })
+                    // 将同字母类型进行分类
+                    let obj = {}
+                    brandList.forEach(item => {
+                        if (!obj[item.initial]) {
+                            obj[item.initial] = [item]
+                        } else {
+                            obj[item.initial].push(item)
+                        }
+                    })
+                    console.log(obj)
+                    this.brandList = obj
+                })
+        },
+        // 上传成功
+        uploadSuccess (res) {
+            this.ruleForm.adPic = res.data
+            this.$refs.advertForm.validateField(['adPic'])
+        },
+        // 上传之前
+        beforeAvatarUpload (file) {
+            const isJPG = /jpeg|png|gif/.test(file.type)
+            const isLt2M = file.size / 1024 / 1024 < 2
+
+            if (!isJPG) {
+                this.$message.error('上传图片只能是 JPG/JPEG/GIF/PNG 格式!')
+            }
+            if (!isLt2M) {
+                this.$message.error('上传图片大小不能超过 2MB!')
+            }
+            return isJPG && isLt2M
+        },
+        // 删除图片
+        removeUploadImg (file, fileList) {
+            this.ruleForm.adPic = ''
+            console.log(file, fileList)
+        },
+        // 当广告类型改变时清空校验情况
+        adTypeChange (val) {
+            this.$refs.advertForm.clearValidate()
+        },
+        // 新增广告弹窗确认
+        save () {
+            this.$refs['advertForm'].validate((valid) => {
+                if (valid) {
+                    let msg, url
+                    let advertData = {
+                        data: {
+                            remark: this.ruleForm.remark,
+                            adType: this.ruleForm.adType,
+                            adTitle: this.ruleForm.adType === 1 ? this.ruleForm.adTitleLong : this.ruleForm.adTitle,
+                            startTime: this.ruleForm.dateRegion[0],
+                            endTime: this.ruleForm.dateRegion[1] + (1000 * 60 * 60 * 24 - 1000),
+                            adHref: this.ruleForm.adHref,
+                            isShareAll: this.ruleForm.isShareAll
+                        }
+                    }
+                    // 弹窗广告参数
+                    if (this.ruleForm.adType === 2) {
+                        advertData.data.adPic = this.ruleForm.adPic
+                        advertData.data.adContent = this.ruleForm.adContent
+                    } else {
+                        advertData.data.adPic = ''
+                        advertData.data.adContent = ''
+                    }
+                    // 指定用户参数
+                    if (this.ruleForm.isShareAll === 0) {
+                        advertData.data.vehicleBrand = this.ruleForm.vehicleBrand + ''
+                        advertData.data.businessCategory = this.ruleForm.businessCategory + ''
+                        advertData.data.city = this.ruleForm.city + ''
+                    } else {
+                        advertData.data.vehicleBrand = ''
+                        advertData.data.businessCategory = ''
+                        advertData.data.city = ''
+                    }
+                    if (this.adId) {
+                        msg = '编辑成功'
+                        url = 'advertisement/edit'
+                        advertData.data.adId = this.adId
+                    } else {
+                        msg = '添加成功'
+                        url = 'advertisement/add'
+                    }
+                    if (this.sendData) {
+                        return
+                    }
+                    this.sendData = true
+                    this.$post(url, advertData)
+                        .then(res => {
+                            if (res.code === 0) {
+                                // this.findAdvertList()
+                                this.$message({
+                                    type: 'success',
+                                    message: msg
+                                })
+                                this.$store.dispatch('delCache', ['advertRelease'])
+                                this.$router.push('/advertRelease')
+                            }
+                            this.sendData = false
+                        })
+                        .catch(e => {
+                            this.sendData = false
+                        })
+                }
+            })
+        },
+        // 广告详情
+        advertDetail (adId, view) {
+            this.showLoading = true
+            this.$post('advertisement/view', {
+                data: {
+                    adId
+                }
+            })
+                .then(res => {
+                    this.showLoading = false
+                    if (res.code === 0) {
+                        if (view) {
+                            res.data.vehicleBrand = this.brandIdToName(res.data.vehicleBrand)
+                            res.data.city = this.cityIdToName(res.data.city)
+                            this.advertDetailData = res.data
+                        } else {
+                            res.data.businessCategory = res.data.businessCategory ? res.data.businessCategory.split(',') : []
+                            res.data.city = res.data.city ? res.data.city.split(',') : []
+                            res.data.vehicleBrand = res.data.vehicleBrand ? this.brandIdToList(res.data.vehicleBrand) : []
+                            res.data.dateRegion = [res.data.startTime, res.data.endTime]
+                            if (res.data.adType === 1) {
+                                res.data.adTitleLong = res.data.adTitle
+                                res.data.adTitle = ''
+                            } else {
+                                res.data.adTitleLong = ''
+                            }
+                            this.ruleForm = res.data
+                            this.adId = adId
+                        }
+                    }
+                })
+        },
+        // 品牌ID转换数字列表
+        brandIdToList (str) {
+            let brandIdList = []
+            str && str.split(',').forEach(item => {
+                brandIdList.push(item - 0)
+            })
+            return brandIdList
+        },
+        // 品牌ID转换名字列表
+        brandIdToName (str) {
+            let brandNameList = []
+            str && str.split(',').forEach(id => {
+                this.initBrandList.forEach(item => {
+                    if ((id - 0) === item.carBrandId) {
+                        brandNameList.push(item.carBrandName)
+                    }
+                })
+            })
+            return brandNameList + ''
+        },
+        // 城市ID列表转换
+        cityIdToName (str) {
+            let cityNameList = []
+            str && str.split(',').forEach(id => {
+                this.cityList.forEach(item => {
+                    if (id === item.cityId) {
+                        cityNameList.push(item.cityName)
+                    }
+                })
+            })
+            return cityNameList + ''
+        }
+    }
+}
+</script>
+
+<style lang='less' scoped>
+#advertReleaseDetail {
+    .tipsText {
+        position: absolute;
+        bottom: 5px;
+        right: 5px;
+        line-height: 1;
+        color: #666666;
+        font-size: 12px;
+    }
+    .detail-title {
+        height:74px;
+        line-height: 74px;
+        margin:0 36px;
+        border-bottom: 1px solid #E8ECEF;
+        font-size: 16px;
+        color:#666666;
+        .back {
+            margin-top:20px;
+            height: 36px;
+            padding: 0;
+            width: 78px;
+            margin-right: 24px;
+        }
+    }
+    .pagination {
+        position: relative;
+        .bottom-data {
+            color:#98A9BC;
+            font-weight: normal;
+            line-height: 36px;
+            color:#98A9BC;
+            font-weight: normal;
+            margin-top: 20px;
+        }
+    }
+    .alertInner {
+        // padding: 0 40px;
+        .w100 {
+            width:100px;
+        }
+    }
+    .w160 {
+        width:160px;
+    }
+    .w120 {
+        width:120px;
+    }
+    .table {
+        margin: 20px;
+        margin-top: 0;
+    }
+    .btn {
+        margin: 20px 0 40px;
+        .el-button {
+            height: 36px;
+            padding: 0;
+            width: 78px;
+            margin-right: 24px;
+        }
+    }
+    .avatar-uploader, .avatar-uploader-tips {
+        vertical-align: middle;
+    }
+    .avatar-uploader-tips {
+        display: inline-block;
+        width: 236px;
+        margin-left: 16px;
+        h6 {
+            color:#778CA2;
+            font-size: 14px;
+        }
+        p {
+            color: #98A9BC;
+            font-size: 12px;
+            line-height: 22px;
+        }
+    }
+    .form {
+        padding-right: 40px;
+    }
+    .detail-table {
+        margin: 3px 40px 0px 40px;
+        border-top: 1px solid #E8ECEF;
+        border-left: 1px solid #E8ECEF;
+        td {
+            border-right: 1px solid #E8ECEF;
+            border-bottom: 1px solid #E8ECEF;
+            height: 44px;
+        }
+        .name {
+            width: 120px;
+            text-align: center;
+        }
+        .value {
+            width: 418px;
+            padding: 0 16px;
+            .advert-image-wrap {
+                border: 1px solid #E8ECEF;
+                padding: 6px;
+                width: 146px;
+                height: 76px;
+                img {
+                    width: 146px;
+                    height: 76px;
+                }
+            }
+            &.textarea {
+                padding: 10px 16px;
+            }
+        }
+    }
+}
+</style>
+<style lang="less">
+#advertReleaseDetail {
+    .avatar-uploader{
+        height: 100px;
+        display: inline-block;
+        .el-upload {
+            border: 1px dashed #d9d9d9;
+            border-radius: 6px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            height: 90px;
+            width:160px;
+            img {
+                width:100%;
+                height: 100%;
+            }
+        }
+        .el-upload-list {
+            position: absolute;
+            bottom: -20px;
+            left: 10px;
+        }
+        .el-upload:hover {
+            border-color: #4D7CFE;
+        }
+        .avatar-uploader-icon {
+            font-size: 28px;
+            color: #8c939d;
+            width: 160px;
+            height: 90px;
+            line-height: 90px;
+            text-align: center;
+        }
+    }
+    .form {
+        .el-select {
+            width: 100%;
+        }
+        .el-input__inner {
+            width: 100%;
+        }
+        .el-date-editor{
+            .el-range-input {
+                width: 41%;
+            }
+        }
+    }
+    .alert-content {
+        padding-top: 0;
+    }
+}
+    .el-popover {
+        height: 200px;
+        overflow-y: scroll;
+    }
+</style>

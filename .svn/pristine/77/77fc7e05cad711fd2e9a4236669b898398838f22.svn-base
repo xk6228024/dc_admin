@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="79px" height="20px" viewBox="0 0 79 20" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 53.2 (72643) - https://sketchapp.com -->
+    <title>运营后台</title>
+    <desc>Created with Sketch.</desc>
+    <g id="一、首页" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" font-family="PingFangSC-Semibold, PingFang SC" font-size="20" font-weight="500">
+        <g id="首页2" transform="translate(-125.000000, -23.000000)" fill="#252631">
+            <g id="导航-/-顶部-/-一级菜单">
+                <g id="系统名称" transform="translate(18.000000, 14.000000)">
+                    <text id="运营后台">
+                        <tspan x="106" y="26">运营后台</tspan>
+                    </text>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

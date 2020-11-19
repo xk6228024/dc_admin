@@ -1,0 +1,650 @@
+<!-- 头部组件 -->
+<template>
+    <div class="header-top" style="background:transparent;">
+        <div class="main-title fl"  id="main_tittle">
+            <img src="../assets/img/zclogo.svg" alt="" class="vam llogo">
+            <span class="icon iconfont iconlogowenzi vam logoz" id="main_tittle_icon"></span>
+            <div class="line" id="main_line" ></div>
+        </div>
+        <div class="tab_group fl">
+            <div class="line" :style="{left: tableft, width: tabWidth}"></div>
+            <div ref="tab_item"
+                class="tab_item tab_item2"
+                @click="changeTab(0)"
+                style="display: none;"
+                :class="{active:0==activeIndex}" >首页</div>
+            <div ref="tab_item" class="tab_item tab_item3"
+                :class="{active:index+1==activeIndex}"
+                v-for="(item,index) in tabList"
+                :key="item.id"
+                @click="changeTab(index+1)">
+                {{item.name}}
+            </div>
+        </div>
+        <div class="user fr">
+            <el-dropdown size="medium" :placement="'top-end'" @command="userMenuClick">
+                <div class="user-menu">
+                    <div class="avatar">
+                        <img src="../assets/images/user.png" alt="">
+                    </div>
+                    <div class="name"  id="user_name">{{name}}</div>
+                </div>
+                <el-dropdown-menu slot="dropdown">
+                    <el-dropdown-item  command="psw">修改密码</el-dropdown-item>
+                </el-dropdown-menu>
+            </el-dropdown>
+            <!-- <div class="avatar">
+                <img src="../assets/images/user.png" alt="">
+            </div>
+            <div class="name" :style="{'color': this.fontColor}">{{name}}</div> -->
+            <div class="login-out" @click="loginOut" id="user_login_out">退出</div>
+            <el-popover
+                placement="bottom"
+                width="288"
+                trigger="click">
+                <div class="popover_inner">
+                    <h5>更换皮肤</h5>
+                    <div class="skin_group clearfix">
+                        <!-- <div class="skin_item" @click="resetTheme" :class="{active: !this.bgColor}">
+                            <img class="skin_img" src="../assets/img/bg_normal.svg" alt="">
+                            <p>默认</p>
+                        </div> -->
+                        <!-- <div class="skin_item" @click="changeTheme('#001529','#4D7CFE')" :class="{active: this.bgColor=='#ffffff'}">
+                            <img class="skin_img" src="../assets/img/bg_normal.svg" alt="">
+                            <p>朴素</p>
+                        </div> -->
+                        <div class="skin_item" :class="{active: this.bgColor=='url(/img/sky.png)'}" @click="changeTheme('url(/img/sky.png)','#4D7CFE')">
+                            <div class="skin_img" style="background:#4D7CFE"></div>
+                            <p>经典蓝</p>
+                        </div>
+                        <div class="skin_item" :class="{active: this.bgColor=='url(/img/timg.jpg)'}" @click="changeTheme('url(/img/timg.jpg)','#697CF0')">
+                            <img class="skin_img" src="../assets/img/xlwx.png" alt="">
+                            <p>绚丽晚霞</p>
+                        </div>
+                        <div class="skin_item" :class="{active: this.bgColor=='url(/img/mlxk.jpg)'}" @click="changeTheme('url(/img/mlxk.jpg)','#4D7CFE')">
+                            <img class="skin_img" src="../assets/img/mlxk.png" alt="">
+                            <p>美丽星空</p>
+                        </div>
+                        <div class="skin_item" :class="{active: this.bgColor=='url(/img/snf.jpg)'}" @click="changeTheme('url(/img/snf.jpg)','#FF6F8F')">
+                            <img class="skin_img" src="../assets/img/snf.png" alt="">
+                            <p>少女粉</p>
+                        </div>
+                        <div class="skin_item" :class="{active: this.bgColor=='url(/img/green.png)'}" @click="changeTheme('url(/img/green.png)','#5F8B2F')">
+                            <img class="skin_img" src="../assets/img/qqcy.png" alt="">
+                            <p>青青草原</p>
+                        </div>
+                        <div class="skin_item" :class="{active: this.bgColor=='url(/img/hdsj_bg.jpg)'}" @click="changeTheme('url(/img/hdsj_bg.jpg)','#4D7CFE')">
+                            <!-- <div class="skin_img" style="background:#D67F05"></div> -->
+                            <img class="skin_img" src="../assets/img/hdsj.png" alt="">
+                            <p>海底世界</p>
+                        </div>
+                        <div class="skin_item" :class="{active: this.bgColor=='url(/img/hswl_bg.jpg)'}" @click="changeTheme('url(/img/hswl_bg.jpg)', '#2063CA')">
+                            <!-- <div class="skin_img" style="background:url(../assets/img/hswl.png)"></div> -->
+                            <img class="skin_img" src="../assets/img/hswl.png" alt="">
+                            <p>黄沙万里</p>
+                        </div>
+                        <div class="skin_item" :class="{active: this.bgColor=='url(/img/gsjl.jpg)'}" @click="changeTheme('url(/img/gsjl.jpg)','#4D7CFE')">
+                            <img class="skin_img" src="../assets/img/gsjl.png" alt="">
+                            <p>高山峻岭</p>
+                        </div>
+                    </div>
+                    <div style="display:none;">
+                        <span style="font-size:12px;line-height:25px;">自定义颜色：</span>
+                        <ThemePicker ref="themePicker"></ThemePicker>
+                    </div>
+                    <!-- <button @click="resetTheme">原</button>
+                    <button @click="changeTheme('#4D7CFE','rgba(255,255,255,0.8)','#3B95D6')">蓝</button>
+                    <button @click="changeTheme('#041527','rgba(255,255,255,0.8)','#5F6881')">黑</button> -->
+                </div>
+                <!-- <img v-if="!bgColor" slot="reference" style="position:relative;top:5px;cursor:pointer;" src="../assets/img/skin.svg" alt="">
+                <img v-if="bgColor" slot="reference" style="position:relative;top:5px;cursor:pointer;" src="../assets/img/skin2.svg" alt=""> -->
+                <img v-if="isSupported || 1" slot="reference" style="position:relative;top:6px;cursor:pointer;" width="20" src="../assets/img/skin2.svg" alt="">
+            </el-popover>
+        </div>
+        <!-- <modal :title="'修改密码'"
+        :height="400"
+        :width="600"
+        :alert="alert"
+        @alertCancel="alertCancel"
+        @alertConfirm="alertConfirm">
+            <el-form :model="ruleForm" status-icon ref="ruleForm" label-width="100px" class="ruleForm">
+                <el-form-item label="原密码" prop="oldPass">
+                    <el-input type="password" v-model="ruleForm.oldPass" autocomplete="off" :rules="$validate({required:true})">
+                    </el-input>
+                </el-form-item>
+                <el-form-item label="新密码" prop="newPass">
+                    <el-input type="password" v-model="ruleForm.newPass" autocomplete="off" :rules="$validate({required:true, min:6})">
+                    </el-input>
+                </el-form-item>
+                <el-form-item label="确认密码" prop="checkPass">
+                    <el-input type="password" v-model="ruleForm.checkPass" autocomplete="off" :rules="$validate({required:true})">
+                    </el-input>
+                </el-form-item>
+            </el-form>
+        </modal> -->
+        <el-dialog
+        title="修改密码"
+        :append-to-body="true"
+        :top="'35vh'"
+        :visible.sync="alert"
+        width="550px">
+            <el-form :model="ruleForm" status-icon ref="ruleForm" label-width="130px" style="margin-right: 50px;">
+                <el-form-item label="原密码：" prop="alertOldPsw" :rules="$validate({required:true})">
+                    <el-input type="password" v-model="ruleForm.alertOldPsw" maxlength="30" placeholder="请输入原密码"></el-input>
+                </el-form-item>
+                <el-form-item label="新密码：" prop="alertNewPsw" :rules="$validate({required:true,max:20,min:6,type:'EN'})">
+                    <el-input type="password" v-model="ruleForm.alertNewPsw" placeholder="请输入新密码"></el-input>
+                </el-form-item>
+                <el-form-item label="确认密码：" prop="alertConfirmPsw" style="margin-bottom:0;" :rules="[
+                    { required: true, message: '请输入确认密码', trigger: 'change' },
+                    { validator: validatePass, trigger: 'change' }
+                ]">
+                    <el-input type="password" v-model="ruleForm.alertConfirmPsw" placeholder="请输入确认密码"></el-input>
+                </el-form-item>
+            </el-form>
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="alertCancel">取消</el-button>
+                <el-button @click="alertConfirm" type="primary">确定</el-button>
+            </span>
+        </el-dialog>
+    </div>
+</template>
+
+<script>
+import { filterTime } from '@/utils/filterTime.js'
+import { getCookie, clearCookie } from '@/utils/cookie.js'
+import ThemePicker from '@/components/themePicker'
+// import { setTimeout } from 'timers';
+export default {
+    name: 'header-top',
+    data () {
+        return {
+            isSupported: window.CSS && window.CSS.supports && window.CSS.supports('--a', 0), // 是否支持css变量
+            // bgColor: '',
+            tabWidth: '20px',
+            tableft: '20px',
+            activeIndex: 1, // 选中tab的index
+            tabList: [],
+            nowDate: filterTime('yyyy-mm-dd', new Date() - 0),
+            name: '',
+            alert: false,
+            ruleForm: {
+                alertConfirmPsw: '', // 确认密码
+                alertNewPsw: '', // 密码
+                alertOldPsw: '' // 原密码
+            }
+        }
+    },
+    computed: {
+        bgColor () {
+            return this.$store.state.themeBgColor
+        }
+        // fontColorL () {
+        //     return this.$store.state.themeFontColorL
+        // },
+        // fontColor () {
+        //     return this.$store.state.themeFontColor
+        // }
+    },
+    created () {
+        try {
+            if (localStorage.newThemeBgColor && localStorage.newThemeFontColor) {
+                this.changeTheme(localStorage.newThemeBgColor, localStorage.newThemeFontColor)
+            } else {
+                this.changeTheme('url(/img/sky.png)', '#4D7CFE')
+            }
+        } catch (e) {}
+        // if (this.isSupported && localStorage.themeBgColor === undefined) {
+        //     this.changeTheme('url(/img/hswl_bg.jpg)', '#2063CA')
+        // }
+        // const isSupported =
+        //     window.CSS &&
+        //     window.CSS.supports &&
+        //     window.CSS.supports('--a', 0)
+        // console.log(isSupported)
+        try {
+            this.name = JSON.parse(getCookie('userName'))
+        } catch (e) {}
+        try {
+            this.tabList = JSON.parse(localStorage.menuList)
+            setTimeout(() => {
+                this.$store.commit('setTabsIndex', localStorage.tabIndex)
+            }, 200)
+            this.activeIndex = localStorage.tabIndex
+            // 主题颜色
+            // if (localStorage.themeBgColor) {
+            //     this.$store.commit('setThemeBgColor', localStorage.themeBgColor)
+            //     // console.log(document.querySelector('.el-tabs__nav-wrap'))
+            //     // document.querySelector('.el-tabs__nav-wrap').style.background = 'transparent'
+            // }
+            // if (localStorage.themeFontColor) {
+            //     if (!localStorage.themeFontColorL) {
+            //         localStorage.themeFontColorL = localStorage.themeFontColor
+            //     }
+            //     this.$store.commit('setThemeFontColor', localStorage.themeFontColor)
+            //     this.$store.commit('setThemeFontColorL', localStorage.themeFontColorL)
+            //     document.querySelector('#app').style.setProperty('--themeFontColor', localStorage.themeFontColor)
+            //     document.querySelector('#app').style.setProperty('--themeFontColorL', localStorage.themeFontColorL)
+            //     document.querySelector('#app').style.setProperty('--themeFontColorA', localStorage.themeFontColor.replace('0.8', '1'))
+            // }
+            // if (localStorage.activeColor) {
+            //     document.querySelector('#app').style.setProperty('--activeColor', localStorage.activeColor)
+            // }
+        } catch (e) {}
+        // console.log(11111, localStorage.themeFontColor)
+    },
+    mounted () {
+        // // console.log(document.querySelector('.el-tabs__nav-wrap'))
+        // try {
+        //     if (this.$store.state.themeBgColor && this.$store.state.themeBgColor !== '#001529' && document.querySelector('.el-tabs__nav-wrap')) {
+        //         document.querySelector('.el-tabs__nav-wrap').style.background = 'transparent'
+        //         document.querySelector('.el-tabs--card').style.background = 'rgba(0,0,0,.1)'
+        //         // document.querySelector('.el-tabs__item').style.color = 'rgba(255,255,255,.5)'
+        //         document.querySelector('#app').style.setProperty('--tabColor', 'rgba(255,255,255,.5)')
+        //     } else if (document.querySelector('.el-tabs__nav-wrap')) {
+        //         document.querySelector('.el-tabs__nav-wrap').style.background = '#ffffff'
+        //         document.querySelector('.el-tabs--card').style.background = ''
+        //         document.querySelector('#app').style.setProperty('--tabColor', '#8C8C8C')
+        //         // document.querySelector('.el-tabs__item').style.color = '#778CA2'
+        //     }
+        // } catch (e) {}
+        // console.log(this.$refs.themePicker.theme = '#ffffff')
+        // console.log(this.$refs.tab_item)
+        // console.log(document.getElementsByClassName('tab_item')[this.activeIndex + 1].offsetLeft)
+        // document.getElementsByClassName('tab_item').onmouseover = () => {
+        //     console.log(111)
+        // }
+        // console.log(document.querySelectorAll('.tab_item23'))
+        // for (let e of document.querySelectorAll('.tab_item')) {
+        //     e.addEventListener('mouseover', () => {
+        //         e.style.color = this.$store.state.settings.theme
+        //     })
+        //     e.addEventListener('mouseout', () => {
+        //         e.style.color = 'a'
+        //     })
+        // }
+        // document.querySelectorAll('.tab_item3').addEventListener('mouseover', () => {
+        //     console.log('12333')
+        // })
+        // 设置默认主题
+        // if (this.isSupported && (localStorage.themeBgColor === '#ffffff' || !localStorage.themeBgColor)) {
+        //     // this.changeTheme('#001529', '#4D7CFE')
+        //     // this.changeTheme('url(/img/sky.png)', '#4D7CFE')
+        // }
+        // if (localStorage.setTheme !== 'has') {
+        //     setTimeout(() => {
+        //         // this.changeTheme('#001529', '#4D7CFE')
+        //         // this.changeTheme('url(/img/sky.png)', '#4D7CFE')
+        //     }, 300)
+        // }
+        // this.$refs.tab_item.onmouseover = () => {
+        //     console.log(111)
+        // }
+        if (localStorage.newThemeBgColor && localStorage.newThemeFontColor) {
+            this.changeTheme(localStorage.newThemeBgColor, localStorage.newThemeFontColor)
+        } else {
+            this.changeTheme('url(/img/sky.png)', '#4D7CFE')
+        }
+    },
+    components: {
+        ThemePicker
+    },
+    watch: {
+        // 'localStorage.newThemeBgColor' (val) {
+        //     console.log(val)
+        // },
+        '$store.state.tabIndex': function (val) {
+            // console.log(val)
+            if (val - 0 === 0) {
+                this.tabWidth = '20px'
+            } else {
+                this.tabWidth = '36px'
+            }
+            let temp = (document.getElementsByClassName('tab_item')[val].offsetWidth - 40 - (val - 0 === 0 ? 20 : 36)) / 2
+            this.tableft = document.getElementsByClassName('tab_item')[val].offsetLeft + 20 + temp + 'px'
+            this.activeIndex = val
+        }
+    },
+    methods: {
+        changeTheme (themeBgColor, themeColor) {
+            // console.log(document.querySelector('#app').style.backgroundImage)
+            // console.log(`url(${themeBgColor})`)
+            document.querySelector('#app').style.backgroundImage = themeBgColor
+            this.$refs.themePicker.theme = themeColor
+            this.$store.commit('setThemeBgColor', themeBgColor)
+            localStorage.newThemeBgColor = themeBgColor
+            localStorage.newThemeFontColor = themeColor
+        },
+        // resetTheme () {
+        //     if (!this.isSupported) {
+        //         // this.$alert('浏览器版本过低,暂不支持此功能', '提示')
+        //         return
+        //     }
+        //     this.$refs.themePicker.theme = '#4D7CFE'
+        //     this.$store.commit('setThemeBgColor', '')
+        //     this.$store.commit('setThemeFontColor', '')
+        //     let themeColor = '#4570e5'
+        //     if (localStorage.theme) themeColor = localStorage.theme
+        //     document.querySelector('#app').style.setProperty('--themeFontColor', themeColor)
+        //     document.querySelector('#app').style.setProperty('--activeColor', '#eeeeee')
+        //     document.querySelector('#app').style.setProperty('--themeFontColorA', themeColor)
+        //     localStorage.themeBgColor = ''
+        //     localStorage.themeFontColor = ''
+        //     localStorage.activeColor = ''
+        //     // ccc
+        //     document.querySelector('#nav_menu').style.background = '#001529'
+        // },
+        // changeTheme (themeBgColor, themeColor) {
+        //     let themeFontColor = 'rgba(255,255,255,0.8)'
+        //     let activeColor = 'rgba(255,255,255,0.2)'
+        //     if (!this.isSupported) {
+        //         // this.$alert('浏览器版本过低,暂不支持此功能', '提示')
+        //         return
+        //     }
+        //     localStorage.setTheme = 'has'
+        //     if (themeBgColor === '#001529') {
+        //         this.$store.commit('setThemeFontColorL', 'rgba(255, 255, 255, 0.8)')
+        //         document.querySelector('#nav_menu').style.background = '#001529'
+        //         document.querySelector('#main_tittle').style.background = '#4D7CFE'
+        //         document.querySelector('#user_login_out').style.color = '#252631'
+        //         document.querySelector('#user_name').style.color = '#252631'
+        //         document.querySelector('#main_line').style.display = 'none'
+        //         // document.querySelector('#main_tittle_icon').style.color = '#ffffff'
+        //         // document.querySelector('.tab_item').style.background = 'red'
+        //         this.$refs.tab_item.forEach(e => {
+        //             e.style.color = '#252631'
+        //         })
+        //         // this.fontColor = '#252631'
+        //         // this.$refs.tab_item.style.background = 'red'
+        //         this.$refs.themePicker.theme = themeColor
+        //         localStorage.themeBgColor = '#ffffff'
+        //         this.$store.commit('setThemeBgColor', '#ffffff')
+        //         // document.querySelector('#app').style.setProperty('--themeFontColor', themeFontColor)
+        //         document.querySelector('#app').style.setProperty('--themeFontColorL', 'rgba(255, 255, 255, 0.8)')
+        //         document.querySelector('#app').style.setProperty('--themeFontColorA', '#4D7CFE')
+        //         document.querySelector('#app').style.setProperty('--tabColor', '#778CA2')
+        //         localStorage.activeColor = activeColor
+        //         document.querySelector('#app').style.setProperty('--activeColor', activeColor)
+        //     } else {
+        //         document.querySelector('#nav_menu').style.background = 'transparent'
+        //         document.querySelector('#main_tittle').style.background = ''
+        //         document.querySelector('#user_login_out').style.color = '#ffffff'
+        //         document.querySelector('#user_name').style.color = '#ffffff'
+        //         document.querySelector('#main_line').style.display = 'block'
+        //         // document.querySelector('#main_tittle_icon').style.color = ''
+        //         this.$refs.tab_item.forEach(e => {
+        //             e.style.color = ''
+        //         })
+        //         this.$refs.themePicker.theme = themeColor
+        //         localStorage.themeBgColor = themeBgColor
+        //         this.$store.commit('setThemeBgColor', themeBgColor)
+        //         localStorage.themeFontColor = themeFontColor
+        //         this.$store.commit('setThemeFontColor', themeFontColor)
+        //         localStorage.themeFontColorL = themeFontColor
+        //         this.$store.commit('setThemeFontColorL', themeFontColor)
+        //         document.querySelector('#app').style.setProperty('--themeFontColor', themeFontColor)
+        //         document.querySelector('#app').style.setProperty('--themeFontColorL', themeFontColor)
+        //         document.querySelector('#app').style.setProperty('--themeFontColorA', themeFontColor.replace('0.8', '1'))
+        //         localStorage.activeColor = activeColor
+        //         document.querySelector('#app').style.setProperty('--activeColor', activeColor)
+        //     }
+        // },
+        changeTab (index) {
+            this.activeIndex = index
+            this.$store.commit('setTabsIndex', index)
+            try {
+                let menuList = JSON.parse(localStorage.menuList);
+                /数据管理/.test(menuList[index - 1].name) && this.$router.push('/dataBoard');
+                /运营管理/.test(menuList[index - 1].name) && this.$router.push('/operateBoard')
+            } catch (e) {}
+        },
+        loginOut () {
+            this.$confirm('确定退出登录吗？', '提示', {
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+                type: 'warning'
+            }).then(() => {
+                this.$get('loginOut')
+                    .then(res => {
+                        if (res.code === 0) {
+                            clearCookie('token')
+                            clearCookie('user')
+                            this.$store.dispatch('delAllCache', 'login')
+                        }
+                    })
+                    .catch(() => {
+                        clearCookie('token')
+                        clearCookie('user')
+                        this.$router.push('login')
+                    })
+            }).catch(() => {
+            })
+        },
+        userMenuClick (command) {
+            if (command === 'psw') {
+                this.alert = true
+            }
+        },
+        // 重复密码校验
+        validatePass (rule, value, callback) {
+            if (value === '') {
+                callback(new Error('请再次输入密码'))
+            } else if (value !== this.ruleForm.alertNewPsw) {
+                callback(new Error('两次输入密码不一致!'))
+            } else {
+                callback()
+            }
+        },
+        alertConfirm () {
+            this.$refs['ruleForm'].validate((valid) => {
+                if (valid) {
+                    this.$post('/user/uppwd', {
+                        password: this.ruleForm.alertOldPsw,
+                        newPassword: this.ruleForm.alertNewPsw
+                    }).then(res => {
+                        if (res.code === 0) {
+                            this.$message({
+                                type: 'success',
+                                message: '修改成功'
+                            })
+                            this.alertCancel()
+                        } else {
+                            this.alert(res.msg, '提示')
+                        }
+                    })
+                }
+            })
+        },
+        alertCancel () {
+            this.$refs['ruleForm'].resetFields()
+            this.alert = false
+        }
+    }
+}
+</script>
+
+<style lang='less' scoped>
+.header-top {
+    // *, *::before, *::after {
+    //     box-sizing: content-box;
+    //     -webkit-box-sizing: content-box;
+    // }
+    position: relative;
+    z-index: 1;
+    height: 65px;
+    line-height: 63px;
+    background: #fff;
+    padding-right: 20px;
+    box-shadow:0px 3px 8px 0px rgba(0,0,0,0.1);
+    transition: all 1s;
+    background-size: cover!important;
+    .icon-logo {
+        color: #4D7CFE;
+        position: relative;
+        top: 4px;
+        // color: var(--themeFontColorL);
+        .ycxc {
+            font-size: 10px;
+        }
+    }
+    .logoz {
+        font-size:28px;
+        font-weight:normal;
+        margin-left:5px;
+    }
+    .tab_group {
+        position: relative;
+        color: #252631;
+        font-size: 16px;
+        padding-left: 30px;
+        .tab_item {
+            cursor: pointer;
+            padding: 0 20px;
+            font-weight: 500;
+            display: inline-block;
+            color: rgba(255, 255, 255, 0.8);
+            // color: var(--themeFontColor);
+            &.active {
+                // color: #4D7CFE!important;
+                color: #ffffff;
+                // color: var(--themeFontColorA)!important;
+                font-weight: bold;
+            }
+            &:hover {
+                color: #ffffff;
+                // color: var(--themeFontColorA);
+            }
+        }
+        .line {
+            background: #ffffff;
+            // background: var(--themeFontColorA);
+            width: 44px;
+            height: 3px;
+            position: absolute;
+            bottom: 10px;
+            transition: .2s all ease-in;
+            border-radius: 5px;
+        }
+    }
+    .main-title {
+        color: #ffffff;
+        font-size: 16px;
+        padding-left: 20px;
+        font-weight: bold;
+        height: 65px;
+        width: 219px;
+        position: relative;
+        .line {
+            width: 1px;
+            height: 30px;
+            position: absolute;
+            right: 0;
+            top: 17px;
+            background: #E8ECEF;
+        }
+        // box-sizing: border-box;
+        .icon1 {
+            vertical-align: middle;
+            margin-top: -9px;
+        }
+        .icon2 {
+            margin-left: 10px;
+            vertical-align: middle;
+        }
+    }
+    .user {
+        .user-menu {
+            display:inline-block;
+            cursor: pointer;
+        }
+        .avatar {
+            height: 36px;
+            width: 36px;
+            img {
+                height: 100%;
+                width: 100%;
+            }
+        }
+        .login-out {
+            cursor: pointer;
+            color: #4D7CFE;
+        }
+        .avatar, .name, .date , .login-out{
+            margin-right: 20px;
+            display: inline-block;
+            vertical-align: middle;
+            color: #ffffff;
+        }
+    }
+}
+@media screen and (max-width: 1400px) {
+    .header-top {
+        // height: 300px;
+        .main-title {
+            width: 159px;
+            .llogo {
+                width: 30px;
+            }
+            .logoz {
+                font-size: 20px;
+            }
+        }
+    }
+}
+</style>
+<style lang="less">
+    // .header-top {
+        .popover_inner {
+            color: #778CA2;
+            h5 {
+                color: #252631;
+                // background: red;
+                line-height: 40px;
+            }
+            .skin_group {
+                .skin_item {
+                    float: left;
+                    margin-right: 15px;
+                    cursor: pointer;
+                    transition: .2s all ease-in;
+                    .skin_img {
+                        width: 48px;
+                        height: 48px;
+                        display: inline-block;
+                        border-radius: 4px;
+                        border: 1px solid #eeeeee;
+                        &:hover {
+                            opacity: 0.8;
+                        }
+                    }
+                    p {
+                        text-align: center;
+                        color: #778CA2;
+                        font-size: 12px;
+                        line-height: 25px;
+                    }
+                    &:hover {
+                        opacity: 0.8;
+                    }
+                    &.active {
+                        position: relative;
+                        &:after {
+                            content: '';
+                            position: absolute;
+                            width: 50px;
+                            height: 50px;
+                            top: 0;
+                            left: 0;
+                            border-radius: 4px;
+                            background: rgba(0,0,0,0.3);
+                            background-image: url('../assets/img/selected.svg');
+                            background-repeat: no-repeat;
+                            background-position: center center;
+                        }
+                        // opacity: .8;
+                    }
+                }
+            }
+        }
+    // }
+</style>
